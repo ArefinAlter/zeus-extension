@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeus.invalid/schema/common",
+  "title": "Zeus common definitions",
+  "description": "Identifier formats, scalar types and the error envelope shared by every Zeus wire format. Normative text: docs/spec/00-conventions.md.",
+  "$defs": {
+    "Ulid": {
+      "description": "26-character Crockford base32 ULID. The first character is 0-7 so the value fits in 128 bits.",
+      "type": "string",
+      "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "JobId": { "type": "string", "pattern": "^job_[0-7][0-9A-HJKMNP-TV-Z]{25}$" },
+    "RunId": { "type": "string", "pattern": "^run_[0-7][0-9A-HJKMNP-TV-Z]{25}$" },
+    "GrantId": { "type": "string", "pattern": "^gr_[0-7][0-9A-HJKMNP-TV-Z]{25}$" },
+    "ApprovalId": { "type": "string", "pattern": "^ap_[0-7][0-9A-HJKMNP-TV-Z]{25}$" },
+    "SessionLeaseId": {
+      "description": "Handle for one release of session material (cookies) under a grant. Never persisted with the material; safe to log.",
+      "type": "string",
+      "pattern": "^sess_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "ConnectionId": { "type": "string", "pattern": "^conn_[0-7][0-9A-HJKMNP-TV-Z]{25}$" },
+    "ChainId": { "type": "string", "pattern": "^chain_[0-7][0-9A-HJKMNP-TV-Z]{25}$" },
+    "EventSeq": {
+      "description": "Monotonic event sequence number. Textual form (URIs, cursors) is ev_<decimal>.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "Timestamp": {
+      "description": "RFC 3339 UTC instant, always with exactly three fractional digits and the Z designator.",
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)\\.[0-9]{3}Z$"
+    },
+    "DurationMs": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+    "Bytes": {
+      "description": "Unsigned byte count or offset. Bounded by 2^53-1 so every JSON implementation represents it exactly.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "Hex256": {
+      "description": "Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "Origin": {
+      "description": "Web origin: scheme, ASCII (punycode) lowercase host, non-default port only. No path, query or fragment.",
+      "type": "string",
+      "maxLength": 300,
+      "pattern": "^https?://(\\[[0-9a-f:.]+\\]|[a-z0-9]([a-z0-9.-]*[a-z0-9])?)(:[0-9]{1,5})?$"
+    },
+    "Url": {
+      "description": "Absolute http(s) URL as received. May contain secrets in its query string: never log it, see 00-conventions section 8.",
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 8192,
+      "pattern": "^https?://"
+    },
+    "RedactedUrl": {
+      "description": "URL after the log or record redaction function of 00-conventions section 8 (no userinfo, no fragment, query dropped or sanitised).",
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 2048,
+      "pattern": "^https?://[^@\\s#]*$"
+    },
+    "ProtocolVersion": { "type": "integer", "minimum": 1, "maximum": 65535 },
+    "CapabilityName": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$"
+    },
+    "SemVer": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\\+[0-9A-Za-z.-]+)?$"
+    },
+    "ErrorClass": {
+      "description": "Coarse, stable failure class. The first nine drive retry policy for jobs (01-domain-model section 8); the remainder classify protocol-level errors.",
+      "enum": [
+        "transient_network",
+        "throttled",
+        "auth_expired",
+        "url_expired",
+        "blocked",
+        "permanent",
+        "disk",
+        "integrity",
+        "policy_denied",
+        "invalid_request",
+        "not_found",
+        "conflict",
+        "unauthenticated",
+        "unsupported",
+        "unavailable",
+        "timeout",
+        "internal"
+      ]
+    },
+    "ErrorCode": {
+      "description": "Stable machine string: <namespace>.<reason>, lowercase snake_case. Never translated, never reused for a different meaning.",
+      "type": "string",
+      "maxLength": 96,
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+    },
+    "ErrorEnvelope": {
+      "type": "object",
+      "required": ["code", "class", "message", "retryable"],
+      "properties": {
+        "code": { "$ref": "#/$defs/ErrorCode" },
+        "class": { "$ref": "#/$defs/ErrorClass" },
+        "message": {
+          "description": "English diagnostic for humans and logs. Never parsed. Must not contain secrets.",
+          "type": "string",
+          "maxLength": 1024
+        },
+        "retryable": {
+          "description": "True iff repeating the same request, possibly after the delay or refresh the class implies, may succeed without human action.",
+          "type": "boolean"
+        },
+        "details": {
+          "description": "Code-specific structured data. Optional. Must not contain secrets.",
+          "type": "object"
+        }
+      }
+    }
+  }
+}

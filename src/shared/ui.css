@@ -1,0 +1,209 @@
+/* Shared styles for the popup and the options page. No external resources; no inline styles. */
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1b1f23;
+  --muted: #5b6570;
+  --card: #f4f6f8;
+  --border: #d5dae0;
+  --accent: #1a56db;
+  --accent-fg: #ffffff;
+  --danger: #b3261e;
+  --warn: #8a5a00;
+  --ok: #17692b;
+  --focus: #1a56db;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14181d;
+    --fg: #e8ebef;
+    --muted: #9aa4af;
+    --card: #1e252c;
+    --border: #38424d;
+    --accent: #6ea3ff;
+    --accent-fg: #0b1220;
+    --danger: #ff8a80;
+    --warn: #ffcc66;
+    --ok: #6fd18a;
+    --focus: #8ab4ff;
+  }
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font:
+    14px/1.45 system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Noto Sans Bengali',
+    'Noto Sans',
+    sans-serif;
+}
+h1 {
+  font-size: 16px;
+  margin: 0;
+}
+h2 {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 16px 0 6px;
+}
+h3 {
+  font-size: 14px;
+  margin: 0 0 6px;
+}
+a {
+  color: var(--accent);
+}
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.status {
+  margin-left: auto;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.status[data-tone='ok'] {
+  color: var(--ok);
+}
+.status[data-tone='warn'] {
+  color: var(--warn);
+}
+.status[data-tone='error'] {
+  color: var(--danger);
+}
+main {
+  padding: 4px 12px 12px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 8px 0;
+}
+.card[data-tone='error'] {
+  border-color: var(--danger);
+}
+.facts {
+  margin: 0 0 6px;
+}
+.fact {
+  display: flex;
+  gap: 8px;
+  padding: 1px 0;
+}
+.fact dt {
+  flex: 0 0 38%;
+  color: var(--muted);
+  font-size: 12px;
+}
+.fact dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.reasons {
+  margin: 4px 0 6px;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.notice {
+  margin: 6px 0;
+  font-size: 13px;
+}
+.muted {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 4px 0;
+}
+.empty {
+  color: var(--muted);
+  text-align: center;
+  margin: 24px 0;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.btn {
+  font: inherit;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
+  cursor: pointer;
+}
+.btn[data-style='primary'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-fg);
+}
+.btn[data-style='danger'] {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.small .btn {
+  padding: 3px 8px;
+  font-size: 12px;
+}
+progress {
+  width: 100%;
+  height: 8px;
+}
+.jobs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.job {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.job-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.job-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.job-state {
+  color: var(--muted);
+  white-space: nowrap;
+  font-size: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

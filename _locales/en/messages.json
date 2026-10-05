@@ -1,0 +1,512 @@
+{
+  "extName": {
+    "message": "Zeus"
+  },
+  "extDescription": {
+    "message": "Finish failed downloads with Zeus, your local download manager. Nothing leaves your computer."
+  },
+  "actionTitle": {
+    "message": "Zeus"
+  },
+  "popupTitle": {
+    "message": "Zeus"
+  },
+  "openOptions": {
+    "message": "Settings"
+  },
+  "optionsTitle": {
+    "message": "Zeus settings"
+  },
+  "statusConnected": {
+    "message": "Connected to Zeus"
+  },
+  "statusConnecting": {
+    "message": "Connecting to Zeus…"
+  },
+  "statusIdle": {
+    "message": "Zeus is idle and connects when needed"
+  },
+  "statusDisconnected": {
+    "message": "Not connected to Zeus"
+  },
+  "statusHostMissing": {
+    "message": "Zeus app not found"
+  },
+  "statusForbidden": {
+    "message": "Zeus does not recognise this extension"
+  },
+  "statusSuspended": {
+    "message": "Connection paused after repeated failures"
+  },
+  "hintHostMissing": {
+    "message": "Install the Zeus app, then run: zeus native-host install"
+  },
+  "hintForbidden": {
+    "message": "Run: zeus native-host install. This extension’s id has to be registered with the app."
+  },
+  "hintSuspended": {
+    "message": "Zeus will try again in a few minutes. You can also try now."
+  },
+  "btnReconnect": {
+    "message": "Try again now"
+  },
+  "sectionApprovals": {
+    "message": "Needs your decision"
+  },
+  "sectionAccess": {
+    "message": "Browser access needed"
+  },
+  "sectionJobs": {
+    "message": "Zeus downloads"
+  },
+  "sectionDownloads": {
+    "message": "Browser downloads"
+  },
+  "emptyState": {
+    "message": "Nothing needs your attention."
+  },
+  "emptyJobs": {
+    "message": "No Zeus downloads yet."
+  },
+  "approvalKindHandoff": {
+    "message": "Finish a failed download"
+  },
+  "approvalKindSessionGrant": {
+    "message": "Use your signed-in session"
+  },
+  "approvalKindRetryEscalation": {
+    "message": "A download keeps failing"
+  },
+  "approvalKindPolicyException": {
+    "message": "Allow an exception"
+  },
+  "approvalKindWorkflowPlan": {
+    "message": "Run a download plan"
+  },
+  "approvalKindDestructiveOp": {
+    "message": "Delete or overwrite files"
+  },
+  "approvalKindOther": {
+    "message": "Approval needed"
+  },
+  "labelFileName": {
+    "message": "File name (supplied by the website)"
+  },
+  "labelSite": {
+    "message": "Site"
+  },
+  "labelSize": {
+    "message": "Size"
+  },
+  "labelFrom": {
+    "message": "Started from"
+  },
+  "labelRequestedBy": {
+    "message": "Requested by (as stated by the requester)"
+  },
+  "labelExpires": {
+    "message": "Expires in $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "sourceBrowserHandoff": {
+    "message": "this browser"
+  },
+  "sourceAgent": {
+    "message": "an AI agent"
+  },
+  "sourceCli": {
+    "message": "the command line"
+  },
+  "sourceWorkflow": {
+    "message": "a download plan"
+  },
+  "cookieNotice": {
+    "message": "If you allow this, Zeus reads your cookies for this site only, for up to 15 minutes at a time, and never saves them."
+  },
+  "reasonHandoffInterrupted": {
+    "message": "Your browser’s download was interrupted."
+  },
+  "reasonSessionFirstUse": {
+    "message": "Zeus has not used your session on this site before."
+  },
+  "reasonRetryExhausted": {
+    "message": "Zeus used up its automatic retries."
+  },
+  "reasonUrlExpired": {
+    "message": "The download link expired."
+  },
+  "btnAllowOnce": {
+    "message": "Allow once"
+  },
+  "btnAllowSite": {
+    "message": "Allow this site for 24 hours"
+  },
+  "btnAllowWorkflow": {
+    "message": "Allow for this plan (7 days)"
+  },
+  "btnNeverSite": {
+    "message": "Never for this site"
+  },
+  "btnDeny": {
+    "message": "Don’t allow"
+  },
+  "btnApprove": {
+    "message": "Approve"
+  },
+  "btnAllowAccess": {
+    "message": "Allow browser access to $SITE$",
+    "placeholders": {
+      "site": {
+        "content": "$1"
+      }
+    }
+  },
+  "accessNeededHint": {
+    "message": "$SITE$ was approved in Zeus. The browser also has to allow it before Zeus can use your session.",
+    "placeholders": {
+      "site": {
+        "content": "$1"
+      }
+    }
+  },
+  "jobStateQueued": {
+    "message": "Waiting"
+  },
+  "jobStateProbing": {
+    "message": "Checking"
+  },
+  "jobStateAwaitingApproval": {
+    "message": "Needs approval"
+  },
+  "jobStateAwaitingSession": {
+    "message": "Waiting for your browser"
+  },
+  "jobStateDownloading": {
+    "message": "Downloading"
+  },
+  "jobStatePaused": {
+    "message": "Paused"
+  },
+  "jobStateRetryScheduled": {
+    "message": "Retrying soon"
+  },
+  "jobStateVerifying": {
+    "message": "Verifying"
+  },
+  "jobStateFinalizing": {
+    "message": "Finishing"
+  },
+  "jobStateCompleted": {
+    "message": "Done"
+  },
+  "jobStateFailed": {
+    "message": "Failed"
+  },
+  "jobStateCanceled": {
+    "message": "Canceled"
+  },
+  "jobQuarantined": {
+    "message": "Flagged as risky. Zeus will not open it."
+  },
+  "btnPause": {
+    "message": "Pause"
+  },
+  "btnResume": {
+    "message": "Resume"
+  },
+  "btnCancel": {
+    "message": "Cancel"
+  },
+  "btnRetry": {
+    "message": "Retry"
+  },
+  "btnFinishWithZeus": {
+    "message": "Finish with Zeus"
+  },
+  "dlInterrupted": {
+    "message": "Interrupted"
+  },
+  "dlInProgress": {
+    "message": "In progress"
+  },
+  "dlSentToZeus": {
+    "message": "Sent to Zeus"
+  },
+  "dlRefusedSecurity": {
+    "message": "The browser blocked this file for safety. Zeus will not override that."
+  },
+  "dlRefusedDangerous": {
+    "message": "The browser flagged this file as dangerous."
+  },
+  "dlRefusedOther": {
+    "message": "Zeus cannot take this download."
+  },
+  "errGeneric": {
+    "message": "Something went wrong."
+  },
+  "errPermissionDenied": {
+    "message": "The browser did not grant access, so nothing was approved."
+  },
+  "errDecideFailed": {
+    "message": "The decision could not be sent ($CODE$).",
+    "placeholders": {
+      "code": {
+        "content": "$1"
+      }
+    }
+  },
+  "errCommandFailed": {
+    "message": "That did not work ($CODE$).",
+    "placeholders": {
+      "code": {
+        "content": "$1"
+      }
+    }
+  },
+  "err_nm_conflict": {
+    "message": "This was already decided or no longer applies."
+  },
+  "err_nm_capability_missing": {
+    "message": "This version of Zeus cannot take decisions from the browser."
+  },
+  "err_nm_user_gesture_required": {
+    "message": "A decision needs a click."
+  },
+  "err_nm_timeout": {
+    "message": "Zeus did not answer in time."
+  },
+  "err_approval_browser_permission_required": {
+    "message": "Allow browser access for this site first."
+  },
+  "err_handoff_security_decision": {
+    "message": "The browser blocked this file for safety. Zeus will not override that."
+  },
+  "err_handoff_dangerous": {
+    "message": "The browser flagged this file as dangerous."
+  },
+  "err_handoff_not_found": {
+    "message": "The download is no longer in the browser."
+  },
+  "err_handoff_own_download": {
+    "message": "This is one of Zeus’s own internal downloads."
+  },
+  "err_handoff_unsupported_url": {
+    "message": "Zeus can only take downloads from http and https addresses."
+  },
+  "err_handoff_user_canceled": {
+    "message": "You canceled this download in the browser."
+  },
+  "err_handoff_not_interrupted": {
+    "message": "This download is not interrupted."
+  },
+  "err_handoff_complete": {
+    "message": "This download is already complete."
+  },
+  "err_url_login_required": {
+    "message": "Sign in to the site in your browser, then try again."
+  },
+  "err_fetch_cross_origin_denied": {
+    "message": "The file moved to another site you have not approved."
+  },
+  "err_session_consent_required": {
+    "message": "You have not allowed Zeus to use your session here."
+  },
+  "err_policy_origin_never": {
+    "message": "You blocked this site for Zeus."
+  },
+  "errClass_transient_network": {
+    "message": "Network problem"
+  },
+  "errClass_throttled": {
+    "message": "The site asked Zeus to slow down"
+  },
+  "errClass_auth_expired": {
+    "message": "The sign-in expired"
+  },
+  "errClass_url_expired": {
+    "message": "The download link expired"
+  },
+  "errClass_blocked": {
+    "message": "The site blocks automated downloads"
+  },
+  "errClass_permanent": {
+    "message": "The server refused the file"
+  },
+  "errClass_disk": {
+    "message": "Disk problem"
+  },
+  "errClass_integrity": {
+    "message": "The file did not match what was expected"
+  },
+  "errClass_policy_denied": {
+    "message": "A rule or a person said no"
+  },
+  "errClass_invalid_request": {
+    "message": "Invalid request"
+  },
+  "errClass_not_found": {
+    "message": "Not found"
+  },
+  "errClass_conflict": {
+    "message": "Conflict"
+  },
+  "errClass_unauthenticated": {
+    "message": "Not allowed"
+  },
+  "errClass_unsupported": {
+    "message": "Not supported"
+  },
+  "errClass_unavailable": {
+    "message": "Temporarily unavailable"
+  },
+  "errClass_timeout": {
+    "message": "Timed out"
+  },
+  "errClass_internal": {
+    "message": "Internal error"
+  },
+  "notifApprovalTitle": {
+    "message": "Zeus needs your decision"
+  },
+  "notifApprovalBody": {
+    "message": "Let Zeus finish $FILE$ from $SITE$? Open Zeus to decide.",
+    "placeholders": {
+      "file": {
+        "content": "$1"
+      },
+      "site": {
+        "content": "$2"
+      }
+    }
+  },
+  "notifPermissionTitle": {
+    "message": "Zeus needs browser access"
+  },
+  "notifPermissionBody": {
+    "message": "Allow Zeus to use your signed-in session on $SITE$: open the Zeus popup.",
+    "placeholders": {
+      "site": {
+        "content": "$1"
+      }
+    }
+  },
+  "notifCompletedTitle": {
+    "message": "Zeus saved a file"
+  },
+  "notifCompletedBody": {
+    "message": "$FILE$ (SHA-256 $HASH$…)",
+    "placeholders": {
+      "file": {
+        "content": "$1"
+      },
+      "hash": {
+        "content": "$2"
+      }
+    }
+  },
+  "notifFailedTitle": {
+    "message": "Zeus could not finish a download"
+  },
+  "notifFailedBody": {
+    "message": "$FILE$: $REASON$",
+    "placeholders": {
+      "file": {
+        "content": "$1"
+      },
+      "reason": {
+        "content": "$2"
+      }
+    }
+  },
+  "notifHostMissingTitle": {
+    "message": "Zeus app not found"
+  },
+  "notifHostMissingBody": {
+    "message": "Zeus needs its app to rescue downloads. Install it, then run: zeus native-host install"
+  },
+  "optSectionStatus": {
+    "message": "Status"
+  },
+  "optSectionAccess": {
+    "message": "Sites Zeus may use your session for"
+  },
+  "optSectionSettings": {
+    "message": "Settings"
+  },
+  "optSectionAbout": {
+    "message": "About this extension"
+  },
+  "optExtensionId": {
+    "message": "Extension id"
+  },
+  "optVersion": {
+    "message": "Extension version"
+  },
+  "optBrowser": {
+    "message": "Browser"
+  },
+  "optDaemon": {
+    "message": "Zeus app version"
+  },
+  "optProtocol": {
+    "message": "Protocol version"
+  },
+  "optCapabilities": {
+    "message": "Negotiated features"
+  },
+  "optProfile": {
+    "message": "Browser profile id (start)"
+  },
+  "optNoAccess": {
+    "message": "No site has been approved."
+  },
+  "optBlocked": {
+    "message": "Blocked sites"
+  },
+  "optNoBlocked": {
+    "message": "No site is blocked."
+  },
+  "btnRevoke": {
+    "message": "Revoke"
+  },
+  "scopeOnce": {
+    "message": "Once"
+  },
+  "scopeSite": {
+    "message": "Site, 24 hours"
+  },
+  "scopeWorkflow": {
+    "message": "Plan, 7 days"
+  },
+  "scopeNever": {
+    "message": "Never"
+  },
+  "labelExpiresAt": {
+    "message": "Expires"
+  },
+  "optAutoOffer": {
+    "message": "Offer interrupted downloads to Zeus"
+  },
+  "optAutoOfferHelp": {
+    "message": "Zeus still asks you before it uses your session on any site."
+  },
+  "optNotifications": {
+    "message": "Show notifications"
+  },
+  "optHostHelp": {
+    "message": "To register the Zeus app with this browser, run: zeus native-host install"
+  },
+  "optNoTelemetry": {
+    "message": "This extension sends nothing anywhere except to the Zeus app on this computer."
+  },
+  "optBrowserPermissionYes": {
+    "message": "browser access granted"
+  },
+  "optBrowserPermissionNo": {
+    "message": "browser access missing"
+  }
+}

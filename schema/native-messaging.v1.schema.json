@@ -1,0 +1,2518 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeus.invalid/schema/native-messaging.v1",
+  "title": "Zeus native messaging protocol v1",
+  "description": "Messages exchanged between the browser extension and the daemon (through zeus-native-host). Normative text: docs/spec/02-native-messaging-v1.md. Receivers MUST ignore unknown properties.",
+  "$defs": {
+    "MessageId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{1,64}$"
+    },
+    "StreamId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{1,32}$"
+    },
+    "BrowserName": {
+      "enum": [
+        "chrome",
+        "edge",
+        "brave",
+        "chromium",
+        "firefox",
+        "other"
+      ]
+    },
+    "InterruptReason": {
+      "description": "chrome.downloads.InterruptReason (verified 2026-10-05) plus UNKNOWN for values an implementation cannot map.",
+      "enum": [
+        "FILE_FAILED",
+        "FILE_ACCESS_DENIED",
+        "FILE_NO_SPACE",
+        "FILE_NAME_TOO_LONG",
+        "FILE_TOO_LARGE",
+        "FILE_VIRUS_INFECTED",
+        "FILE_TRANSIENT_ERROR",
+        "FILE_BLOCKED",
+        "FILE_SECURITY_CHECK_FAILED",
+        "FILE_TOO_SHORT",
+        "FILE_HASH_MISMATCH",
+        "FILE_SAME_AS_SOURCE",
+        "NETWORK_FAILED",
+        "NETWORK_TIMEOUT",
+        "NETWORK_DISCONNECTED",
+        "NETWORK_SERVER_DOWN",
+        "NETWORK_INVALID_REQUEST",
+        "SERVER_FAILED",
+        "SERVER_NO_RANGE",
+        "SERVER_BAD_CONTENT",
+        "SERVER_UNAUTHORIZED",
+        "SERVER_CERT_PROBLEM",
+        "SERVER_FORBIDDEN",
+        "SERVER_UNREACHABLE",
+        "SERVER_CONTENT_LENGTH_MISMATCH",
+        "SERVER_CROSS_ORIGIN_REDIRECT",
+        "USER_CANCELED",
+        "USER_SHUTDOWN",
+        "CRASH",
+        "UNKNOWN"
+      ]
+    },
+    "RequestHeaderName": {
+      "enum": [
+        "accept",
+        "accept-language"
+      ]
+    },
+    "ResponseHeaderName": {
+      "enum": [
+        "accept-ranges",
+        "cache-control",
+        "cf-mitigated",
+        "content-digest",
+        "content-disposition",
+        "content-encoding",
+        "content-length",
+        "content-range",
+        "content-type",
+        "date",
+        "etag",
+        "last-modified",
+        "repr-digest",
+        "retry-after",
+        "server",
+        "www-authenticate"
+      ]
+    },
+    "SessionHeaderName": {
+      "enum": [
+        "accept-language",
+        "sec-ch-ua",
+        "sec-ch-ua-mobile",
+        "sec-ch-ua-platform"
+      ]
+    },
+    "Limits": {
+      "type": "object",
+      "required": [
+        "max_frame_to_extension_bytes",
+        "max_frame_to_daemon_bytes",
+        "default_chunk_bytes",
+        "max_chunk_bytes",
+        "default_credit_window",
+        "max_credit_window",
+        "max_concurrent_streams",
+        "max_range_bytes",
+        "ping_interval_ms",
+        "pong_timeout_ms",
+        "max_cookie_count",
+        "max_session_ttl_ms"
+      ],
+      "properties": {
+        "max_frame_to_extension_bytes": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 1000000
+        },
+        "max_frame_to_daemon_bytes": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 67108864
+        },
+        "default_chunk_bytes": {
+          "type": "integer",
+          "minimum": 1024
+        },
+        "max_chunk_bytes": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 2097152
+        },
+        "default_credit_window": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "max_credit_window": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "max_concurrent_streams": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "max_range_bytes": {
+          "type": "integer",
+          "minimum": 1048576
+        },
+        "ping_interval_ms": {
+          "type": "integer",
+          "minimum": 1000
+        },
+        "pong_timeout_ms": {
+          "type": "integer",
+          "minimum": 1000
+        },
+        "max_cookie_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 150
+        },
+        "max_session_ttl_ms": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 900000
+        }
+      }
+    },
+    "Cookie": {
+      "type": "object",
+      "required": [
+        "name",
+        "value",
+        "domain",
+        "path",
+        "secure",
+        "http_only",
+        "same_site",
+        "host_only",
+        "expires_at"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 8192,
+          "x-zeus-secret": true
+        },
+        "domain": {
+          "type": "string",
+          "maxLength": 255
+        },
+        "path": {
+          "type": "string",
+          "maxLength": 1024
+        },
+        "secure": {
+          "type": "boolean"
+        },
+        "http_only": {
+          "type": "boolean"
+        },
+        "same_site": {
+          "enum": [
+            "no_restriction",
+            "lax",
+            "strict",
+            "unspecified"
+          ]
+        },
+        "host_only": {
+          "type": "boolean"
+        },
+        "expires_at": {
+          "oneOf": [
+            {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "partition_key": {
+          "type": "object",
+          "required": [
+            "top_level_site"
+          ],
+          "properties": {
+            "top_level_site": {
+              "type": "string",
+              "maxLength": 300
+            },
+            "has_cross_site_ancestor": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "SessionMaterial": {
+      "type": "object",
+      "required": [
+        "session_id",
+        "origin",
+        "issued_at",
+        "ttl_ms",
+        "cookies",
+        "user_agent",
+        "headers"
+      ],
+      "properties": {
+        "session_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/SessionLeaseId"
+        },
+        "origin": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Origin"
+        },
+        "issued_at": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp"
+        },
+        "ttl_ms": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 900000
+        },
+        "cookies": {
+          "type": "array",
+          "maxItems": 150,
+          "items": {
+            "$ref": "#/$defs/Cookie"
+          },
+          "x-zeus-secret": true
+        },
+        "user_agent": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "headers": {
+          "type": "object",
+          "maxProperties": 32,
+          "propertyNames": {
+            "$ref": "#/$defs/SessionHeaderName"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "maxLength": 8192
+          }
+        },
+        "cookie_store_id": {
+          "type": "string",
+          "maxLength": 64
+        }
+      }
+    },
+    "Envelope": {
+      "type": "object",
+      "required": [
+        "v",
+        "id",
+        "type"
+      ],
+      "properties": {
+        "v": {
+          "const": 1,
+          "description": "Protocol major version of this message. hello is always sent with v=1."
+        },
+        "id": {
+          "$ref": "#/$defs/MessageId"
+        },
+        "type": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "re": {
+          "$ref": "#/$defs/MessageId",
+          "description": "id of the request this message answers."
+        },
+        "body": {
+          "type": "object"
+        }
+      }
+    },
+    "HelloBody": {
+      "type": "object",
+      "required": [
+        "client",
+        "extension_id",
+        "extension_version",
+        "browser",
+        "profile_id",
+        "protocol_versions",
+        "capabilities",
+        "sw_instance_id"
+      ],
+      "properties": {
+        "client": {
+          "const": "zeus-extension"
+        },
+        "extension_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "extension_version": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/SemVer"
+        },
+        "browser": {
+          "type": "object",
+          "required": [
+            "name",
+            "version"
+          ],
+          "properties": {
+            "name": {
+              "$ref": "#/$defs/BrowserName"
+            },
+            "version": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "platform": {
+              "type": "string",
+              "maxLength": 64
+            }
+          }
+        },
+        "protocol_versions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "https://zeus.invalid/schema/common#/$defs/ProtocolVersion"
+          }
+        },
+        "capabilities": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "https://zeus.invalid/schema/common#/$defs/CapabilityName"
+          }
+        },
+        "profile_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$",
+          "description": "Random value created once per browser profile and kept in extension storage. Routes browser-bound jobs to the right cookie jar."
+        },
+        "sw_instance_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{16,32}$"
+        },
+        "resume": {
+          "type": "object",
+          "required": [
+            "last_event_seq"
+          ],
+          "properties": {
+            "last_event_seq": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          }
+        }
+      }
+    },
+    "HelloMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "hello"
+            },
+            "body": {
+              "$ref": "#/$defs/HelloBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "HelloAckBody": {
+      "type": "object",
+      "required": [
+        "protocol_version",
+        "capabilities",
+        "daemon",
+        "host",
+        "connection_id",
+        "limits",
+        "server_time",
+        "head_seq"
+      ],
+      "properties": {
+        "protocol_version": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/ProtocolVersion"
+        },
+        "capabilities": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "https://zeus.invalid/schema/common#/$defs/CapabilityName"
+          }
+        },
+        "daemon": {
+          "type": "object",
+          "required": [
+            "version",
+            "instance_id"
+          ],
+          "properties": {
+            "version": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/SemVer"
+            },
+            "instance_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{32}$"
+            }
+          }
+        },
+        "host": {
+          "type": "object",
+          "required": [
+            "version"
+          ],
+          "properties": {
+            "version": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/SemVer"
+            }
+          }
+        },
+        "connection_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/ConnectionId"
+        },
+        "limits": {
+          "$ref": "#/$defs/Limits"
+        },
+        "server_time": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp"
+        },
+        "head_seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "HelloAckMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "hello.ack"
+            },
+            "body": {
+              "$ref": "#/$defs/HelloAckBody"
+            }
+          },
+          "required": [
+            "body",
+            "re"
+          ]
+        }
+      ]
+    },
+    "PingBody": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "nonce": {
+          "type": "string",
+          "maxLength": 32
+        }
+      }
+    },
+    "PingMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "ping"
+            },
+            "body": {
+              "$ref": "#/$defs/PingBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "PongBody": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "nonce": {
+          "type": "string",
+          "maxLength": 32
+        }
+      }
+    },
+    "PongMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "pong"
+            },
+            "body": {
+              "$ref": "#/$defs/PongBody"
+            }
+          },
+          "required": [
+            "body",
+            "re"
+          ]
+        }
+      ]
+    },
+    "ByeBody": {
+      "type": "object",
+      "required": [
+        "reason"
+      ],
+      "properties": {
+        "reason": {
+          "enum": [
+            "shutdown",
+            "daemon_gone",
+            "extension_unload",
+            "protocol_error",
+            "superseded",
+            "idle_timeout"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 256
+        }
+      }
+    },
+    "ByeMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "bye"
+            },
+            "body": {
+              "$ref": "#/$defs/ByeBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "ErrorBody": {
+      "type": "object",
+      "required": [
+        "error"
+      ],
+      "properties": {
+        "error": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/ErrorEnvelope"
+        }
+      }
+    },
+    "ErrorMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "error"
+            },
+            "body": {
+              "$ref": "#/$defs/ErrorBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "HandoffOfferBody": {
+      "type": "object",
+      "required": [
+        "offer_key",
+        "trigger",
+        "download"
+      ],
+      "properties": {
+        "offer_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "trigger": {
+          "enum": [
+            "interrupted",
+            "user_initiated"
+          ]
+        },
+        "download": {
+          "type": "object",
+          "required": [
+            "browser_download_id",
+            "url",
+            "final_url",
+            "referrer",
+            "filename",
+            "mime",
+            "bytes_received",
+            "total_bytes",
+            "start_time",
+            "incognito",
+            "can_resume",
+            "interrupt_reason"
+          ],
+          "properties": {
+            "browser_download_id": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "url": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Url"
+            },
+            "final_url": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Url"
+            },
+            "referrer": {
+              "oneOf": [
+                {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/Url"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "filename": {
+              "type": "string",
+              "maxLength": 255,
+              "description": "Basename only. Absolute paths MUST NOT leave the browser."
+            },
+            "mime": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 255
+            },
+            "bytes_received": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+            },
+            "total_bytes": {
+              "oneOf": [
+                {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "start_time": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp"
+            },
+            "incognito": {
+              "type": "boolean"
+            },
+            "can_resume": {
+              "type": "boolean"
+            },
+            "interrupt_reason": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/InterruptReason"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "by_extension_id": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        },
+        "validators": {
+          "oneOf": [
+            {
+              "$ref": "https://zeus.invalid/schema/domain#/$defs/Validators"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "HandoffOfferMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "handoff.offer"
+            },
+            "body": {
+              "$ref": "#/$defs/HandoffOfferBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "HandoffAcceptBody": {
+      "type": "object",
+      "required": [
+        "job_id",
+        "state",
+        "deduplicated"
+      ],
+      "properties": {
+        "job_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/JobId"
+        },
+        "state": {
+          "$ref": "https://zeus.invalid/schema/domain#/$defs/JobState"
+        },
+        "approval_id": {
+          "oneOf": [
+            {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/ApprovalId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "deduplicated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "HandoffAcceptMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "handoff.accept"
+            },
+            "body": {
+              "$ref": "#/$defs/HandoffAcceptBody"
+            }
+          },
+          "required": [
+            "body",
+            "re"
+          ]
+        }
+      ]
+    },
+    "HandoffRejectBody": {
+      "type": "object",
+      "required": [
+        "error"
+      ],
+      "properties": {
+        "error": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/ErrorEnvelope"
+        }
+      }
+    },
+    "HandoffRejectMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "handoff.reject"
+            },
+            "body": {
+              "$ref": "#/$defs/HandoffRejectBody"
+            }
+          },
+          "required": [
+            "body",
+            "re"
+          ]
+        }
+      ]
+    },
+    "HandoffWithdrawBody": {
+      "type": "object",
+      "required": [
+        "job_id",
+        "offer_key",
+        "reason"
+      ],
+      "properties": {
+        "job_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/JobId"
+        },
+        "offer_key": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "reason": {
+          "enum": [
+            "completed_in_browser",
+            "resumed_in_browser",
+            "canceled_by_user",
+            "download_erased"
+          ]
+        }
+      }
+    },
+    "HandoffWithdrawMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "handoff.withdraw"
+            },
+            "body": {
+              "$ref": "#/$defs/HandoffWithdrawBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "SessionRequestBody": {
+      "type": "object",
+      "required": [
+        "job_id",
+        "session_id",
+        "grant_id",
+        "origin",
+        "url",
+        "purpose",
+        "request_headers",
+        "ttl_ms",
+        "incognito"
+      ],
+      "properties": {
+        "job_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/JobId"
+        },
+        "session_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/SessionLeaseId"
+        },
+        "grant_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId"
+        },
+        "origin": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Origin"
+        },
+        "url": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Url"
+        },
+        "purpose": {
+          "enum": [
+            "download",
+            "probe",
+            "refresh"
+          ]
+        },
+        "request_headers": {
+          "type": "array",
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/SessionHeaderName"
+          }
+        },
+        "ttl_ms": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 900000
+        },
+        "incognito": {
+          "type": "boolean"
+        }
+      }
+    },
+    "SessionRequestMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "session.request"
+            },
+            "body": {
+              "$ref": "#/$defs/SessionRequestBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "SessionResponseBody": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "status",
+            "session"
+          ],
+          "properties": {
+            "status": {
+              "const": "granted"
+            },
+            "session": {
+              "$ref": "#/$defs/SessionMaterial"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "status",
+            "error"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "consent_required",
+                "denied",
+                "unavailable"
+              ]
+            },
+            "error": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/ErrorEnvelope"
+            }
+          }
+        }
+      ]
+    },
+    "SessionResponseMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "session.response"
+            },
+            "body": {
+              "$ref": "#/$defs/SessionResponseBody"
+            }
+          },
+          "required": [
+            "body",
+            "re"
+          ]
+        }
+      ]
+    },
+    "UrlRefreshRequestBody": {
+      "type": "object",
+      "required": [
+        "job_id",
+        "origin",
+        "origin_url",
+        "stale_url",
+        "reason",
+        "methods",
+        "deadline_ms"
+      ],
+      "properties": {
+        "job_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/JobId"
+        },
+        "origin": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Origin"
+        },
+        "origin_url": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Url"
+        },
+        "stale_url": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Url"
+        },
+        "reason": {
+          "enum": [
+            "url_expired",
+            "auth_expired",
+            "blocked"
+          ]
+        },
+        "methods": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "refetch",
+              "download_api"
+            ]
+          }
+        },
+        "expected": {
+          "type": "object",
+          "required": [],
+          "properties": {
+            "total_bytes": {
+              "oneOf": [
+                {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "etag": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 512
+            },
+            "filename": {
+              "type": "string",
+              "maxLength": 255
+            }
+          }
+        },
+        "deadline_ms": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 60000
+        }
+      }
+    },
+    "UrlRefreshRequestMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "url.refresh.request"
+            },
+            "body": {
+              "$ref": "#/$defs/UrlRefreshRequestBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "UrlRefreshResponseBody": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "status",
+            "url",
+            "final_url",
+            "method"
+          ],
+          "properties": {
+            "status": {
+              "const": "refreshed"
+            },
+            "url": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Url"
+            },
+            "final_url": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Url"
+            },
+            "method": {
+              "enum": [
+                "refetch",
+                "download_api"
+              ]
+            },
+            "validators": {
+              "oneOf": [
+                {
+                  "$ref": "https://zeus.invalid/schema/domain#/$defs/Validators"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "total_bytes": {
+              "oneOf": [
+                {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "properties": {
+            "status": {
+              "const": "unchanged"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "status",
+            "error"
+          ],
+          "properties": {
+            "status": {
+              "const": "cannot_refresh"
+            },
+            "error": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/ErrorEnvelope"
+            }
+          }
+        }
+      ]
+    },
+    "UrlRefreshResponseMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "url.refresh.response"
+            },
+            "body": {
+              "$ref": "#/$defs/UrlRefreshResponseBody"
+            }
+          },
+          "required": [
+            "body",
+            "re"
+          ]
+        }
+      ]
+    },
+    "FetchRangeBody": {
+      "type": "object",
+      "required": [
+        "stream_id",
+        "job_id",
+        "url",
+        "origin",
+        "range",
+        "chunk_bytes",
+        "credits",
+        "deadline_ms"
+      ],
+      "properties": {
+        "stream_id": {
+          "$ref": "#/$defs/StreamId"
+        },
+        "job_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/JobId"
+        },
+        "url": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Url"
+        },
+        "origin": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Origin"
+        },
+        "range": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "offset",
+                "length"
+              ],
+              "properties": {
+                "offset": {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+                },
+                "length": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "if_range": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "request_headers": {
+          "type": "object",
+          "maxProperties": 32,
+          "propertyNames": {
+            "$ref": "#/$defs/RequestHeaderName"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "maxLength": 8192
+          }
+        },
+        "chunk_bytes": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 2097152
+        },
+        "credits": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "deadline_ms": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 60000
+        }
+      }
+    },
+    "FetchRangeMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "fetch.range"
+            },
+            "body": {
+              "$ref": "#/$defs/FetchRangeBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "FetchHeadBody": {
+      "type": "object",
+      "required": [
+        "stream_id",
+        "status",
+        "final_url",
+        "redirected",
+        "headers"
+      ],
+      "properties": {
+        "stream_id": {
+          "$ref": "#/$defs/StreamId"
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 599
+        },
+        "final_url": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Url"
+        },
+        "redirected": {
+          "type": "boolean"
+        },
+        "headers": {
+          "type": "object",
+          "maxProperties": 32,
+          "propertyNames": {
+            "$ref": "#/$defs/ResponseHeaderName"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "maxLength": 8192
+          }
+        }
+      }
+    },
+    "FetchHeadMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "fetch.head"
+            },
+            "body": {
+              "$ref": "#/$defs/FetchHeadBody"
+            }
+          },
+          "required": [
+            "body",
+            "re"
+          ]
+        }
+      ]
+    },
+    "FetchChunkBody": {
+      "type": "object",
+      "required": [
+        "stream_id",
+        "index",
+        "offset",
+        "length",
+        "data"
+      ],
+      "properties": {
+        "stream_id": {
+          "$ref": "#/$defs/StreamId"
+        },
+        "index": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+        },
+        "offset": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+        },
+        "length": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2097152
+        },
+        "data": {
+          "type": "string",
+          "maxLength": 2796208,
+          "pattern": "^[A-Za-z0-9+/]+={0,2}$",
+          "x-zeus-secret": true
+        }
+      }
+    },
+    "FetchChunkMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "fetch.chunk"
+            },
+            "body": {
+              "$ref": "#/$defs/FetchChunkBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "FetchCreditBody": {
+      "type": "object",
+      "required": [
+        "stream_id",
+        "credits"
+      ],
+      "properties": {
+        "stream_id": {
+          "$ref": "#/$defs/StreamId"
+        },
+        "credits": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        }
+      }
+    },
+    "FetchCreditMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "fetch.credit"
+            },
+            "body": {
+              "$ref": "#/$defs/FetchCreditBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "FetchEndBody": {
+      "type": "object",
+      "required": [
+        "stream_id",
+        "reason",
+        "chunks",
+        "bytes"
+      ],
+      "properties": {
+        "stream_id": {
+          "$ref": "#/$defs/StreamId"
+        },
+        "reason": {
+          "enum": [
+            "complete",
+            "canceled"
+          ]
+        },
+        "chunks": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+        },
+        "bytes": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+        }
+      }
+    },
+    "FetchEndMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "fetch.end"
+            },
+            "body": {
+              "$ref": "#/$defs/FetchEndBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "FetchErrorBody": {
+      "type": "object",
+      "required": [
+        "stream_id",
+        "error",
+        "bytes"
+      ],
+      "properties": {
+        "stream_id": {
+          "$ref": "#/$defs/StreamId"
+        },
+        "error": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/ErrorEnvelope"
+        },
+        "bytes": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+        }
+      }
+    },
+    "FetchErrorMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "fetch.error"
+            },
+            "body": {
+              "$ref": "#/$defs/FetchErrorBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "FetchCancelBody": {
+      "type": "object",
+      "required": [
+        "stream_id",
+        "reason"
+      ],
+      "properties": {
+        "stream_id": {
+          "$ref": "#/$defs/StreamId"
+        },
+        "reason": {
+          "enum": [
+            "job_canceled",
+            "job_paused",
+            "superseded",
+            "shutdown",
+            "protocol_violation"
+          ]
+        }
+      }
+    },
+    "FetchCancelMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "fetch.cancel"
+            },
+            "body": {
+              "$ref": "#/$defs/FetchCancelBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "ApprovalListBody": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "states": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "pending",
+              "approved",
+              "denied",
+              "expired",
+              "canceled"
+            ]
+          }
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "cursor": {
+          "type": "string",
+          "maxLength": 256
+        }
+      }
+    },
+    "ApprovalListMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "approval.list"
+            },
+            "body": {
+              "$ref": "#/$defs/ApprovalListBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "ApprovalListResponseBody": {
+      "type": "object",
+      "required": [
+        "approvals",
+        "next_cursor"
+      ],
+      "properties": {
+        "approvals": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "https://zeus.invalid/schema/domain#/$defs/Approval"
+          }
+        },
+        "next_cursor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 256
+        }
+      }
+    },
+    "ApprovalListResponseMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "approval.list.response"
+            },
+            "body": {
+              "$ref": "#/$defs/ApprovalListResponseBody"
+            }
+          },
+          "required": [
+            "body",
+            "re"
+          ]
+        }
+      ]
+    },
+    "ApprovalPendingBody": {
+      "type": "object",
+      "required": [
+        "approval"
+      ],
+      "properties": {
+        "approval": {
+          "$ref": "https://zeus.invalid/schema/domain#/$defs/Approval"
+        }
+      }
+    },
+    "ApprovalPendingMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "approval.pending"
+            },
+            "body": {
+              "$ref": "#/$defs/ApprovalPendingBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "ApprovalDecideBody": {
+      "type": "object",
+      "required": [
+        "approval_id",
+        "decision",
+        "ui"
+      ],
+      "properties": {
+        "approval_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/ApprovalId"
+        },
+        "decision": {
+          "enum": [
+            "approve",
+            "deny"
+          ]
+        },
+        "scope": {
+          "$ref": "https://zeus.invalid/schema/domain#/$defs/GrantScope"
+        },
+        "ui": {
+          "type": "object",
+          "required": [
+            "surface",
+            "user_gesture"
+          ],
+          "properties": {
+            "surface": {
+              "enum": [
+                "extension_popup",
+                "extension_options",
+                "extension_sidepanel",
+                "extension_notification"
+              ]
+            },
+            "user_gesture": {
+              "const": true
+            }
+          }
+        }
+      }
+    },
+    "ApprovalDecideMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "approval.decide"
+            },
+            "body": {
+              "$ref": "#/$defs/ApprovalDecideBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "ApprovalDecideResponseBody": {
+      "type": "object",
+      "required": [
+        "approval"
+      ],
+      "properties": {
+        "approval": {
+          "$ref": "https://zeus.invalid/schema/domain#/$defs/Approval"
+        },
+        "grant": {
+          "$ref": "https://zeus.invalid/schema/domain#/$defs/SessionGrant"
+        }
+      }
+    },
+    "ApprovalDecideResponseMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "approval.decide.response"
+            },
+            "body": {
+              "$ref": "#/$defs/ApprovalDecideResponseBody"
+            }
+          },
+          "required": [
+            "body",
+            "re"
+          ]
+        }
+      ]
+    },
+    "EventsSubscribeBody": {
+      "type": "object",
+      "required": [
+        "include_progress",
+        "scope"
+      ],
+      "properties": {
+        "since_seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "types": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "maxLength": 64
+          }
+        },
+        "include_progress": {
+          "type": "boolean"
+        },
+        "progress_interval_ms": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 60000
+        },
+        "scope": {
+          "enum": [
+            "all",
+            "own"
+          ]
+        }
+      }
+    },
+    "EventsSubscribeMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "events.subscribe"
+            },
+            "body": {
+              "$ref": "#/$defs/EventsSubscribeBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "EventsSubscribeResponseBody": {
+      "type": "object",
+      "required": [
+        "subscription_id",
+        "head_seq",
+        "replay_count",
+        "replay_truncated"
+      ],
+      "properties": {
+        "subscription_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,32}$"
+        },
+        "head_seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "replay_count": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+        },
+        "replay_truncated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "EventsSubscribeResponseMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "events.subscribe.response"
+            },
+            "body": {
+              "$ref": "#/$defs/EventsSubscribeResponseBody"
+            }
+          },
+          "required": [
+            "body",
+            "re"
+          ]
+        }
+      ]
+    },
+    "EventsUnsubscribeBody": {
+      "type": "object",
+      "required": [
+        "subscription_id"
+      ],
+      "properties": {
+        "subscription_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,32}$"
+        }
+      }
+    },
+    "EventsUnsubscribeMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "events.unsubscribe"
+            },
+            "body": {
+              "$ref": "#/$defs/EventsUnsubscribeBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "JobEventBody": {
+      "type": "object",
+      "required": [
+        "subscription_id",
+        "event"
+      ],
+      "properties": {
+        "subscription_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,32}$"
+        },
+        "event": {
+          "$ref": "https://zeus.invalid/schema/domain#/$defs/Event"
+        }
+      }
+    },
+    "JobEventMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "job.event"
+            },
+            "body": {
+              "$ref": "#/$defs/JobEventBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "JobListBody": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "states": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "https://zeus.invalid/schema/domain#/$defs/JobState"
+          }
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "cursor": {
+          "type": "string",
+          "maxLength": 256
+        }
+      }
+    },
+    "JobListMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "job.list"
+            },
+            "body": {
+              "$ref": "#/$defs/JobListBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "JobListResponseBody": {
+      "type": "object",
+      "required": [
+        "jobs",
+        "next_cursor"
+      ],
+      "properties": {
+        "jobs": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "https://zeus.invalid/schema/domain#/$defs/JobSummary"
+          }
+        },
+        "next_cursor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 256
+        }
+      }
+    },
+    "JobListResponseMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "job.list.response"
+            },
+            "body": {
+              "$ref": "#/$defs/JobListResponseBody"
+            }
+          },
+          "required": [
+            "body",
+            "re"
+          ]
+        }
+      ]
+    },
+    "JobControlBody": {
+      "type": "object",
+      "required": [
+        "job_id",
+        "action"
+      ],
+      "properties": {
+        "job_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/JobId"
+        },
+        "action": {
+          "enum": [
+            "pause",
+            "resume",
+            "cancel",
+            "retry"
+          ]
+        }
+      }
+    },
+    "JobControlMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "job.control"
+            },
+            "body": {
+              "$ref": "#/$defs/JobControlBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "JobControlResponseBody": {
+      "type": "object",
+      "required": [
+        "job"
+      ],
+      "properties": {
+        "job": {
+          "$ref": "https://zeus.invalid/schema/domain#/$defs/JobSummary"
+        }
+      }
+    },
+    "JobControlResponseMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "job.control.response"
+            },
+            "body": {
+              "$ref": "#/$defs/JobControlResponseBody"
+            }
+          },
+          "required": [
+            "body",
+            "re"
+          ]
+        }
+      ]
+    },
+    "GrantListBody": {
+      "type": "object",
+      "required": [
+        "include_inactive"
+      ],
+      "properties": {
+        "include_inactive": {
+          "type": "boolean"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      }
+    },
+    "GrantListMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "grant.list"
+            },
+            "body": {
+              "$ref": "#/$defs/GrantListBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "GrantListResponseBody": {
+      "type": "object",
+      "required": [
+        "grants"
+      ],
+      "properties": {
+        "grants": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "https://zeus.invalid/schema/domain#/$defs/SessionGrant"
+          }
+        }
+      }
+    },
+    "GrantListResponseMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "grant.list.response"
+            },
+            "body": {
+              "$ref": "#/$defs/GrantListResponseBody"
+            }
+          },
+          "required": [
+            "body",
+            "re"
+          ]
+        }
+      ]
+    },
+    "GrantRevokeBody": {
+      "type": "object",
+      "required": [
+        "grant_id"
+      ],
+      "properties": {
+        "grant_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId"
+        }
+      }
+    },
+    "GrantRevokeMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "grant.revoke"
+            },
+            "body": {
+              "$ref": "#/$defs/GrantRevokeBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "GrantRevokeResponseBody": {
+      "type": "object",
+      "required": [
+        "grant"
+      ],
+      "properties": {
+        "grant": {
+          "$ref": "https://zeus.invalid/schema/domain#/$defs/SessionGrant"
+        }
+      }
+    },
+    "GrantRevokeResponseMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "grant.revoke.response"
+            },
+            "body": {
+              "$ref": "#/$defs/GrantRevokeResponseBody"
+            }
+          },
+          "required": [
+            "body",
+            "re"
+          ]
+        }
+      ]
+    },
+    "ExtensionToDaemonMessage": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/HelloMessage"
+        },
+        {
+          "$ref": "#/$defs/PingMessage"
+        },
+        {
+          "$ref": "#/$defs/PongMessage"
+        },
+        {
+          "$ref": "#/$defs/ByeMessage"
+        },
+        {
+          "$ref": "#/$defs/ErrorMessage"
+        },
+        {
+          "$ref": "#/$defs/HandoffOfferMessage"
+        },
+        {
+          "$ref": "#/$defs/HandoffWithdrawMessage"
+        },
+        {
+          "$ref": "#/$defs/SessionResponseMessage"
+        },
+        {
+          "$ref": "#/$defs/UrlRefreshResponseMessage"
+        },
+        {
+          "$ref": "#/$defs/FetchHeadMessage"
+        },
+        {
+          "$ref": "#/$defs/FetchChunkMessage"
+        },
+        {
+          "$ref": "#/$defs/FetchEndMessage"
+        },
+        {
+          "$ref": "#/$defs/FetchErrorMessage"
+        },
+        {
+          "$ref": "#/$defs/ApprovalListMessage"
+        },
+        {
+          "$ref": "#/$defs/ApprovalDecideMessage"
+        },
+        {
+          "$ref": "#/$defs/EventsSubscribeMessage"
+        },
+        {
+          "$ref": "#/$defs/EventsUnsubscribeMessage"
+        },
+        {
+          "$ref": "#/$defs/JobListMessage"
+        },
+        {
+          "$ref": "#/$defs/JobControlMessage"
+        },
+        {
+          "$ref": "#/$defs/GrantListMessage"
+        },
+        {
+          "$ref": "#/$defs/GrantRevokeMessage"
+        }
+      ]
+    },
+    "DaemonToExtensionMessage": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/HelloAckMessage"
+        },
+        {
+          "$ref": "#/$defs/PingMessage"
+        },
+        {
+          "$ref": "#/$defs/PongMessage"
+        },
+        {
+          "$ref": "#/$defs/ByeMessage"
+        },
+        {
+          "$ref": "#/$defs/ErrorMessage"
+        },
+        {
+          "$ref": "#/$defs/HandoffAcceptMessage"
+        },
+        {
+          "$ref": "#/$defs/HandoffRejectMessage"
+        },
+        {
+          "$ref": "#/$defs/SessionRequestMessage"
+        },
+        {
+          "$ref": "#/$defs/UrlRefreshRequestMessage"
+        },
+        {
+          "$ref": "#/$defs/FetchRangeMessage"
+        },
+        {
+          "$ref": "#/$defs/FetchCreditMessage"
+        },
+        {
+          "$ref": "#/$defs/FetchCancelMessage"
+        },
+        {
+          "$ref": "#/$defs/ApprovalListResponseMessage"
+        },
+        {
+          "$ref": "#/$defs/ApprovalPendingMessage"
+        },
+        {
+          "$ref": "#/$defs/ApprovalDecideResponseMessage"
+        },
+        {
+          "$ref": "#/$defs/EventsSubscribeResponseMessage"
+        },
+        {
+          "$ref": "#/$defs/JobEventMessage"
+        },
+        {
+          "$ref": "#/$defs/JobListResponseMessage"
+        },
+        {
+          "$ref": "#/$defs/JobControlResponseMessage"
+        },
+        {
+          "$ref": "#/$defs/GrantListResponseMessage"
+        },
+        {
+          "$ref": "#/$defs/GrantRevokeResponseMessage"
+        }
+      ]
+    },
+    "Message": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExtensionToDaemonMessage"
+        },
+        {
+          "$ref": "#/$defs/DaemonToExtensionMessage"
+        }
+      ]
+    },
+    "HostManifestChrome": {
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "path",
+        "type",
+        "allowed_origins"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+(\\.[a-z0-9_]+)*$"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "path": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "type": {
+          "const": "stdio"
+        },
+        "allowed_origins": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^chrome-extension://[a-p]{32}/$"
+          }
+        }
+      }
+    },
+    "HostManifestFirefox": {
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "path",
+        "type",
+        "allowed_extensions"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+(\\.[a-z0-9_]+)*$"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "path": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "type": {
+          "const": "stdio"
+        },
+        "allowed_extensions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        }
+      }
+    }
+  }
+}

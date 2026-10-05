@@ -1,0 +1,512 @@
+{
+  "extName": {
+    "message": "Zeus"
+  },
+  "extDescription": {
+    "message": "ব্যর্থ ডাউনলোড শেষ করুন আপনার লোকাল ডাউনলোড ম্যানেজার Zeus দিয়ে। কিছুই আপনার কম্পিউটারের বাইরে যায় না।"
+  },
+  "actionTitle": {
+    "message": "Zeus"
+  },
+  "popupTitle": {
+    "message": "Zeus"
+  },
+  "openOptions": {
+    "message": "সেটিংস"
+  },
+  "optionsTitle": {
+    "message": "Zeus সেটিংস"
+  },
+  "statusConnected": {
+    "message": "Zeus-এর সঙ্গে সংযুক্ত"
+  },
+  "statusConnecting": {
+    "message": "Zeus-এর সঙ্গে সংযোগ হচ্ছে…"
+  },
+  "statusIdle": {
+    "message": "Zeus নিষ্ক্রিয়, প্রয়োজনে সংযুক্ত হবে"
+  },
+  "statusDisconnected": {
+    "message": "Zeus-এর সঙ্গে সংযুক্ত নয়"
+  },
+  "statusHostMissing": {
+    "message": "Zeus অ্যাপ পাওয়া যায়নি"
+  },
+  "statusForbidden": {
+    "message": "Zeus এই এক্সটেনশনকে চেনে না"
+  },
+  "statusSuspended": {
+    "message": "বারবার ব্যর্থ হওয়ায় সংযোগ বিরতিতে আছে"
+  },
+  "hintHostMissing": {
+    "message": "Zeus অ্যাপ ইনস্টল করুন, তারপর চালান: zeus native-host install"
+  },
+  "hintForbidden": {
+    "message": "চালান: zeus native-host install। এই এক্সটেনশনের আইডি অ্যাপে নিবন্ধিত থাকতে হবে।"
+  },
+  "hintSuspended": {
+    "message": "Zeus কয়েক মিনিট পরে আবার চেষ্টা করবে। আপনি এখনই চেষ্টা করতেও পারেন।"
+  },
+  "btnReconnect": {
+    "message": "এখনই আবার চেষ্টা করুন"
+  },
+  "sectionApprovals": {
+    "message": "আপনার সিদ্ধান্ত দরকার"
+  },
+  "sectionAccess": {
+    "message": "ব্রাউজারের অনুমতি দরকার"
+  },
+  "sectionJobs": {
+    "message": "Zeus ডাউনলোড"
+  },
+  "sectionDownloads": {
+    "message": "ব্রাউজারের ডাউনলোড"
+  },
+  "emptyState": {
+    "message": "আপনার মনোযোগ দরকার এমন কিছু নেই।"
+  },
+  "emptyJobs": {
+    "message": "এখনও কোনো Zeus ডাউনলোড নেই।"
+  },
+  "approvalKindHandoff": {
+    "message": "ব্যর্থ ডাউনলোড শেষ করা"
+  },
+  "approvalKindSessionGrant": {
+    "message": "আপনার সাইন-ইন করা সেশন ব্যবহার"
+  },
+  "approvalKindRetryEscalation": {
+    "message": "একটি ডাউনলোড বারবার ব্যর্থ হচ্ছে"
+  },
+  "approvalKindPolicyException": {
+    "message": "একটি ব্যতিক্রম অনুমতি"
+  },
+  "approvalKindWorkflowPlan": {
+    "message": "ডাউনলোড পরিকল্পনা চালানো"
+  },
+  "approvalKindDestructiveOp": {
+    "message": "ফাইল মুছে ফেলা বা ওভাররাইট করা"
+  },
+  "approvalKindOther": {
+    "message": "অনুমোদন দরকার"
+  },
+  "labelFileName": {
+    "message": "ফাইলের নাম (ওয়েবসাইটের দেওয়া)"
+  },
+  "labelSite": {
+    "message": "সাইট"
+  },
+  "labelSize": {
+    "message": "আকার"
+  },
+  "labelFrom": {
+    "message": "শুরু হয়েছে"
+  },
+  "labelRequestedBy": {
+    "message": "অনুরোধকারী (অনুরোধকারীর নিজের বর্ণনা অনুযায়ী)"
+  },
+  "labelExpires": {
+    "message": "$TIME$ পরে মেয়াদ শেষ",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "sourceBrowserHandoff": {
+    "message": "এই ব্রাউজার থেকে"
+  },
+  "sourceAgent": {
+    "message": "একটি এআই এজেন্ট থেকে"
+  },
+  "sourceCli": {
+    "message": "কমান্ড লাইন থেকে"
+  },
+  "sourceWorkflow": {
+    "message": "একটি ডাউনলোড পরিকল্পনা থেকে"
+  },
+  "cookieNotice": {
+    "message": "আপনি অনুমতি দিলে Zeus শুধু এই সাইটের কুকি পড়বে, একবারে সর্বোচ্চ ১৫ মিনিটের জন্য, এবং কখনও সংরক্ষণ করবে না।"
+  },
+  "reasonHandoffInterrupted": {
+    "message": "আপনার ব্রাউজারের ডাউনলোড মাঝপথে থেমে গেছে।"
+  },
+  "reasonSessionFirstUse": {
+    "message": "Zeus এর আগে এই সাইটে আপনার সেশন ব্যবহার করেনি।"
+  },
+  "reasonRetryExhausted": {
+    "message": "Zeus-এর স্বয়ংক্রিয় পুনঃচেষ্টা শেষ হয়ে গেছে।"
+  },
+  "reasonUrlExpired": {
+    "message": "ডাউনলোডের লিংকের মেয়াদ শেষ হয়ে গেছে।"
+  },
+  "btnAllowOnce": {
+    "message": "একবার অনুমতি দিন"
+  },
+  "btnAllowSite": {
+    "message": "এই সাইটকে ২৪ ঘণ্টার জন্য অনুমতি দিন"
+  },
+  "btnAllowWorkflow": {
+    "message": "এই পরিকল্পনার জন্য অনুমতি দিন (৭ দিন)"
+  },
+  "btnNeverSite": {
+    "message": "এই সাইটের জন্য কখনও নয়"
+  },
+  "btnDeny": {
+    "message": "অনুমতি দেবেন না"
+  },
+  "btnApprove": {
+    "message": "অনুমোদন করুন"
+  },
+  "btnAllowAccess": {
+    "message": "$SITE$-এ ব্রাউজারের অনুমতি দিন",
+    "placeholders": {
+      "site": {
+        "content": "$1"
+      }
+    }
+  },
+  "accessNeededHint": {
+    "message": "$SITE$ Zeus-এ অনুমোদিত হয়েছে। Zeus আপনার সেশন ব্যবহার করার আগে ব্রাউজারকেও অনুমতি দিতে হবে।",
+    "placeholders": {
+      "site": {
+        "content": "$1"
+      }
+    }
+  },
+  "jobStateQueued": {
+    "message": "অপেক্ষায়"
+  },
+  "jobStateProbing": {
+    "message": "যাচাই হচ্ছে"
+  },
+  "jobStateAwaitingApproval": {
+    "message": "অনুমোদন দরকার"
+  },
+  "jobStateAwaitingSession": {
+    "message": "আপনার ব্রাউজারের জন্য অপেক্ষা"
+  },
+  "jobStateDownloading": {
+    "message": "ডাউনলোড হচ্ছে"
+  },
+  "jobStatePaused": {
+    "message": "বিরতিতে"
+  },
+  "jobStateRetryScheduled": {
+    "message": "শীঘ্রই আবার চেষ্টা"
+  },
+  "jobStateVerifying": {
+    "message": "যাচাই করা হচ্ছে"
+  },
+  "jobStateFinalizing": {
+    "message": "শেষ করা হচ্ছে"
+  },
+  "jobStateCompleted": {
+    "message": "সম্পন্ন"
+  },
+  "jobStateFailed": {
+    "message": "ব্যর্থ"
+  },
+  "jobStateCanceled": {
+    "message": "বাতিল"
+  },
+  "jobQuarantined": {
+    "message": "ঝুঁকিপূর্ণ হিসেবে চিহ্নিত। Zeus এটি খুলবে না।"
+  },
+  "btnPause": {
+    "message": "বিরতি"
+  },
+  "btnResume": {
+    "message": "চালিয়ে যান"
+  },
+  "btnCancel": {
+    "message": "বাতিল"
+  },
+  "btnRetry": {
+    "message": "আবার চেষ্টা"
+  },
+  "btnFinishWithZeus": {
+    "message": "Zeus দিয়ে শেষ করুন"
+  },
+  "dlInterrupted": {
+    "message": "থেমে গেছে"
+  },
+  "dlInProgress": {
+    "message": "চলছে"
+  },
+  "dlSentToZeus": {
+    "message": "Zeus-এ পাঠানো হয়েছে"
+  },
+  "dlRefusedSecurity": {
+    "message": "ব্রাউজার নিরাপত্তার কারণে এই ফাইল আটকেছে। Zeus সেটি লঙ্ঘন করবে না।"
+  },
+  "dlRefusedDangerous": {
+    "message": "ব্রাউজার এই ফাইলকে বিপজ্জনক হিসেবে চিহ্নিত করেছে।"
+  },
+  "dlRefusedOther": {
+    "message": "Zeus এই ডাউনলোড নিতে পারে না।"
+  },
+  "errGeneric": {
+    "message": "কিছু একটা ভুল হয়েছে।"
+  },
+  "errPermissionDenied": {
+    "message": "ব্রাউজার অনুমতি দেয়নি, তাই কিছুই অনুমোদন করা হয়নি।"
+  },
+  "errDecideFailed": {
+    "message": "সিদ্ধান্ত পাঠানো যায়নি ($CODE$)।",
+    "placeholders": {
+      "code": {
+        "content": "$1"
+      }
+    }
+  },
+  "errCommandFailed": {
+    "message": "কাজটি হয়নি ($CODE$)।",
+    "placeholders": {
+      "code": {
+        "content": "$1"
+      }
+    }
+  },
+  "err_nm_conflict": {
+    "message": "এটি আগেই সিদ্ধান্ত হয়ে গেছে বা আর প্রযোজ্য নয়।"
+  },
+  "err_nm_capability_missing": {
+    "message": "Zeus-এর এই সংস্করণ ব্রাউজার থেকে সিদ্ধান্ত নিতে পারে না।"
+  },
+  "err_nm_user_gesture_required": {
+    "message": "সিদ্ধান্তের জন্য একটি ক্লিক দরকার।"
+  },
+  "err_nm_timeout": {
+    "message": "Zeus সময়মতো উত্তর দেয়নি।"
+  },
+  "err_approval_browser_permission_required": {
+    "message": "আগে এই সাইটের জন্য ব্রাউজারের অনুমতি দিন।"
+  },
+  "err_handoff_security_decision": {
+    "message": "ব্রাউজার নিরাপত্তার কারণে এই ফাইল আটকেছে। Zeus সেটি লঙ্ঘন করবে না।"
+  },
+  "err_handoff_dangerous": {
+    "message": "ব্রাউজার এই ফাইলকে বিপজ্জনক হিসেবে চিহ্নিত করেছে।"
+  },
+  "err_handoff_not_found": {
+    "message": "ডাউনলোডটি আর ব্রাউজারে নেই।"
+  },
+  "err_handoff_own_download": {
+    "message": "এটি Zeus-এর নিজের অভ্যন্তরীণ ডাউনলোড।"
+  },
+  "err_handoff_unsupported_url": {
+    "message": "Zeus শুধু http ও https ঠিকানা থেকে ডাউনলোড নিতে পারে।"
+  },
+  "err_handoff_user_canceled": {
+    "message": "আপনি ব্রাউজারে এই ডাউনলোড বাতিল করেছেন।"
+  },
+  "err_handoff_not_interrupted": {
+    "message": "এই ডাউনলোড থেমে যায়নি।"
+  },
+  "err_handoff_complete": {
+    "message": "এই ডাউনলোড ইতিমধ্যে সম্পন্ন হয়েছে।"
+  },
+  "err_url_login_required": {
+    "message": "ব্রাউজারে সাইটে সাইন ইন করুন, তারপর আবার চেষ্টা করুন।"
+  },
+  "err_fetch_cross_origin_denied": {
+    "message": "ফাইলটি এমন একটি সাইটে সরে গেছে যাকে আপনি অনুমোদন দেননি।"
+  },
+  "err_session_consent_required": {
+    "message": "আপনি এখানে Zeus-কে আপনার সেশন ব্যবহারের অনুমতি দেননি।"
+  },
+  "err_policy_origin_never": {
+    "message": "আপনি এই সাইটটি Zeus-এর জন্য ব্লক করেছেন।"
+  },
+  "errClass_transient_network": {
+    "message": "নেটওয়ার্কের সমস্যা"
+  },
+  "errClass_throttled": {
+    "message": "সাইট Zeus-কে ধীর হতে বলেছে"
+  },
+  "errClass_auth_expired": {
+    "message": "সাইন-ইনের মেয়াদ শেষ"
+  },
+  "errClass_url_expired": {
+    "message": "ডাউনলোডের লিংকের মেয়াদ শেষ"
+  },
+  "errClass_blocked": {
+    "message": "সাইটটি স্বয়ংক্রিয় ডাউনলোড আটকায়"
+  },
+  "errClass_permanent": {
+    "message": "সার্ভার ফাইলটি দিতে অস্বীকার করেছে"
+  },
+  "errClass_disk": {
+    "message": "ডিস্কের সমস্যা"
+  },
+  "errClass_integrity": {
+    "message": "ফাইলটি প্রত্যাশার সঙ্গে মেলেনি"
+  },
+  "errClass_policy_denied": {
+    "message": "কোনো নিয়ম বা কেউ না বলেছে"
+  },
+  "errClass_invalid_request": {
+    "message": "অবৈধ অনুরোধ"
+  },
+  "errClass_not_found": {
+    "message": "পাওয়া যায়নি"
+  },
+  "errClass_conflict": {
+    "message": "সংঘাত"
+  },
+  "errClass_unauthenticated": {
+    "message": "অনুমতি নেই"
+  },
+  "errClass_unsupported": {
+    "message": "সমর্থিত নয়"
+  },
+  "errClass_unavailable": {
+    "message": "সাময়িকভাবে পাওয়া যাচ্ছে না"
+  },
+  "errClass_timeout": {
+    "message": "সময় শেষ"
+  },
+  "errClass_internal": {
+    "message": "অভ্যন্তরীণ ত্রুটি"
+  },
+  "notifApprovalTitle": {
+    "message": "Zeus-এর জন্য আপনার সিদ্ধান্ত দরকার"
+  },
+  "notifApprovalBody": {
+    "message": "$SITE$ থেকে $FILE$ কি Zeus শেষ করবে? সিদ্ধান্ত নিতে Zeus খুলুন।",
+    "placeholders": {
+      "file": {
+        "content": "$1"
+      },
+      "site": {
+        "content": "$2"
+      }
+    }
+  },
+  "notifPermissionTitle": {
+    "message": "Zeus-এর ব্রাউজারের অনুমতি দরকার"
+  },
+  "notifPermissionBody": {
+    "message": "$SITE$-এ Zeus-কে আপনার সাইন-ইন করা সেশন ব্যবহারের অনুমতি দিন: Zeus পপআপ খুলুন।",
+    "placeholders": {
+      "site": {
+        "content": "$1"
+      }
+    }
+  },
+  "notifCompletedTitle": {
+    "message": "Zeus একটি ফাইল সংরক্ষণ করেছে"
+  },
+  "notifCompletedBody": {
+    "message": "$FILE$ (SHA-256 $HASH$…)",
+    "placeholders": {
+      "file": {
+        "content": "$1"
+      },
+      "hash": {
+        "content": "$2"
+      }
+    }
+  },
+  "notifFailedTitle": {
+    "message": "Zeus একটি ডাউনলোড শেষ করতে পারেনি"
+  },
+  "notifFailedBody": {
+    "message": "$FILE$: $REASON$",
+    "placeholders": {
+      "file": {
+        "content": "$1"
+      },
+      "reason": {
+        "content": "$2"
+      }
+    }
+  },
+  "notifHostMissingTitle": {
+    "message": "Zeus অ্যাপ পাওয়া যায়নি"
+  },
+  "notifHostMissingBody": {
+    "message": "ডাউনলোড উদ্ধার করতে Zeus-এর অ্যাপ লাগে। ইনস্টল করুন, তারপর চালান: zeus native-host install"
+  },
+  "optSectionStatus": {
+    "message": "অবস্থা"
+  },
+  "optSectionAccess": {
+    "message": "যে সাইটে Zeus আপনার সেশন ব্যবহার করতে পারে"
+  },
+  "optSectionSettings": {
+    "message": "সেটিংস"
+  },
+  "optSectionAbout": {
+    "message": "এই এক্সটেনশন সম্পর্কে"
+  },
+  "optExtensionId": {
+    "message": "এক্সটেনশন আইডি"
+  },
+  "optVersion": {
+    "message": "এক্সটেনশনের সংস্করণ"
+  },
+  "optBrowser": {
+    "message": "ব্রাউজার"
+  },
+  "optDaemon": {
+    "message": "Zeus অ্যাপের সংস্করণ"
+  },
+  "optProtocol": {
+    "message": "প্রোটোকলের সংস্করণ"
+  },
+  "optCapabilities": {
+    "message": "সম্মত বৈশিষ্ট্য"
+  },
+  "optProfile": {
+    "message": "ব্রাউজার প্রোফাইল আইডি (শুরুর অংশ)"
+  },
+  "optNoAccess": {
+    "message": "কোনো সাইট অনুমোদিত নেই।"
+  },
+  "optBlocked": {
+    "message": "ব্লক করা সাইট"
+  },
+  "optNoBlocked": {
+    "message": "কোনো সাইট ব্লক করা নেই।"
+  },
+  "btnRevoke": {
+    "message": "প্রত্যাহার"
+  },
+  "scopeOnce": {
+    "message": "একবার"
+  },
+  "scopeSite": {
+    "message": "সাইট, ২৪ ঘণ্টা"
+  },
+  "scopeWorkflow": {
+    "message": "পরিকল্পনা, ৭ দিন"
+  },
+  "scopeNever": {
+    "message": "কখনও নয়"
+  },
+  "labelExpiresAt": {
+    "message": "মেয়াদ শেষ"
+  },
+  "optAutoOffer": {
+    "message": "থেমে যাওয়া ডাউনলোড Zeus-কে দেওয়ার প্রস্তাব দিন"
+  },
+  "optAutoOfferHelp": {
+    "message": "কোনো সাইটে আপনার সেশন ব্যবহারের আগে Zeus তবুও আপনাকে জিজ্ঞেস করবে।"
+  },
+  "optNotifications": {
+    "message": "বিজ্ঞপ্তি দেখান"
+  },
+  "optHostHelp": {
+    "message": "এই ব্রাউজারে Zeus অ্যাপ নিবন্ধন করতে চালান: zeus native-host install"
+  },
+  "optNoTelemetry": {
+    "message": "এই এক্সটেনশন এই কম্পিউটারের Zeus অ্যাপ ছাড়া আর কোথাও কিছু পাঠায় না।"
+  },
+  "optBrowserPermissionYes": {
+    "message": "ব্রাউজারের অনুমতি আছে"
+  },
+  "optBrowserPermissionNo": {
+    "message": "ব্রাউজারের অনুমতি নেই"
+  }
+}

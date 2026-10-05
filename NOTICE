@@ -1,0 +1,10 @@
+Zeus Extension
+Copyright 2026 Zeus contributors
+
+This product includes software developed by the Zeus contributors
+(https://github.com/ArefinAlter/zeus-extension).
+
+The shipped extension contains no third-party code at run time: the files in dist/ are built from
+this repository only. Development tools (TypeScript, esbuild, Vitest, happy-dom, ESLint, Prettier, Ajv,
+json-schema-to-typescript) are used to build and test it and are distributed under their own
+licences; see package-lock.json for the inventory.

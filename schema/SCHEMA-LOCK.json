@@ -1,0 +1,14 @@
+{
+  "note": "sha256 of the normalised (LF) content of each copied contract. Do not edit by hand: run npm run sync:schema.",
+  "source_markdown_sha256": {
+    "02-native-messaging-v1.md": "712453187579801de9f061a61ea42b402329424c6f25650a2b6d9452f7963ce3",
+    "01-domain-model.md": "40cee42fb90951fb5156ae0e219aa045d9ea55ddadb0d60104a14b415ee663cd"
+  },
+  "files": {
+    "native-messaging.v1.schema.json": "d104dc67b08c605fb09ca5e0c74912e2a4797ab3eed84818ed02b8ad7f91b2b2",
+    "common.schema.json": "c007e04f8feaab6fc0307eb5b9024f0733ae8de983cbd8733e841045408321eb",
+    "domain.schema.json": "b521f009565fdb0375cb484ae35a7bb700435e8a5cd1d14a9c752d65457a6f6e",
+    "redaction-vectors.v1.json": "8f937e2533d5c195b071b4dec06d8f54474bb5090785247500b60fa2e239a75d",
+    "examples/spec-examples.json": "9df8579eb4a0aab7d1f21d1f20adf8e12ffa7fc9549bfccadbbac608edae285e"
+  }
+}

@@ -1,0 +1,759 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeus.invalid/schema/domain",
+  "title": "Zeus domain model",
+  "description": "Entities and events of docs/spec/01-domain-model.md. Receivers MUST ignore unknown properties; this schema therefore does not forbid them.",
+  "$defs": {
+    "JobState": {
+      "enum": [
+        "queued",
+        "probing",
+        "awaiting_approval",
+        "awaiting_session",
+        "downloading",
+        "paused",
+        "retry_scheduled",
+        "verifying",
+        "finalizing",
+        "completed",
+        "failed",
+        "canceled"
+      ]
+    },
+    "SourceKind": { "enum": ["browser_handoff", "agent", "cli", "workflow"] },
+    "GrantScope": { "enum": ["once", "site", "workflow", "never"] },
+    "Priority": { "enum": ["low", "normal", "high"] },
+    "Transport": { "enum": ["direct", "browser_proxy"] },
+    "Source": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "$ref": "#/$defs/SourceKind" },
+        "via": { "enum": ["mcp", "a2a", "jsonrpc", "cli", "tui", "native_messaging", "workflow_runner"] },
+        "client_id": { "type": "string", "maxLength": 128 },
+        "run_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/RunId" },
+        "browser": {
+          "type": "object",
+          "required": ["name", "incognito"],
+          "properties": {
+            "name": { "enum": ["chrome", "edge", "brave", "chromium", "firefox", "other"] },
+            "extension_id": { "type": "string", "maxLength": 128 },
+            "profile_id": { "type": "string", "pattern": "^[0-9a-f]{32}$" },
+            "download_id": { "type": "integer", "minimum": 0 },
+            "offer_key": { "type": "string", "maxLength": 200 },
+            "incognito": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "JobSpec": {
+      "description": "Immutable request that created a job. Only priority may change after creation (jobs.reprioritize).",
+      "type": "object",
+      "required": ["url", "source"],
+      "properties": {
+        "url": { "$ref": "https://zeus.invalid/schema/common#/$defs/Url" },
+        "hint_url": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Url",
+          "description": "Last known resolved (often signed) URL. Tried first; url is used to re-resolve when it fails."
+        },
+        "referrer": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Url" }, { "type": "null" }] },
+        "dest_dir": { "type": "string", "maxLength": 4096 },
+        "filename": { "type": "string", "maxLength": 255 },
+        "expected_sha256": { "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256" },
+        "expected_size": { "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" },
+        "priority": { "$ref": "#/$defs/Priority", "default": "normal" },
+        "session_origin": { "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" },
+        "grant_scope_hint": { "enum": ["once", "site", "workflow"] },
+        "extra_headers": {
+          "type": "object",
+          "maxProperties": 16,
+          "additionalProperties": { "type": "string", "maxLength": 2048 }
+        },
+        "idempotency_key": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "overwrite": { "enum": ["rename", "fail", "replace"], "default": "rename" },
+        "max_connections": { "type": "integer", "minimum": 1, "maximum": 32 },
+        "transport_hint": { "enum": ["auto", "direct", "browser_proxy"], "default": "auto" },
+        "labels": {
+          "type": "object",
+          "maxProperties": 16,
+          "additionalProperties": { "type": "string", "maxLength": 256 }
+        },
+        "source": { "$ref": "#/$defs/Source" }
+      }
+    },
+    "Validators": {
+      "type": "object",
+      "properties": {
+        "etag": { "type": ["string", "null"], "maxLength": 512, "description": "Raw entity-tag including quotes and any W/ prefix." },
+        "last_modified": { "type": ["string", "null"], "maxLength": 64, "description": "Raw HTTP-date." },
+        "last_modified_strong": {
+          "type": ["boolean", "null"],
+          "description": "True iff Last-Modified is at least one second older than the response Date (RFC 9110 section 8.8.2.2), i.e. usable in If-Range."
+        },
+        "repr_digest": { "type": ["string", "null"], "maxLength": 512, "description": "Raw Repr-Digest header value (RFC 9530), if sent." }
+      }
+    },
+    "ProbeResult": {
+      "type": "object",
+      "required": ["probed_at", "method", "transport", "status", "range_support", "requires_session", "filename", "validators"],
+      "properties": {
+        "probed_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
+        "method": { "enum": ["range_get", "head", "get_stream"] },
+        "transport": { "$ref": "#/$defs/Transport" },
+        "http_version": { "type": ["string", "null"], "enum": ["HTTP/1.1", "h2", "h3", null] },
+        "status": { "type": "integer", "minimum": 100, "maximum": 599 },
+        "final_url_redacted": { "$ref": "https://zeus.invalid/schema/common#/$defs/RedactedUrl" },
+        "redirects": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "range_support": { "enum": ["verified", "unsupported", "unknown"] },
+        "total_bytes": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" }, { "type": "null" }] },
+        "content_type": { "type": ["string", "null"], "maxLength": 255 },
+        "content_encoding": { "type": ["string", "null"], "maxLength": 64 },
+        "filename": {
+          "type": "object",
+          "required": ["value", "source"],
+          "properties": {
+            "value": { "type": "string", "minLength": 1, "maxLength": 255 },
+            "source": { "enum": ["content_disposition", "url_path", "handoff_hint", "content_type_default", "user_spec"] }
+          }
+        },
+        "validators": { "$ref": "#/$defs/Validators" },
+        "requires_session": { "type": "boolean" },
+        "interstitial_suspected": { "type": "boolean" }
+      }
+    },
+    "Segment": {
+      "description": "Planned work unit; a view derived from the committed range set (03-journal section 3). Half-open: [start, end).",
+      "type": "object",
+      "required": ["index", "start", "end", "committed_bytes", "state"],
+      "properties": {
+        "index": { "type": "integer", "minimum": 0 },
+        "start": { "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" },
+        "end": { "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" },
+        "committed_bytes": { "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" },
+        "state": { "enum": ["pending", "active", "done", "failed"] }
+      }
+    },
+    "Progress": {
+      "type": "object",
+      "required": ["bytes_done", "bytes_total", "rate_ewma", "eta_s", "segments_active", "last_error_class", "updated_at"],
+      "properties": {
+        "bytes_done": { "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes", "description": "Committed bytes only." },
+        "bytes_total": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" }, { "type": "null" }] },
+        "rate_ewma": { "type": "integer", "minimum": 0, "description": "Smoothed throughput in bytes per second." },
+        "eta_s": { "type": ["integer", "null"], "minimum": 0 },
+        "segments_active": { "type": "integer", "minimum": 0, "maximum": 64 },
+        "last_error_class": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/ErrorClass" }, { "type": "null" }] },
+        "updated_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }
+      }
+    },
+    "RetryState": {
+      "type": "object",
+      "required": ["attempt", "consecutive_failures", "auth_refreshes", "proxy_escalations", "integrity_restarts", "resource_restarts", "recovery_count"],
+      "properties": {
+        "attempt": { "type": "integer", "minimum": 0 },
+        "consecutive_failures": { "type": "integer", "minimum": 0 },
+        "last_progress_at": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }, { "type": "null" }] },
+        "next_attempt_at": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }, { "type": "null" }] },
+        "auth_refreshes": { "type": "integer", "minimum": 0 },
+        "proxy_escalations": { "type": "integer", "minimum": 0 },
+        "integrity_restarts": { "type": "integer", "minimum": 0 },
+        "resource_restarts": { "type": "integer", "minimum": 0 },
+        "recovery_count": { "type": "integer", "minimum": 0 },
+        "session_wait_deadline_at": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }, { "type": "null" }] }
+      }
+    },
+    "QuarantineReason": {
+      "enum": ["executable_type", "mime_mismatch", "html_disguised", "archive_limits", "av_flagged", "untrusted_origin", "session_derived"]
+    },
+    "JobResult": {
+      "type": "object",
+      "required": ["path", "size_bytes", "sha256", "blake3", "completed_at"],
+      "properties": {
+        "path": { "type": "string", "maxLength": 4096 },
+        "size_bytes": { "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" },
+        "sha256": { "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256" },
+        "blake3": { "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256" },
+        "detected_mime": { "type": ["string", "null"], "maxLength": 255 },
+        "completed_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }
+      }
+    },
+    "Job": {
+      "type": "object",
+      "required": ["id", "state", "quarantined", "spec", "created_at", "updated_at", "state_since", "progress", "retry", "transport"],
+      "properties": {
+        "id": { "$ref": "https://zeus.invalid/schema/common#/$defs/JobId" },
+        "state": { "$ref": "#/$defs/JobState" },
+        "quarantined": { "type": "boolean", "description": "Only ever true when state is completed." },
+        "quarantine_reasons": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/QuarantineReason" },
+          "uniqueItems": true
+        },
+        "spec": { "$ref": "#/$defs/JobSpec" },
+        "created_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
+        "updated_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
+        "state_since": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
+        "probe": { "oneOf": [{ "$ref": "#/$defs/ProbeResult" }, { "type": "null" }] },
+        "progress": { "$ref": "#/$defs/Progress" },
+        "retry": { "$ref": "#/$defs/RetryState" },
+        "error": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/ErrorEnvelope" }, { "type": "null" }] },
+        "result": { "oneOf": [{ "$ref": "#/$defs/JobResult" }, { "type": "null" }] },
+        "transport": { "$ref": "#/$defs/Transport" },
+        "grant_id": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId" }, { "type": "null" }] },
+        "approval_id": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/ApprovalId" }, { "type": "null" }] }
+      }
+    },
+    "JobSummary": {
+      "description": "Compact projection of Job for list views and the extension popup.",
+      "type": "object",
+      "required": ["id", "state", "quarantined", "source_kind", "url_redacted", "bytes_done", "bytes_total", "created_at", "updated_at"],
+      "properties": {
+        "id": { "$ref": "https://zeus.invalid/schema/common#/$defs/JobId" },
+        "state": { "$ref": "#/$defs/JobState" },
+        "quarantined": { "type": "boolean" },
+        "source_kind": { "$ref": "#/$defs/SourceKind" },
+        "filename": { "type": ["string", "null"], "maxLength": 255 },
+        "url_redacted": { "$ref": "https://zeus.invalid/schema/common#/$defs/RedactedUrl" },
+        "origin": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" }, { "type": "null" }] },
+        "bytes_done": { "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" },
+        "bytes_total": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" }, { "type": "null" }] },
+        "last_error": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/ErrorEnvelope" }, { "type": "null" }] },
+        "created_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
+        "updated_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }
+      }
+    },
+    "SessionGrant": {
+      "description": "Consent record. Holds no cookies; cookies are fetched per use and wiped (00-conventions section 8, 01 section 5).",
+      "type": "object",
+      "required": ["id", "origin", "scope", "state", "created_at", "expires_at", "approval_id", "decided_by", "uses", "renewable"],
+      "properties": {
+        "id": { "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId" },
+        "origin": { "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" },
+        "scope": { "$ref": "#/$defs/GrantScope" },
+        "state": { "enum": ["active", "expired", "revoked", "consumed"] },
+        "created_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
+        "expires_at": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }, { "type": "null" }] },
+        "job_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/JobId" },
+        "run_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/RunId" },
+        "approval_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/ApprovalId" },
+        "decided_by": { "$ref": "#/$defs/Actor" },
+        "uses": { "type": "integer", "minimum": 0 },
+        "last_used_at": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }, { "type": "null" }] },
+        "revoked_at": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }, { "type": "null" }] },
+        "renewable": { "type": "boolean" },
+        "renewal_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "Actor": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "enum": ["human", "agent", "cli", "extension", "engine", "policy", "system"] },
+        "surface": { "enum": ["extension_popup", "extension_options", "extension_sidepanel", "extension_notification", "tui", "cli_interactive", "mcp", "a2a", "jsonrpc"] },
+        "client_id": { "type": "string", "maxLength": 128 }
+      }
+    },
+    "ApprovalKind": {
+      "enum": ["handoff", "session_grant", "retry_escalation", "policy_exception", "workflow_plan", "destructive_op"]
+    },
+    "Approval": {
+      "description": "A pending or decided request for a human decision. Only a human trust surface may decide one (docs/spec/07-approvals.md).",
+      "type": "object",
+      "required": ["id", "kind", "state", "allowed_scopes", "reason_codes", "summary", "created_at", "expires_at"],
+      "properties": {
+        "id": { "$ref": "https://zeus.invalid/schema/common#/$defs/ApprovalId" },
+        "kind": { "$ref": "#/$defs/ApprovalKind" },
+        "state": { "enum": ["pending", "approved", "denied", "expired", "canceled"] },
+        "job_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/JobId" },
+        "run_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/RunId" },
+        "origin": { "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" },
+        "allowed_scopes": { "type": "array", "items": { "$ref": "#/$defs/GrantScope" }, "uniqueItems": true },
+        "reason_codes": {
+          "type": "array",
+          "items": { "$ref": "https://zeus.invalid/schema/common#/$defs/CapabilityName" },
+          "description": "Why the approval is needed, e.g. handoff.interrupted, session.first_use, retry.exhausted."
+        },
+        "summary": {
+          "type": "object",
+          "required": ["title"],
+          "properties": {
+            "title": { "type": "string", "maxLength": 255 },
+            "url_redacted": { "$ref": "https://zeus.invalid/schema/common#/$defs/RedactedUrl" },
+            "total_bytes": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" }, { "type": "null" }] },
+            "source_kind": { "$ref": "#/$defs/SourceKind" },
+            "requested_by": { "type": "string", "maxLength": 128 }
+          }
+        },
+        "created_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
+        "expires_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
+        "decided_at": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }, { "type": "null" }] },
+        "decision": {
+          "type": "object",
+          "required": ["outcome", "actor"],
+          "properties": {
+            "outcome": { "enum": ["approve", "deny", "expire", "cancel"] },
+            "scope": { "$ref": "#/$defs/GrantScope" },
+            "actor": { "$ref": "#/$defs/Actor" },
+            "grant_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId" }
+          }
+        }
+      }
+    },
+
+    "StateCause": {
+      "enum": [
+        "created",
+        "user_request",
+        "scheduler",
+        "probe_ok",
+        "session_needed",
+        "approval_needed",
+        "approval_approved",
+        "approval_denied",
+        "approval_expired",
+        "session_delivered",
+        "session_deadline",
+        "refresh_impossible",
+        "retry_timer",
+        "retry_now",
+        "all_committed",
+        "verification_ok",
+        "integrity_restart",
+        "integrity_failed",
+        "finalized",
+        "finalize_error",
+        "error",
+        "escalation",
+        "grant_revoked",
+        "grant_expired",
+        "policy",
+        "recovered",
+        "crash_loop"
+      ]
+    },
+    "SuggestedAction": {
+      "enum": ["retry", "approve", "request_session", "open_in_browser", "free_disk_space", "fix_destination", "check_url", "none"]
+    },
+
+    "EventBase": {
+      "type": "object",
+      "required": ["ts", "type", "data"],
+      "properties": {
+        "seq": { "$ref": "https://zeus.invalid/schema/common#/$defs/EventSeq", "description": "Present on durable events." },
+        "after_seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "Present on ephemeral events instead of seq: the last durable seq allocated when the event was emitted."
+        },
+        "ts": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
+        "type": { "type": "string" },
+        "job_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/JobId" },
+        "run_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/RunId" },
+        "data": { "type": "object" }
+      },
+      "oneOf": [{ "required": ["seq"] }, { "required": ["after_seq"] }]
+    },
+
+    "Event": {
+      "oneOf": [
+        { "$ref": "#/$defs/EvJobCreated" },
+        { "$ref": "#/$defs/EvJobStateChanged" },
+        { "$ref": "#/$defs/EvJobProbed" },
+        { "$ref": "#/$defs/EvJobProgress" },
+        { "$ref": "#/$defs/EvJobThrottled" },
+        { "$ref": "#/$defs/EvJobRetryScheduled" },
+        { "$ref": "#/$defs/EvSessionRefreshNeeded" },
+        { "$ref": "#/$defs/EvSessionLeased" },
+        { "$ref": "#/$defs/EvGrantCreated" },
+        { "$ref": "#/$defs/EvGrantRevoked" },
+        { "$ref": "#/$defs/EvGrantExpired" },
+        { "$ref": "#/$defs/EvApprovalRequested" },
+        { "$ref": "#/$defs/EvApprovalDecided" },
+        { "$ref": "#/$defs/EvJobVerified" },
+        { "$ref": "#/$defs/EvJobQuarantined" },
+        { "$ref": "#/$defs/EvJobCompleted" },
+        { "$ref": "#/$defs/EvJobFailed" },
+        { "$ref": "#/$defs/EvDaemonStarted" },
+        { "$ref": "#/$defs/EvDaemonStopping" }
+      ]
+    },
+
+    "EvJobCreated": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "job.created" },
+            "data": {
+              "type": "object",
+              "required": ["source", "state", "url_redacted", "priority"],
+              "properties": {
+                "source": { "$ref": "#/$defs/Source" },
+                "state": { "enum": ["queued", "awaiting_approval"] },
+                "url_redacted": { "$ref": "https://zeus.invalid/schema/common#/$defs/RedactedUrl" },
+                "filename_hint": { "type": ["string", "null"], "maxLength": 255 },
+                "origin": { "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" },
+                "session_origin": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" }, { "type": "null" }] },
+                "priority": { "$ref": "#/$defs/Priority" }
+              }
+            }
+          },
+          "required": ["job_id"]
+        }
+      ]
+    },
+    "EvJobStateChanged": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "job.state_changed" },
+            "data": {
+              "type": "object",
+              "required": ["from", "to", "transition", "cause", "actor"],
+              "properties": {
+                "from": { "$ref": "#/$defs/JobState" },
+                "to": { "$ref": "#/$defs/JobState" },
+                "transition": { "type": "string", "pattern": "^S[0-9]{2}$" },
+                "cause": { "$ref": "#/$defs/StateCause" },
+                "actor": { "$ref": "#/$defs/Actor" }
+              }
+            }
+          },
+          "required": ["job_id"]
+        }
+      ]
+    },
+    "EvJobProbed": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "job.probed" },
+            "data": { "type": "object", "required": ["probe"], "properties": { "probe": { "$ref": "#/$defs/ProbeResult" } } }
+          },
+          "required": ["job_id"]
+        }
+      ]
+    },
+    "EvJobProgress": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "job.progress" },
+            "data": { "type": "object", "required": ["progress"], "properties": { "progress": { "$ref": "#/$defs/Progress" } } }
+          },
+          "required": ["job_id", "after_seq"]
+        }
+      ]
+    },
+    "EvJobThrottled": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "job.throttled" },
+            "data": {
+              "type": "object",
+              "required": ["host", "concurrency_before", "concurrency_after"],
+              "properties": {
+                "host": { "type": "string", "maxLength": 255 },
+                "status": { "type": ["integer", "null"], "minimum": 100, "maximum": 599 },
+                "retry_after_ms": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/DurationMs" }, { "type": "null" }] },
+                "concurrency_before": { "type": "integer", "minimum": 1 },
+                "concurrency_after": { "type": "integer", "minimum": 1 }
+              }
+            }
+          },
+          "required": ["job_id"]
+        }
+      ]
+    },
+    "EvJobRetryScheduled": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "job.retry_scheduled" },
+            "data": {
+              "type": "object",
+              "required": ["attempt", "error", "delay_ms", "next_attempt_at"],
+              "properties": {
+                "attempt": { "type": "integer", "minimum": 1 },
+                "error": { "$ref": "https://zeus.invalid/schema/common#/$defs/ErrorEnvelope" },
+                "delay_ms": { "$ref": "https://zeus.invalid/schema/common#/$defs/DurationMs" },
+                "next_attempt_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
+                "restart_from_zero": { "type": "boolean" }
+              }
+            }
+          },
+          "required": ["job_id"]
+        }
+      ]
+    },
+    "EvSessionRefreshNeeded": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "session.refresh_needed" },
+            "data": {
+              "type": "object",
+              "required": ["origin", "need", "reason", "attempt", "deadline_at"],
+              "properties": {
+                "origin": { "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" },
+                "need": { "enum": ["session", "url", "proxy"] },
+                "reason": { "enum": ["first_use", "auth_expired", "url_expired", "blocked", "lease_expired", "extension_disconnected"] },
+                "attempt": { "type": "integer", "minimum": 1 },
+                "deadline_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }
+              }
+            }
+          },
+          "required": ["job_id"]
+        }
+      ]
+    },
+    "EvSessionLeased": {
+      "description": "Emitted for every release of session material. Contains no cookie names or values.",
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "session.leased" },
+            "data": {
+              "type": "object",
+              "required": ["lease_id", "grant_id", "origin", "purpose", "cookie_count", "ttl_ms"],
+              "properties": {
+                "lease_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/SessionLeaseId" },
+                "grant_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId" },
+                "origin": { "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" },
+                "purpose": { "enum": ["download", "probe", "refresh"] },
+                "cookie_count": { "type": "integer", "minimum": 0 },
+                "ttl_ms": { "$ref": "https://zeus.invalid/schema/common#/$defs/DurationMs" }
+              }
+            }
+          },
+          "required": ["job_id"]
+        }
+      ]
+    },
+    "EvGrantCreated": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "grant.created" },
+            "data": { "type": "object", "required": ["grant"], "properties": { "grant": { "$ref": "#/$defs/SessionGrant" } } }
+          }
+        }
+      ]
+    },
+    "EvGrantRevoked": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "grant.revoked" },
+            "data": {
+              "type": "object",
+              "required": ["grant_id", "origin", "by"],
+              "properties": {
+                "grant_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId" },
+                "origin": { "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" },
+                "by": { "$ref": "#/$defs/Actor" }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "EvGrantExpired": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "grant.expired" },
+            "data": {
+              "type": "object",
+              "required": ["grant_id", "origin"],
+              "properties": {
+                "grant_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId" },
+                "origin": { "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "EvApprovalRequested": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "approval.requested" },
+            "data": { "type": "object", "required": ["approval"], "properties": { "approval": { "$ref": "#/$defs/Approval" } } }
+          }
+        }
+      ]
+    },
+    "EvApprovalDecided": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "approval.decided" },
+            "data": {
+              "type": "object",
+              "required": ["approval_id", "kind", "outcome", "actor"],
+              "properties": {
+                "approval_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/ApprovalId" },
+                "kind": { "$ref": "#/$defs/ApprovalKind" },
+                "outcome": { "enum": ["approve", "deny", "expire", "cancel"] },
+                "scope": { "$ref": "#/$defs/GrantScope" },
+                "actor": { "$ref": "#/$defs/Actor" },
+                "grant_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId" }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "EvJobVerified": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "job.verified" },
+            "data": {
+              "type": "object",
+              "required": ["size_bytes", "sha256", "blake3", "expected_sha256_match", "expected_size_match"],
+              "properties": {
+                "size_bytes": { "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" },
+                "sha256": { "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256" },
+                "blake3": { "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256" },
+                "detected_mime": { "type": ["string", "null"], "maxLength": 255 },
+                "declared_mime": { "type": ["string", "null"], "maxLength": 255 },
+                "mime_match": { "type": ["boolean", "null"] },
+                "expected_sha256_match": { "type": ["boolean", "null"] },
+                "expected_size_match": { "type": ["boolean", "null"] }
+              }
+            }
+          },
+          "required": ["job_id"]
+        }
+      ]
+    },
+    "EvJobQuarantined": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "job.quarantined" },
+            "data": {
+              "type": "object",
+              "required": ["reasons"],
+              "properties": {
+                "reasons": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/QuarantineReason" } }
+              }
+            }
+          },
+          "required": ["job_id"]
+        }
+      ]
+    },
+    "EvJobCompleted": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "job.completed" },
+            "data": {
+              "type": "object",
+              "required": ["path", "size_bytes", "sha256", "blake3", "quarantined", "duration_ms"],
+              "properties": {
+                "path": { "type": "string", "maxLength": 4096 },
+                "size_bytes": { "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" },
+                "sha256": { "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256" },
+                "blake3": { "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256" },
+                "quarantined": { "type": "boolean" },
+                "duration_ms": { "$ref": "https://zeus.invalid/schema/common#/$defs/DurationMs" }
+              }
+            }
+          },
+          "required": ["job_id"]
+        }
+      ]
+    },
+    "EvJobFailed": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "job.failed" },
+            "data": {
+              "type": "object",
+              "required": ["error", "suggested_next"],
+              "properties": {
+                "error": { "$ref": "https://zeus.invalid/schema/common#/$defs/ErrorEnvelope" },
+                "suggested_next": {
+                  "type": "object",
+                  "required": ["action"],
+                  "properties": {
+                    "action": { "$ref": "#/$defs/SuggestedAction" },
+                    "tool": { "type": ["string", "null"], "pattern": "^zeus_[a-z0-9_]+$" }
+                  }
+                }
+              }
+            }
+          },
+          "required": ["job_id"]
+        }
+      ]
+    },
+    "EvDaemonStarted": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "daemon.started" },
+            "data": {
+              "type": "object",
+              "required": ["version", "instance_id", "recovery"],
+              "properties": {
+                "version": { "$ref": "https://zeus.invalid/schema/common#/$defs/SemVer" },
+                "instance_id": { "type": "string", "pattern": "^[0-9a-f]{32}$" },
+                "recovery": {
+                  "type": "object",
+                  "required": ["jobs_recovered", "jobs_failed", "orphans_found", "audit_chain_ok"],
+                  "properties": {
+                    "jobs_recovered": { "type": "integer", "minimum": 0 },
+                    "jobs_failed": { "type": "integer", "minimum": 0 },
+                    "orphans_found": { "type": "integer", "minimum": 0 },
+                    "audit_chain_ok": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "EvDaemonStopping": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "daemon.stopping" },
+            "data": {
+              "type": "object",
+              "required": ["reason"],
+              "properties": { "reason": { "enum": ["user_request", "signal", "upgrade", "fatal_error"] } }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

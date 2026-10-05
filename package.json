@@ -1,0 +1,40 @@
+{
+  "name": "zeus-extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Zeus browser extension: trust surface, download rescue, session oracle and in-browser fetch fallback for the Zeus download layer.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:conformance": "vitest run test/conformance",
+    "build": "node scripts/build.mjs",
+    "build:chrome": "node scripts/build.mjs --target chrome",
+    "build:firefox": "node scripts/build.mjs --target firefox",
+    "build:store": "node scripts/build.mjs --store",
+    "gen:types": "node scripts/gen-types.mjs",
+    "gen:icons": "node scripts/gen-icons.mjs",
+    "sync:schema": "node scripts/sync-schema.mjs",
+    "check": "node scripts/check.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/chrome": "^0.3.4",
+    "@types/node": "^22.20.5",
+    "ajv": "^8.20.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.12.0",
+    "happy-dom": "^20.14.5",
+    "json-schema-to-typescript": "^16.0.0",
+    "prettier": "^3.9.9",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.0",
+    "vitest": "^5.0.3"
+  }
+}

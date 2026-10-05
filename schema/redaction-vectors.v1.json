@@ -1,0 +1,216 @@
+{
+  "$comment": "Normative test vectors for redact_url (00-conventions section 8.2). Generated from tools/redact-url.mjs; every implementation MUST reproduce expected and redacted exactly.",
+  "version": 1,
+  "cases": [
+    {
+      "name": "userinfo, query and fragment",
+      "mode": "log",
+      "input": "https://user:pw@example.com/a/b.zip?x=1#frag",
+      "expected": "https://example.com/a/b.zip?…",
+      "redacted": true
+    },
+    {
+      "name": "userinfo, query and fragment",
+      "mode": "record",
+      "input": "https://user:pw@example.com/a/b.zip?x=1#frag",
+      "expected": "https://example.com/a/b.zip?x=1",
+      "redacted": true
+    },
+    {
+      "name": "userinfo, query and fragment",
+      "mode": "strict",
+      "input": "https://user:pw@example.com/a/b.zip?x=1#frag",
+      "expected": "https://example.com/a/b.zip",
+      "redacted": true
+    },
+    {
+      "name": "S3 presigned URL",
+      "mode": "log",
+      "input": "https://bucket.s3.amazonaws.com/path/file.tar.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAEXAMPLE%2F20261005%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Expires=300&X-Amz-Signature=abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+      "expected": "https://bucket.s3.amazonaws.com/path/file.tar.gz?…",
+      "redacted": true
+    },
+    {
+      "name": "S3 presigned URL",
+      "mode": "record",
+      "input": "https://bucket.s3.amazonaws.com/path/file.tar.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAEXAMPLE%2F20261005%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Expires=300&X-Amz-Signature=abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+      "expected": "https://bucket.s3.amazonaws.com/path/file.tar.gz",
+      "redacted": true
+    },
+    {
+      "name": "S3 presigned URL",
+      "mode": "strict",
+      "input": "https://bucket.s3.amazonaws.com/path/file.tar.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAEXAMPLE%2F20261005%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Expires=300&X-Amz-Signature=abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+      "expected": "https://bucket.s3.amazonaws.com/path/file.tar.gz",
+      "redacted": true
+    },
+    {
+      "name": "plain query with a token parameter",
+      "mode": "log",
+      "input": "https://example.com/download?id=12345&format=pdf&token=abc",
+      "expected": "https://example.com/download?…",
+      "redacted": true
+    },
+    {
+      "name": "plain query with a token parameter",
+      "mode": "record",
+      "input": "https://example.com/download?id=12345&format=pdf&token=abc",
+      "expected": "https://example.com/download?id=12345&format=pdf",
+      "redacted": true
+    },
+    {
+      "name": "plain query with a token parameter",
+      "mode": "strict",
+      "input": "https://example.com/download?id=12345&format=pdf&token=abc",
+      "expected": "https://example.com/download",
+      "redacted": true
+    },
+    {
+      "name": "readable slug in path is kept",
+      "mode": "log",
+      "input": "https://example.com/files/Quarterly-Report-2026-final-version/get",
+      "expected": "https://example.com/files/Quarterly-Report-2026-final-version/get",
+      "redacted": false
+    },
+    {
+      "name": "readable slug in path is kept",
+      "mode": "record",
+      "input": "https://example.com/files/Quarterly-Report-2026-final-version/get",
+      "expected": "https://example.com/files/Quarterly-Report-2026-final-version/get",
+      "redacted": false
+    },
+    {
+      "name": "readable slug in path is kept",
+      "mode": "strict",
+      "input": "https://example.com/files/Quarterly-Report-2026-final-version/get",
+      "expected": "https://example.com/files/Quarterly-Report-2026-final-version/get",
+      "redacted": false
+    },
+    {
+      "name": "credential-like path segment",
+      "mode": "log",
+      "input": "https://example.com/s/AbCdEf0123456789XyZ_qwertyUIOP12/file.zip",
+      "expected": "https://example.com/s/…/file.zip",
+      "redacted": true
+    },
+    {
+      "name": "credential-like path segment",
+      "mode": "record",
+      "input": "https://example.com/s/AbCdEf0123456789XyZ_qwertyUIOP12/file.zip",
+      "expected": "https://example.com/s/AbCdEf0123456789XyZ_qwertyUIOP12/file.zip",
+      "redacted": false
+    },
+    {
+      "name": "credential-like path segment",
+      "mode": "strict",
+      "input": "https://example.com/s/AbCdEf0123456789XyZ_qwertyUIOP12/file.zip",
+      "expected": "https://example.com/s/…/file.zip",
+      "redacted": true
+    },
+    {
+      "name": "long hex path segment",
+      "mode": "log",
+      "input": "https://example.com/blob/0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "expected": "https://example.com/blob/…",
+      "redacted": true
+    },
+    {
+      "name": "long hex path segment",
+      "mode": "record",
+      "input": "https://example.com/blob/0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "expected": "https://example.com/blob/0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "redacted": false
+    },
+    {
+      "name": "long hex path segment",
+      "mode": "strict",
+      "input": "https://example.com/blob/0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "expected": "https://example.com/blob/…",
+      "redacted": true
+    },
+    {
+      "name": "uuid is an identifier, not a secret",
+      "mode": "log",
+      "input": "https://example.com/f/123e4567-e89b-12d3-a456-426614174000/dl?name=report.pdf",
+      "expected": "https://example.com/f/123e4567-e89b-12d3-a456-426614174000/dl?…",
+      "redacted": true
+    },
+    {
+      "name": "uuid is an identifier, not a secret",
+      "mode": "record",
+      "input": "https://example.com/f/123e4567-e89b-12d3-a456-426614174000/dl?name=report.pdf",
+      "expected": "https://example.com/f/123e4567-e89b-12d3-a456-426614174000/dl?name=report.pdf",
+      "redacted": false
+    },
+    {
+      "name": "uuid is an identifier, not a secret",
+      "mode": "strict",
+      "input": "https://example.com/f/123e4567-e89b-12d3-a456-426614174000/dl?name=report.pdf",
+      "expected": "https://example.com/f/123e4567-e89b-12d3-a456-426614174000/dl",
+      "redacted": true
+    },
+    {
+      "name": "credential-like value under an innocent name",
+      "mode": "log",
+      "input": "https://example.com/a?v=AbCdEf0123456789XyZ_qwertyUIOP12&ref=main",
+      "expected": "https://example.com/a?…",
+      "redacted": true
+    },
+    {
+      "name": "credential-like value under an innocent name",
+      "mode": "record",
+      "input": "https://example.com/a?v=AbCdEf0123456789XyZ_qwertyUIOP12&ref=main",
+      "expected": "https://example.com/a?ref=main",
+      "redacted": true
+    },
+    {
+      "name": "credential-like value under an innocent name",
+      "mode": "strict",
+      "input": "https://example.com/a?v=AbCdEf0123456789XyZ_qwertyUIOP12&ref=main",
+      "expected": "https://example.com/a",
+      "redacted": true
+    },
+    {
+      "name": "JWT in a query value",
+      "mode": "log",
+      "input": "https://example.com/a?ref=main&jwt=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.c2ln",
+      "expected": "https://example.com/a?…",
+      "redacted": true
+    },
+    {
+      "name": "JWT in a query value",
+      "mode": "record",
+      "input": "https://example.com/a?ref=main&jwt=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.c2ln",
+      "expected": "https://example.com/a?ref=main",
+      "redacted": true
+    },
+    {
+      "name": "JWT in a query value",
+      "mode": "strict",
+      "input": "https://example.com/a?ref=main&jwt=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.c2ln",
+      "expected": "https://example.com/a",
+      "redacted": true
+    },
+    {
+      "name": "host case and explicit port",
+      "mode": "log",
+      "input": "https://EXAMPLE.com:8443/x",
+      "expected": "https://example.com:8443/x",
+      "redacted": false
+    },
+    {
+      "name": "host case and explicit port",
+      "mode": "record",
+      "input": "https://EXAMPLE.com:8443/x",
+      "expected": "https://example.com:8443/x",
+      "redacted": false
+    },
+    {
+      "name": "host case and explicit port",
+      "mode": "strict",
+      "input": "https://EXAMPLE.com:8443/x",
+      "expected": "https://example.com:8443/x",
+      "redacted": false
+    }
+  ]
+}

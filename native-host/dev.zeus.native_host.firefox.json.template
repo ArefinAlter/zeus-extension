@@ -1,0 +1,7 @@
+{
+  "name": "dev.zeus.native_host",
+  "description": "Zeus native messaging host",
+  "path": "__HOST_PATH__",
+  "type": "stdio",
+  "allowed_extensions": ["__ADDON_ID__"]
+}

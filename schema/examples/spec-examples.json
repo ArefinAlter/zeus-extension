@@ -1,0 +1,1577 @@
+{
+  "sources": [
+    "02-native-messaging-v1.md",
+    "01-domain-model.md"
+  ],
+  "examples": [
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/HostManifestChrome",
+      "line": 62,
+      "value": {
+        "name": "dev.zeus.native_host",
+        "description": "Zeus native messaging host",
+        "path": "C:\\Users\\ada\\AppData\\Local\\Programs\\Zeus\\zeus-native-host.exe",
+        "type": "stdio",
+        "allowed_origins": [
+          "chrome-extension://abcdefghijklmnopabcdefghijklmnop/"
+        ]
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/HostManifestFirefox",
+      "line": 72,
+      "value": {
+        "name": "dev.zeus.native_host",
+        "description": "Zeus native messaging host",
+        "path": "/home/ada/.local/share/zeus/bin/zeus-native-host",
+        "type": "stdio",
+        "allowed_extensions": [
+          "zeus@zeus.invalid"
+        ]
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
+      "line": 210,
+      "value": {
+        "v": 1,
+        "id": "e1",
+        "type": "hello",
+        "body": {
+          "client": "zeus-extension",
+          "extension_id": "abcdefghijklmnopabcdefghijklmnop",
+          "extension_version": "0.1.0",
+          "browser": {
+            "name": "chrome",
+            "version": "141.0.7390.65",
+            "platform": "win"
+          },
+          "profile_id": "5e0b1f6d9a2c47e8b3d1f0a7c6e92b41",
+          "protocol_versions": [
+            1
+          ],
+          "capabilities": [
+            "handoff",
+            "session",
+            "url_refresh.refetch",
+            "url_refresh.download_api",
+            "fetch_proxy",
+            "incognito"
+          ],
+          "sw_instance_id": "9c1f4a7e52b84d06",
+          "resume": {
+            "last_event_seq": 48198
+          }
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
+      "line": 229,
+      "value": {
+        "v": 1,
+        "id": "d1",
+        "re": "e1",
+        "type": "hello.ack",
+        "body": {
+          "protocol_version": 1,
+          "capabilities": [
+            "handoff",
+            "session",
+            "url_refresh.refetch",
+            "url_refresh.download_api",
+            "fetch_proxy",
+            "incognito",
+            "approvals",
+            "events",
+            "job_control",
+            "grants"
+          ],
+          "daemon": {
+            "version": "0.1.0",
+            "instance_id": "3f9a6c2d1b7e4a08c5d2e9f1a0b3c4d5"
+          },
+          "host": {
+            "version": "0.1.0"
+          },
+          "connection_id": "conn_01M45NGARG09NTCP2S5QFQEN6J",
+          "limits": {
+            "max_frame_to_extension_bytes": 1000000,
+            "max_frame_to_daemon_bytes": 4194304,
+            "default_chunk_bytes": 262144,
+            "max_chunk_bytes": 2097152,
+            "default_credit_window": 8,
+            "max_credit_window": 32,
+            "max_concurrent_streams": 4,
+            "max_range_bytes": 16777216,
+            "ping_interval_ms": 20000,
+            "pong_timeout_ms": 5000,
+            "max_cookie_count": 150,
+            "max_session_ttl_ms": 900000
+          },
+          "server_time": "2026-10-05T09:14:50.120Z",
+          "head_seq": 48209
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
+      "line": 365,
+      "value": {
+        "v": 1,
+        "id": "e2",
+        "type": "handoff.offer",
+        "body": {
+          "offer_key": "chrome:317:2026-10-05T09:15:12.004Z",
+          "trigger": "interrupted",
+          "download": {
+            "browser_download_id": 317,
+            "url": "https://portal.example.org/download/8841",
+            "final_url": "https://cdn.example.org/blobs/dataset-v3.tar.zst?X-Amz-Expires=300&X-Amz-Signature=EXAMPLE",
+            "referrer": "https://portal.example.org/datasets/v3",
+            "filename": "dataset-v3.tar.zst",
+            "mime": "application/zstd",
+            "bytes_received": 402653184,
+            "total_bytes": 1288490188,
+            "start_time": "2026-10-05T09:15:12.004Z",
+            "incognito": false,
+            "can_resume": false,
+            "interrupt_reason": "NETWORK_DISCONNECTED"
+          },
+          "validators": null
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
+      "line": 401,
+      "value": {
+        "v": 1,
+        "id": "d2",
+        "re": "e2",
+        "type": "handoff.accept",
+        "body": {
+          "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+          "state": "awaiting_approval",
+          "approval_id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+          "deduplicated": false
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
+      "line": 416,
+      "value": {
+        "v": 1,
+        "id": "d3",
+        "re": "e13",
+        "type": "handoff.reject",
+        "body": {
+          "error": {
+            "code": "handoff.not_eligible",
+            "class": "policy_denied",
+            "message": "The browser blocked this file as unsafe (FILE_BLOCKED); Zeus does not override security decisions.",
+            "retryable": false,
+            "details": {
+              "interrupt_reason": "FILE_BLOCKED"
+            }
+          }
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
+      "line": 438,
+      "value": {
+        "v": 1,
+        "id": "e14",
+        "type": "handoff.withdraw",
+        "body": {
+          "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+          "offer_key": "chrome:317:2026-10-05T09:15:12.004Z",
+          "reason": "completed_in_browser"
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
+      "line": 457,
+      "value": {
+        "v": 1,
+        "id": "d6",
+        "type": "session.request",
+        "body": {
+          "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+          "session_id": "sess_01M45NHQTC78XWWC8N35Y2BPEA",
+          "grant_id": "gr_01M45NHPJP04TX6B1CJVQVQAK9",
+          "origin": "https://portal.example.org",
+          "url": "https://portal.example.org/download/8841",
+          "purpose": "download",
+          "request_headers": [
+            "accept-language",
+            "sec-ch-ua",
+            "sec-ch-ua-mobile",
+            "sec-ch-ua-platform"
+          ],
+          "ttl_ms": 900000,
+          "incognito": false
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
+      "line": 495,
+      "value": {
+        "v": 1,
+        "id": "e4",
+        "re": "d6",
+        "type": "session.response",
+        "body": {
+          "status": "granted",
+          "session": {
+            "session_id": "sess_01M45NHQTC78XWWC8N35Y2BPEA",
+            "origin": "https://portal.example.org",
+            "issued_at": "2026-10-05T09:15:36.130Z",
+            "ttl_ms": 900000,
+            "cookies": [
+              {
+                "name": "portal_session",
+                "value": "example-session-value-not-real",
+                "domain": "portal.example.org",
+                "path": "/",
+                "secure": true,
+                "http_only": true,
+                "same_site": "lax",
+                "host_only": true,
+                "expires_at": null
+              },
+              {
+                "name": "csrf",
+                "value": "example-csrf-value-not-real",
+                "domain": ".example.org",
+                "path": "/download",
+                "secure": true,
+                "http_only": false,
+                "same_site": "strict",
+                "host_only": false,
+                "expires_at": "2026-10-06T09:00:00.000Z"
+              }
+            ],
+            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+            "headers": {
+              "accept-language": "en-US,en;q=0.9",
+              "sec-ch-ua": "\"Chromium\";v=\"141\", \"Not?A_Brand\";v=\"8\"",
+              "sec-ch-ua-mobile": "?0",
+              "sec-ch-ua-platform": "\"Windows\""
+            }
+          }
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
+      "line": 552,
+      "value": {
+        "v": 1,
+        "id": "e5",
+        "re": "d6",
+        "type": "session.response",
+        "body": {
+          "status": "consent_required",
+          "error": {
+            "code": "session.consent_required",
+            "class": "auth_expired",
+            "message": "No consent record covers gr_01M45NHPJP04TX6B1CJVQVQAK9 for https://portal.example.org.",
+            "retryable": true
+          }
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
+      "line": 574,
+      "value": {
+        "v": 1,
+        "id": "d7",
+        "type": "url.refresh.request",
+        "body": {
+          "job_id": "job_01M45SSZ20WN6VYFYEM4GP8SZD",
+          "origin": "https://portal.example.org",
+          "origin_url": "https://portal.example.org/files/annual-report.pdf",
+          "stale_url": "https://cdn.example.org/blobs/annual-report.pdf?X-Amz-Expires=300&X-Amz-Signature=EXAMPLE",
+          "reason": "url_expired",
+          "methods": [
+            "refetch",
+            "download_api"
+          ],
+          "expected": {
+            "total_bytes": 734003200,
+            "etag": "\"a81c-77e2\"",
+            "filename": "annual-report.pdf"
+          },
+          "deadline_ms": 25000
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
+      "line": 601,
+      "value": {
+        "v": 1,
+        "id": "e6",
+        "re": "d7",
+        "type": "url.refresh.response",
+        "body": {
+          "status": "refreshed",
+          "url": "https://portal.example.org/files/annual-report.pdf",
+          "final_url": "https://cdn.example.org/blobs/annual-report.pdf?X-Amz-Expires=300&X-Amz-Signature=FRESH-EXAMPLE",
+          "method": "refetch",
+          "validators": {
+            "etag": "\"a81c-77e2\"",
+            "last_modified": null
+          },
+          "total_bytes": 734003200
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
+      "line": 644,
+      "value": {
+        "v": 1,
+        "id": "d8",
+        "type": "fetch.range",
+        "body": {
+          "stream_id": "s1",
+          "job_id": "job_01M45VGWW0NNYSESRJPP2BBRQN",
+          "url": "https://portal.example.org/download/9120",
+          "origin": "https://portal.example.org",
+          "range": {
+            "offset": 402653184,
+            "length": 16777216
+          },
+          "if_range": "\"5f3a9c-4c1d2e7b\"",
+          "request_headers": {
+            "accept": "*/*"
+          },
+          "chunk_bytes": 262144,
+          "credits": 8,
+          "deadline_ms": 25000
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
+      "line": 693,
+      "value": {
+        "v": 1,
+        "id": "e7",
+        "re": "d8",
+        "type": "fetch.head",
+        "body": {
+          "stream_id": "s1",
+          "status": 206,
+          "final_url": "https://cdn.example.org/blobs/dataset-v3.tar.zst?X-Amz-Expires=300&X-Amz-Signature=EXAMPLE",
+          "redirected": true,
+          "headers": {
+            "content-range": "bytes 402653184-419430399/1288490188",
+            "content-length": "16777216",
+            "etag": "\"5f3a9c-4c1d2e7b\"",
+            "accept-ranges": "bytes",
+            "content-type": "application/zstd"
+          }
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
+      "line": 719,
+      "value": {
+        "v": 1,
+        "id": "e8",
+        "type": "fetch.chunk",
+        "body": {
+          "stream_id": "s1",
+          "index": 0,
+          "offset": 402653184,
+          "length": 12,
+          "data": "aGVsbG8td29ybGQh"
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
+      "line": 743,
+      "value": {
+        "v": 1,
+        "id": "d9",
+        "type": "fetch.credit",
+        "body": {
+          "stream_id": "s1",
+          "credits": 4
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
+      "line": 747,
+      "value": {
+        "v": 1,
+        "id": "e9",
+        "type": "fetch.end",
+        "body": {
+          "stream_id": "s1",
+          "reason": "complete",
+          "chunks": 64,
+          "bytes": 16777216
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
+      "line": 751,
+      "value": {
+        "v": 1,
+        "id": "e10",
+        "type": "fetch.error",
+        "body": {
+          "stream_id": "s1",
+          "error": {
+            "code": "fetch.network_error",
+            "class": "transient_network",
+            "message": "fetch() rejected: Failed to fetch",
+            "retryable": true
+          },
+          "bytes": 5242880
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
+      "line": 769,
+      "value": {
+        "v": 1,
+        "id": "d10",
+        "type": "fetch.cancel",
+        "body": {
+          "stream_id": "s1",
+          "reason": "job_canceled"
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
+      "line": 808,
+      "value": {
+        "v": 1,
+        "id": "d4",
+        "type": "approval.pending",
+        "body": {
+          "approval": {
+            "id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+            "kind": "handoff",
+            "state": "pending",
+            "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+            "origin": "https://portal.example.org",
+            "allowed_scopes": [
+              "once",
+              "site",
+              "never"
+            ],
+            "reason_codes": [
+              "handoff.interrupted",
+              "session.first_use"
+            ],
+            "summary": {
+              "title": "dataset-v3.tar.zst",
+              "url_redacted": "https://portal.example.org/download/8841",
+              "total_bytes": 1288490188,
+              "source_kind": "browser_handoff"
+            },
+            "created_at": "2026-10-05T09:15:30.301Z",
+            "expires_at": "2026-10-06T09:15:30.301Z",
+            "decided_at": null
+          }
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
+      "line": 836,
+      "value": {
+        "v": 1,
+        "id": "e3",
+        "type": "approval.decide",
+        "body": {
+          "approval_id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+          "decision": "approve",
+          "scope": "site",
+          "ui": {
+            "surface": "extension_popup",
+            "user_gesture": true
+          }
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
+      "line": 850,
+      "value": {
+        "v": 1,
+        "id": "d5",
+        "re": "e3",
+        "type": "approval.decide.response",
+        "body": {
+          "approval": {
+            "id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+            "kind": "handoff",
+            "state": "approved",
+            "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+            "origin": "https://portal.example.org",
+            "allowed_scopes": [
+              "once",
+              "site",
+              "never"
+            ],
+            "reason_codes": [
+              "handoff.interrupted",
+              "session.first_use"
+            ],
+            "summary": {
+              "title": "dataset-v3.tar.zst",
+              "url_redacted": "https://portal.example.org/download/8841",
+              "total_bytes": 1288490188,
+              "source_kind": "browser_handoff"
+            },
+            "created_at": "2026-10-05T09:15:30.301Z",
+            "expires_at": "2026-10-06T09:15:30.301Z",
+            "decided_at": "2026-10-05T09:15:34.870Z",
+            "decision": {
+              "outcome": "approve",
+              "scope": "site",
+              "actor": {
+                "kind": "human",
+                "surface": "extension_popup"
+              },
+              "grant_id": "gr_01M45NHPJP04TX6B1CJVQVQAK9"
+            }
+          },
+          "grant": {
+            "id": "gr_01M45NHPJP04TX6B1CJVQVQAK9",
+            "origin": "https://portal.example.org",
+            "scope": "site",
+            "state": "active",
+            "created_at": "2026-10-05T09:15:34.870Z",
+            "expires_at": "2026-10-06T09:15:34.870Z",
+            "approval_id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+            "decided_by": {
+              "kind": "human",
+              "surface": "extension_popup"
+            },
+            "uses": 0,
+            "last_used_at": null,
+            "revoked_at": null,
+            "renewable": false,
+            "renewal_count": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
+      "line": 929,
+      "value": {
+        "v": 1,
+        "id": "e11",
+        "type": "events.subscribe",
+        "body": {
+          "since_seq": 48198,
+          "include_progress": true,
+          "progress_interval_ms": 1000,
+          "scope": "all"
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
+      "line": 948,
+      "value": {
+        "v": 1,
+        "id": "d11",
+        "re": "e11",
+        "type": "events.subscribe.response",
+        "body": {
+          "subscription_id": "sub1",
+          "head_seq": 48209,
+          "replay_count": 11,
+          "replay_truncated": false
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
+      "line": 960,
+      "value": {
+        "v": 1,
+        "id": "d12",
+        "type": "job.event",
+        "body": {
+          "subscription_id": "sub1",
+          "event": {
+            "seq": 48222,
+            "ts": "2026-10-05T09:17:12.020Z",
+            "type": "job.completed",
+            "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+            "data": {
+              "path": "/home/ada/Downloads/Zeus/dataset-v3.tar.zst",
+              "size_bytes": 1288490188,
+              "sha256": "eba4a8587ad422baa9bb314f660b11dfd73563c9af06c6c6ed6ec4bf2da2bc47",
+              "blake3": "1e0f07a3c0beca17e28b2d889c3e78a743e9c931e3d5efbff76921fe028ce231",
+              "quarantined": false,
+              "duration_ms": 101770
+            }
+          }
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
+      "line": 989,
+      "value": {
+        "v": 1,
+        "id": "d13",
+        "re": "e12",
+        "type": "job.list.response",
+        "body": {
+          "jobs": [
+            {
+              "id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+              "state": "downloading",
+              "quarantined": false,
+              "source_kind": "browser_handoff",
+              "filename": "dataset-v3.tar.zst",
+              "url_redacted": "https://portal.example.org/download/8841",
+              "origin": "https://portal.example.org",
+              "bytes_done": 611057664,
+              "bytes_total": 1288490188,
+              "last_error": null,
+              "created_at": "2026-10-05T09:15:30.250Z",
+              "updated_at": "2026-10-05T09:16:10.000Z"
+            }
+          ],
+          "next_cursor": null
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Job",
+      "line": 49,
+      "value": {
+        "id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "state": "downloading",
+        "quarantined": false,
+        "spec": {
+          "url": "https://portal.example.org/download/8841",
+          "hint_url": "https://cdn.example.org/blobs/dataset-v3.tar.zst?X-Amz-Signature=REDACTED-IN-DOCS",
+          "referrer": "https://portal.example.org/datasets/v3",
+          "filename": "dataset-v3.tar.zst",
+          "priority": "high",
+          "session_origin": "https://portal.example.org",
+          "grant_scope_hint": "site",
+          "overwrite": "rename",
+          "source": {
+            "kind": "browser_handoff",
+            "via": "native_messaging",
+            "client_id": "ext:chrome",
+            "browser": {
+              "name": "chrome",
+              "extension_id": "abcdefghijklmnopabcdefghijklmnop",
+              "download_id": 317,
+              "offer_key": "chrome:317:2026-10-05T09:15:12.004Z",
+              "incognito": false
+            }
+          }
+        },
+        "created_at": "2026-10-05T09:15:30.250Z",
+        "updated_at": "2026-10-05T09:16:10.000Z",
+        "state_since": "2026-10-05T09:15:36.640Z",
+        "probe": {
+          "probed_at": "2026-10-05T09:15:36.610Z",
+          "method": "range_get",
+          "transport": "direct",
+          "http_version": "h2",
+          "status": 206,
+          "final_url_redacted": "https://cdn.example.org/blobs/dataset-v3.tar.zst?…",
+          "redirects": 1,
+          "range_support": "verified",
+          "total_bytes": 1288490188,
+          "content_type": "application/zstd",
+          "content_encoding": null,
+          "filename": {
+            "value": "dataset-v3.tar.zst",
+            "source": "content_disposition"
+          },
+          "validators": {
+            "etag": "\"5f3a9c-4c1d2e7b\"",
+            "last_modified": "Tue, 29 Sep 2026 14:02:11 GMT",
+            "last_modified_strong": true,
+            "repr_digest": null
+          },
+          "requires_session": true,
+          "interstitial_suspected": false
+        },
+        "progress": {
+          "bytes_done": 611057664,
+          "bytes_total": 1288490188,
+          "rate_ewma": 15728640,
+          "eta_s": 43,
+          "segments_active": 4,
+          "last_error_class": null,
+          "updated_at": "2026-10-05T09:16:10.000Z"
+        },
+        "retry": {
+          "attempt": 1,
+          "consecutive_failures": 0,
+          "last_progress_at": "2026-10-05T09:16:10.000Z",
+          "next_attempt_at": null,
+          "auth_refreshes": 0,
+          "proxy_escalations": 0,
+          "integrity_restarts": 0,
+          "resource_restarts": 0,
+          "recovery_count": 0,
+          "session_wait_deadline_at": null
+        },
+        "error": null,
+        "result": null,
+        "transport": "direct",
+        "grant_id": "gr_01M45NHPJP04TX6B1CJVQVQAK9",
+        "approval_id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8"
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/JobSpec",
+      "line": 156,
+      "value": {
+        "url": "https://files.example.com/exports/2026/q3.csv.gz",
+        "referrer": null,
+        "dest_dir": "/home/ada/Downloads/Zeus",
+        "filename": "q3.csv.gz",
+        "expected_sha256": "9218812567e906efb346546840f6145fc189148e5633d0737fee7402a3207f9a",
+        "priority": "normal",
+        "idempotency_key": "agent-7f3c:q3-export",
+        "overwrite": "rename",
+        "max_connections": 8,
+        "transport_hint": "auto",
+        "labels": {
+          "task": "quarterly-report"
+        },
+        "source": {
+          "kind": "agent",
+          "via": "mcp",
+          "client_id": "claude-code:3d9e",
+          "run_id": "run_01M45KGHR0ED0WJDFXKG49029B"
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/ProbeResult",
+      "line": 214,
+      "value": {
+        "probed_at": "2026-10-05T09:15:36.610Z",
+        "method": "range_get",
+        "transport": "direct",
+        "http_version": "h2",
+        "status": 206,
+        "final_url_redacted": "https://cdn.example.org/blobs/dataset-v3.tar.zst?…",
+        "redirects": 1,
+        "range_support": "verified",
+        "total_bytes": 1288490188,
+        "content_type": "application/zstd",
+        "content_encoding": null,
+        "filename": {
+          "value": "dataset-v3.tar.zst",
+          "source": "content_disposition"
+        },
+        "validators": {
+          "etag": "\"5f3a9c-4c1d2e7b\"",
+          "last_modified": "Tue, 29 Sep 2026 14:02:11 GMT",
+          "last_modified_strong": true,
+          "repr_digest": null
+        },
+        "requires_session": true,
+        "interstitial_suspected": false
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Segment",
+      "line": 250,
+      "value": {
+        "index": 3,
+        "start": 50331648,
+        "end": 67108864,
+        "committed_bytes": 4194304,
+        "state": "active"
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Progress",
+      "line": 270,
+      "value": {
+        "bytes_done": 611057664,
+        "bytes_total": 1288490188,
+        "rate_ewma": 15728640,
+        "eta_s": 43,
+        "segments_active": 4,
+        "last_error_class": null,
+        "updated_at": "2026-10-05T09:16:10.000Z"
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/SessionGrant",
+      "line": 332,
+      "value": {
+        "id": "gr_01M45NHPJP04TX6B1CJVQVQAK9",
+        "origin": "https://portal.example.org",
+        "scope": "site",
+        "state": "active",
+        "created_at": "2026-10-05T09:15:34.870Z",
+        "expires_at": "2026-10-06T09:15:34.870Z",
+        "approval_id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+        "decided_by": {
+          "kind": "human",
+          "surface": "extension_popup"
+        },
+        "uses": 1,
+        "last_used_at": "2026-10-05T09:15:36.140Z",
+        "revoked_at": null,
+        "renewable": false,
+        "renewal_count": 0
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Approval",
+      "line": 375,
+      "value": {
+        "id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+        "kind": "handoff",
+        "state": "approved",
+        "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "origin": "https://portal.example.org",
+        "allowed_scopes": [
+          "once",
+          "site",
+          "never"
+        ],
+        "reason_codes": [
+          "handoff.interrupted",
+          "session.first_use"
+        ],
+        "summary": {
+          "title": "dataset-v3.tar.zst",
+          "url_redacted": "https://portal.example.org/download/8841",
+          "total_bytes": 1288490188,
+          "source_kind": "browser_handoff"
+        },
+        "created_at": "2026-10-05T09:15:30.301Z",
+        "expires_at": "2026-10-06T09:15:30.301Z",
+        "decided_at": "2026-10-05T09:15:34.870Z",
+        "decision": {
+          "outcome": "approve",
+          "scope": "site",
+          "actor": {
+            "kind": "human",
+            "surface": "extension_popup"
+          },
+          "grant_id": "gr_01M45NHPJP04TX6B1CJVQVQAK9"
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 873,
+      "value": {
+        "seq": 48210,
+        "ts": "2026-10-05T09:15:30.250Z",
+        "type": "job.created",
+        "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "data": {
+          "source": {
+            "kind": "browser_handoff",
+            "via": "native_messaging",
+            "client_id": "ext:chrome",
+            "browser": {
+              "name": "chrome",
+              "extension_id": "abcdefghijklmnopabcdefghijklmnop",
+              "download_id": 317,
+              "offer_key": "chrome:317:2026-10-05T09:15:12.004Z",
+              "incognito": false
+            }
+          },
+          "state": "awaiting_approval",
+          "url_redacted": "https://portal.example.org/download/8841",
+          "filename_hint": "dataset-v3.tar.zst",
+          "origin": "https://portal.example.org",
+          "session_origin": "https://portal.example.org",
+          "priority": "high"
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 874,
+      "value": {
+        "seq": 48211,
+        "ts": "2026-10-05T09:15:30.301Z",
+        "type": "approval.requested",
+        "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "data": {
+          "approval": {
+            "id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+            "kind": "handoff",
+            "state": "pending",
+            "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+            "origin": "https://portal.example.org",
+            "allowed_scopes": [
+              "once",
+              "site",
+              "never"
+            ],
+            "reason_codes": [
+              "handoff.interrupted",
+              "session.first_use"
+            ],
+            "summary": {
+              "title": "dataset-v3.tar.zst",
+              "url_redacted": "https://portal.example.org/download/8841",
+              "total_bytes": 1288490188,
+              "source_kind": "browser_handoff"
+            },
+            "created_at": "2026-10-05T09:15:30.301Z",
+            "expires_at": "2026-10-06T09:15:30.301Z",
+            "decided_at": null
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 875,
+      "value": {
+        "seq": 48212,
+        "ts": "2026-10-05T09:15:34.870Z",
+        "type": "approval.decided",
+        "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "data": {
+          "approval_id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+          "kind": "handoff",
+          "outcome": "approve",
+          "scope": "site",
+          "actor": {
+            "kind": "human",
+            "surface": "extension_popup"
+          },
+          "grant_id": "gr_01M45NHPJP04TX6B1CJVQVQAK9"
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 876,
+      "value": {
+        "seq": 48213,
+        "ts": "2026-10-05T09:15:34.870Z",
+        "type": "grant.created",
+        "data": {
+          "grant": {
+            "id": "gr_01M45NHPJP04TX6B1CJVQVQAK9",
+            "origin": "https://portal.example.org",
+            "scope": "site",
+            "state": "active",
+            "created_at": "2026-10-05T09:15:34.870Z",
+            "expires_at": "2026-10-06T09:15:34.870Z",
+            "approval_id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+            "decided_by": {
+              "kind": "human",
+              "surface": "extension_popup"
+            },
+            "uses": 0,
+            "last_used_at": null,
+            "revoked_at": null,
+            "renewable": false,
+            "renewal_count": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 877,
+      "value": {
+        "seq": 48214,
+        "ts": "2026-10-05T09:15:34.871Z",
+        "type": "job.state_changed",
+        "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "data": {
+          "from": "awaiting_approval",
+          "to": "queued",
+          "transition": "S30",
+          "cause": "approval_approved",
+          "actor": {
+            "kind": "human",
+            "surface": "extension_popup"
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 878,
+      "value": {
+        "seq": 48215,
+        "ts": "2026-10-05T09:15:34.900Z",
+        "type": "job.state_changed",
+        "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "data": {
+          "from": "queued",
+          "to": "probing",
+          "transition": "S03",
+          "cause": "scheduler",
+          "actor": {
+            "kind": "engine"
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 879,
+      "value": {
+        "seq": 48216,
+        "ts": "2026-10-05T09:15:36.140Z",
+        "type": "session.leased",
+        "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "data": {
+          "lease_id": "sess_01M45NHQTC78XWWC8N35Y2BPEA",
+          "grant_id": "gr_01M45NHPJP04TX6B1CJVQVQAK9",
+          "origin": "https://portal.example.org",
+          "purpose": "download",
+          "cookie_count": 7,
+          "ttl_ms": 900000
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 880,
+      "value": {
+        "seq": 48217,
+        "ts": "2026-10-05T09:15:36.610Z",
+        "type": "job.probed",
+        "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "data": {
+          "probe": {
+            "probed_at": "2026-10-05T09:15:36.610Z",
+            "method": "range_get",
+            "transport": "direct",
+            "http_version": "h2",
+            "status": 206,
+            "final_url_redacted": "https://cdn.example.org/blobs/dataset-v3.tar.zst?…",
+            "redirects": 1,
+            "range_support": "verified",
+            "total_bytes": 1288490188,
+            "content_type": "application/zstd",
+            "content_encoding": null,
+            "filename": {
+              "value": "dataset-v3.tar.zst",
+              "source": "content_disposition"
+            },
+            "validators": {
+              "etag": "\"5f3a9c-4c1d2e7b\"",
+              "last_modified": "Tue, 29 Sep 2026 14:02:11 GMT",
+              "last_modified_strong": true,
+              "repr_digest": null
+            },
+            "requires_session": true,
+            "interstitial_suspected": false
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 881,
+      "value": {
+        "seq": 48218,
+        "ts": "2026-10-05T09:15:36.640Z",
+        "type": "job.state_changed",
+        "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "data": {
+          "from": "probing",
+          "to": "downloading",
+          "transition": "S10",
+          "cause": "probe_ok",
+          "actor": {
+            "kind": "engine"
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 882,
+      "value": {
+        "after_seq": 48218,
+        "ts": "2026-10-05T09:16:10.000Z",
+        "type": "job.progress",
+        "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "data": {
+          "progress": {
+            "bytes_done": 611057664,
+            "bytes_total": 1288490188,
+            "rate_ewma": 15728640,
+            "eta_s": 43,
+            "segments_active": 4,
+            "last_error_class": null,
+            "updated_at": "2026-10-05T09:16:10.000Z"
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 883,
+      "value": {
+        "seq": 48219,
+        "ts": "2026-10-05T09:17:02.311Z",
+        "type": "job.state_changed",
+        "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "data": {
+          "from": "downloading",
+          "to": "verifying",
+          "transition": "S20",
+          "cause": "all_committed",
+          "actor": {
+            "kind": "engine"
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 884,
+      "value": {
+        "seq": 48220,
+        "ts": "2026-10-05T09:17:11.870Z",
+        "type": "job.verified",
+        "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "data": {
+          "size_bytes": 1288490188,
+          "sha256": "eba4a8587ad422baa9bb314f660b11dfd73563c9af06c6c6ed6ec4bf2da2bc47",
+          "blake3": "1e0f07a3c0beca17e28b2d889c3e78a743e9c931e3d5efbff76921fe028ce231",
+          "detected_mime": "application/zstd",
+          "declared_mime": "application/zstd",
+          "mime_match": true,
+          "expected_sha256_match": null,
+          "expected_size_match": true
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 885,
+      "value": {
+        "seq": 48221,
+        "ts": "2026-10-05T09:17:11.905Z",
+        "type": "job.state_changed",
+        "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "data": {
+          "from": "verifying",
+          "to": "finalizing",
+          "transition": "S70",
+          "cause": "verification_ok",
+          "actor": {
+            "kind": "engine"
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 886,
+      "value": {
+        "seq": 48222,
+        "ts": "2026-10-05T09:17:12.020Z",
+        "type": "job.completed",
+        "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "data": {
+          "path": "/home/ada/Downloads/Zeus/dataset-v3.tar.zst",
+          "size_bytes": 1288490188,
+          "sha256": "eba4a8587ad422baa9bb314f660b11dfd73563c9af06c6c6ed6ec4bf2da2bc47",
+          "blake3": "1e0f07a3c0beca17e28b2d889c3e78a743e9c931e3d5efbff76921fe028ce231",
+          "quarantined": false,
+          "duration_ms": 101770
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 887,
+      "value": {
+        "seq": 48223,
+        "ts": "2026-10-05T09:17:12.020Z",
+        "type": "job.state_changed",
+        "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "data": {
+          "from": "finalizing",
+          "to": "completed",
+          "transition": "S80",
+          "cause": "finalized",
+          "actor": {
+            "kind": "engine"
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 893,
+      "value": {
+        "seq": 48301,
+        "ts": "2026-10-05T10:03:44.100Z",
+        "type": "job.state_changed",
+        "job_id": "job_01M45R71NCNH3W8EQ63TAFME4C",
+        "data": {
+          "from": "downloading",
+          "to": "retry_scheduled",
+          "transition": "S21",
+          "cause": "error",
+          "actor": {
+            "kind": "engine"
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 894,
+      "value": {
+        "seq": 48302,
+        "ts": "2026-10-05T10:03:44.100Z",
+        "type": "job.retry_scheduled",
+        "job_id": "job_01M45R71NCNH3W8EQ63TAFME4C",
+        "data": {
+          "attempt": 1,
+          "error": {
+            "code": "http.status_429",
+            "class": "throttled",
+            "message": "Server answered 429 Too Many Requests.",
+            "retryable": true,
+            "details": {
+              "status": 429,
+              "retry_after_ms": 30000
+            }
+          },
+          "delay_ms": 30000,
+          "next_attempt_at": "2026-10-05T10:04:14.100Z",
+          "restart_from_zero": false
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 895,
+      "value": {
+        "seq": 48303,
+        "ts": "2026-10-05T10:03:44.100Z",
+        "type": "job.throttled",
+        "job_id": "job_01M45R71NCNH3W8EQ63TAFME4C",
+        "data": {
+          "host": "cdn.example.org",
+          "status": 429,
+          "retry_after_ms": 30000,
+          "concurrency_before": 4,
+          "concurrency_after": 2
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 896,
+      "value": {
+        "seq": 48304,
+        "ts": "2026-10-05T10:04:14.100Z",
+        "type": "job.state_changed",
+        "job_id": "job_01M45R71NCNH3W8EQ63TAFME4C",
+        "data": {
+          "from": "retry_scheduled",
+          "to": "queued",
+          "transition": "S60",
+          "cause": "retry_timer",
+          "actor": {
+            "kind": "system"
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 897,
+      "value": {
+        "seq": 48410,
+        "ts": "2026-10-05T10:31:20.000Z",
+        "type": "job.state_changed",
+        "job_id": "job_01M45SSZ20WN6VYFYEM4GP8SZD",
+        "data": {
+          "from": "downloading",
+          "to": "awaiting_session",
+          "transition": "S22",
+          "cause": "error",
+          "actor": {
+            "kind": "engine"
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 898,
+      "value": {
+        "seq": 48411,
+        "ts": "2026-10-05T10:31:20.000Z",
+        "type": "session.refresh_needed",
+        "job_id": "job_01M45SSZ20WN6VYFYEM4GP8SZD",
+        "data": {
+          "origin": "https://portal.example.org",
+          "need": "url",
+          "reason": "url_expired",
+          "attempt": 1,
+          "deadline_at": "2026-10-05T11:31:20.000Z"
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 899,
+      "value": {
+        "seq": 48420,
+        "ts": "2026-10-05T10:40:00.000Z",
+        "type": "job.state_changed",
+        "job_id": "job_01M45SSZ20WN6VYFYEM4GP8SZD",
+        "data": {
+          "from": "downloading",
+          "to": "awaiting_approval",
+          "transition": "S23",
+          "cause": "escalation",
+          "actor": {
+            "kind": "engine"
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 900,
+      "value": {
+        "seq": 48421,
+        "ts": "2026-10-05T10:40:00.000Z",
+        "type": "approval.requested",
+        "job_id": "job_01M45SSZ20WN6VYFYEM4GP8SZD",
+        "data": {
+          "approval": {
+            "id": "ap_01M45TC900WT1S4TZV708J04JP",
+            "kind": "retry_escalation",
+            "state": "pending",
+            "job_id": "job_01M45SSZ20WN6VYFYEM4GP8SZD",
+            "origin": "https://portal.example.org",
+            "allowed_scopes": [],
+            "reason_codes": [
+              "retry.exhausted",
+              "url.expired"
+            ],
+            "summary": {
+              "title": "annual-report.pdf",
+              "url_redacted": "https://portal.example.org/files/annual-report.pdf",
+              "total_bytes": 734003200,
+              "source_kind": "browser_handoff"
+            },
+            "created_at": "2026-10-05T10:40:00.000Z",
+            "expires_at": "2026-10-12T10:40:00.000Z",
+            "decided_at": null
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 901,
+      "value": {
+        "seq": 48530,
+        "ts": "2026-10-05T11:03:10.000Z",
+        "type": "job.state_changed",
+        "job_id": "job_01M45VGWW0NNYSESRJPP2BBRQN",
+        "data": {
+          "from": "downloading",
+          "to": "failed",
+          "transition": "S25",
+          "cause": "error",
+          "actor": {
+            "kind": "engine"
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 902,
+      "value": {
+        "seq": 48531,
+        "ts": "2026-10-05T11:03:10.000Z",
+        "type": "job.failed",
+        "job_id": "job_01M45VGWW0NNYSESRJPP2BBRQN",
+        "data": {
+          "error": {
+            "code": "http.blocked_challenge",
+            "class": "blocked",
+            "message": "A challenge page was served to the engine and to the in-browser proxy.",
+            "retryable": false,
+            "details": {
+              "proxy_attempted": true
+            }
+          },
+          "suggested_next": {
+            "action": "open_in_browser",
+            "tool": null
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 903,
+      "value": {
+        "seq": 48600,
+        "ts": "2026-10-05T12:05:41.000Z",
+        "type": "job.quarantined",
+        "job_id": "job_01M45Z7XF00EGQK145RK7K5ZSV",
+        "data": {
+          "reasons": [
+            "executable_type",
+            "mime_mismatch"
+          ]
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 904,
+      "value": {
+        "seq": 48700,
+        "ts": "2026-10-05T12:30:00.000Z",
+        "type": "grant.revoked",
+        "data": {
+          "grant_id": "gr_01M45NHPJP04TX6B1CJVQVQAK9",
+          "origin": "https://portal.example.org",
+          "by": {
+            "kind": "human",
+            "surface": "extension_popup"
+          }
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 905,
+      "value": {
+        "seq": 48701,
+        "ts": "2026-10-05T13:00:00.000Z",
+        "type": "grant.expired",
+        "data": {
+          "grant_id": "gr_01M43TJMZ0J1FV0KM8533A5XGG",
+          "origin": "https://files.example.com"
+        }
+      }
+    },
+    {
+      "source": "01-domain-model.md",
+      "ref": "domain#/$defs/Event",
+      "line": 906,
+      "value": {
+        "seq": 48000,
+        "ts": "2026-10-05T08:55:02.000Z",
+        "type": "daemon.started",
+        "data": {
+          "version": "0.1.0",
+          "instance_id": "3f9a6c2d1b7e4a08c5d2e9f1a0b3c4d5",
+          "recovery": {
+            "jobs_recovered": 2,
+            "jobs_failed": 0,
+            "orphans_found": 1,
+            "audit_chain_ok": true
+          }
+        }
+      }
+    }
+  ]
+}

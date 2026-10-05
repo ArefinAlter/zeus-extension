@@ -1,0 +1,19 @@
+# dependencies and build output
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# secrets: the extension signing key must never live in the repository
+.keys/
+*.pem
+*.key
+*.crx
+*.zip
+
+# editor and OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

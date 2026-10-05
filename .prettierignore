@@ -1,0 +1,9 @@
+node_modules
+dist
+coverage
+package-lock.json
+# normative copies and generated output: formatted by their generators, not by prettier
+schema
+src/lib/protocol.generated.ts
+_locales
+icons

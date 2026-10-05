@@ -1,0 +1,11 @@
+body.popup {
+  width: 380px;
+  min-height: 160px;
+  max-height: 580px;
+  overflow-y: auto;
+}
+.bottom {
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+}
