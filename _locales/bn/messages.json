@@ -508,5 +508,26 @@
   },
   "optBrowserPermissionNo": {
     "message": "ব্রাউজারের অনুমতি নেই"
+  },
+  "errApprovalIntegrity": {
+    "message": "অনুরোধটির অখণ্ডতা যাচাই ব্যর্থ হয়েছে। সিদ্ধান্তের আগে Zeus রিফ্রেশ বা আপডেট করুন।"
+  },
+  "errConfirmationCode": {
+    "message": "এই অনুরোধে দেখানো নিশ্চিতকরণ কোডটি লিখুন।"
+  },
+  "labelRequestCode": {
+    "message": "অনুরোধের কোড"
+  },
+  "labelAgentText": {
+    "message": "AI বলছে — অবিশ্বস্ত লেখা, Zeus যাচাই করেনি"
+  },
+  "labelConfirmationCode": {
+    "message": "নিশ্চিত করতে অনুরোধের কোড লিখুন"
+  },
+  "btnStopAll": {
+    "message": "সব কাজ বন্ধ করুন"
+  },
+  "btnReleaseStop": {
+    "message": "বন্ধ অবস্থা তুলুন (কাজ বিরত থাকবে)"
   }
 }

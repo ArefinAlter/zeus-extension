@@ -1,3 +1,4 @@
+import { withBinding, decisionBinding } from '../helpers/approvals';
 // The sequence diagrams of spec 02 section 15, played end to end against the real background with a
 // scripted daemon. Every frame the extension emits is validated against the schema by the fake
 // daemon; each test ends by asserting that there were no violations.
@@ -17,7 +18,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-const pendingApproval = {
+const pendingApproval = withBinding({
   id: approvalId(1),
   kind: 'handoff',
   state: 'pending',
@@ -34,7 +35,7 @@ const pendingApproval = {
   created_at: '2026-10-05T09:15:30.301Z',
   expires_at: '2026-10-06T09:15:30.301Z',
   decided_at: null,
-};
+});
 
 const siteGrant = {
   id: grantId(1),
@@ -104,6 +105,7 @@ describe('15.1 rescue happy path', () => {
       await w.ext.api.permissions.request({ permissions: ['cookies'], origins: [`${ORIGIN}/*`] }),
     ).toBe(true);
     const decided = (await w.ext.sendFromPage({
+      ...decisionBinding(pendingApproval),
       cmd: 'approval.decide',
       approval_id: approvalId(1),
       decision: 'approve',
@@ -371,6 +373,7 @@ describe('15.4 consent denied', () => {
     w.daemon.send('approval.pending', { approval: pendingApproval });
     await w.settle();
     const decided = (await w.ext.sendFromPage({
+      ...decisionBinding(pendingApproval),
       cmd: 'approval.decide',
       approval_id: approvalId(1),
       decision: 'deny',

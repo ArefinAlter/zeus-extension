@@ -53,6 +53,7 @@ export function verifyDist(dir, { target, store }) {
   const need = (/** @type {string} */ f, /** @type {string} */ why) => {
     if (!files.has(f)) bad(`${why} references missing file ${f}`);
   };
+  need('THIRD_PARTY_NOTICES.md', 'bundled hashing library');
   for (const f of leaves(manifest.icons)) need(f, 'manifest icons');
   for (const f of leaves(manifest.action?.default_icon)) need(f, 'action icon');
   if (manifest.action?.default_popup) need(manifest.action.default_popup, 'action');

@@ -1,7 +1,8 @@
 {
   "sources": [
     "02-native-messaging-v1.md",
-    "01-domain-model.md"
+    "01-domain-model.md",
+    "07-approvals-trust-surface-and-consent.md"
   ],
   "examples": [
     {
@@ -35,7 +36,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 210,
+      "line": 211,
       "value": {
         "v": 1,
         "id": "e1",
@@ -71,7 +72,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 229,
+      "line": 230,
       "value": {
         "v": 1,
         "id": "d1",
@@ -121,7 +122,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 365,
+      "line": 368,
       "value": {
         "v": 1,
         "id": "e2",
@@ -150,7 +151,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 401,
+      "line": 404,
       "value": {
         "v": 1,
         "id": "d2",
@@ -167,7 +168,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 416,
+      "line": 419,
       "value": {
         "v": 1,
         "id": "d3",
@@ -189,7 +190,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 438,
+      "line": 441,
       "value": {
         "v": 1,
         "id": "e14",
@@ -204,7 +205,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 457,
+      "line": 460,
       "value": {
         "v": 1,
         "id": "d6",
@@ -230,7 +231,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 495,
+      "line": 498,
       "value": {
         "v": 1,
         "id": "e4",
@@ -281,7 +282,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 552,
+      "line": 555,
       "value": {
         "v": 1,
         "id": "e5",
@@ -301,7 +302,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 574,
+      "line": 577,
       "value": {
         "v": 1,
         "id": "d7",
@@ -328,7 +329,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 601,
+      "line": 604,
       "value": {
         "v": 1,
         "id": "e6",
@@ -350,7 +351,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 644,
+      "line": 647,
       "value": {
         "v": 1,
         "id": "d8",
@@ -377,7 +378,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 693,
+      "line": 696,
       "value": {
         "v": 1,
         "id": "e7",
@@ -401,7 +402,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 719,
+      "line": 722,
       "value": {
         "v": 1,
         "id": "e8",
@@ -418,7 +419,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 743,
+      "line": 746,
       "value": {
         "v": 1,
         "id": "d9",
@@ -432,7 +433,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 747,
+      "line": 750,
       "value": {
         "v": 1,
         "id": "e9",
@@ -448,7 +449,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 751,
+      "line": 754,
       "value": {
         "v": 1,
         "id": "e10",
@@ -468,7 +469,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 769,
+      "line": 772,
       "value": {
         "v": 1,
         "id": "d10",
@@ -482,7 +483,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 808,
+      "line": 812,
       "value": {
         "v": 1,
         "id": "d4",
@@ -511,7 +512,65 @@
             },
             "created_at": "2026-10-05T09:15:30.301Z",
             "expires_at": "2026-10-06T09:15:30.301Z",
-            "decided_at": null
+            "decided_at": null,
+            "request_hash": "09e8478513076b8b79ed19675402421a3cee9eb3d4c73487daa7bd63a55003ae",
+            "requested_by": "cli_01M3V7ME00TBC6F3THCHXHRYWJ",
+            "revision": 1,
+            "facts": {
+              "t": "zeus.approval.facts.v1",
+              "approval_id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+              "revision": 1,
+              "kind": "handoff",
+              "requester": {
+                "kind": "human",
+                "role": "native_host",
+                "client_id": "cli_01M3V7ME00TBC6F3THCHXHRYWJ",
+                "label": "host"
+              },
+              "issued_at": "2026-10-05T09:15:30.301Z",
+              "expires_at": "2026-10-06T09:15:30.301Z",
+              "allowed_scopes": [
+                "once",
+                "site",
+                "never"
+              ],
+              "confirmation": {
+                "once": "gesture",
+                "site": "gesture"
+              },
+              "reason_codes": [
+                "handoff.interrupted",
+                "session.first_use"
+              ],
+              "origin": "https://portal.example.org",
+              "first_time_for_origin": true,
+              "browser": {
+                "name": "chrome",
+                "profile_id": "6f1c2a9e0b7d4e3fa5c8d2b1e0f9a7c3",
+                "incognito": false
+              },
+              "transfer": {
+                "job_ids": [
+                  "job_01M45NHJ2AHWMXT8JVJ7BEEJX7"
+                ],
+                "total_bytes": 1288490188,
+                "unknown_size_count": 0,
+                "dest_dirs": [
+                  "/home/ada/Downloads/Zeus"
+                ],
+                "dest_dirs_omitted": 0
+              },
+              "items": [
+                {
+                  "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+                  "untrusted_name": "dataset-v3.tar.zst",
+                  "untrusted_url": "https://portal.example.org/download/8841",
+                  "total_bytes": 1288490188
+                }
+              ],
+              "items_omitted": 0,
+              "agent_says_blake3": null
+            }
           }
         }
       }
@@ -519,13 +578,14 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 836,
+      "line": 875,
       "value": {
         "v": 1,
         "id": "e3",
         "type": "approval.decide",
         "body": {
           "approval_id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+          "request_hash": "09e8478513076b8b79ed19675402421a3cee9eb3d4c73487daa7bd63a55003ae",
           "decision": "approve",
           "scope": "site",
           "ui": {
@@ -538,7 +598,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 850,
+      "line": 890,
       "value": {
         "v": 1,
         "id": "d5",
@@ -603,7 +663,42 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 929,
+      "line": 941,
+      "value": {
+        "v": 1,
+        "id": "e9",
+        "type": "kill_switch",
+        "body": {
+          "action": "engage",
+          "ui": {
+            "surface": "extension_popup",
+            "user_gesture": true
+          }
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
+      "line": 950,
+      "value": {
+        "v": 1,
+        "id": "d12",
+        "re": "e9",
+        "type": "kill_switch.response",
+        "body": {
+          "engaged": true,
+          "changed": true,
+          "grants_revoked": 3,
+          "jobs_paused": 5,
+          "approvals_pending": 2
+        }
+      }
+    },
+    {
+      "source": "02-native-messaging-v1.md",
+      "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
+      "line": 993,
       "value": {
         "v": 1,
         "id": "e11",
@@ -619,7 +714,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 948,
+      "line": 1012,
       "value": {
         "v": 1,
         "id": "d11",
@@ -636,7 +731,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 960,
+      "line": 1024,
       "value": {
         "v": 1,
         "id": "d12",
@@ -663,7 +758,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 989,
+      "line": 1053,
       "value": {
         "v": 1,
         "id": "d13",
@@ -923,7 +1018,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 873,
+      "line": 876,
       "value": {
         "seq": 48210,
         "ts": "2026-10-05T09:15:30.250Z",
@@ -954,7 +1049,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 874,
+      "line": 877,
       "value": {
         "seq": 48211,
         "ts": "2026-10-05T09:15:30.301Z",
@@ -992,7 +1087,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 875,
+      "line": 878,
       "value": {
         "seq": 48212,
         "ts": "2026-10-05T09:15:34.870Z",
@@ -1014,7 +1109,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 876,
+      "line": 879,
       "value": {
         "seq": 48213,
         "ts": "2026-10-05T09:15:34.870Z",
@@ -1044,7 +1139,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 877,
+      "line": 880,
       "value": {
         "seq": 48214,
         "ts": "2026-10-05T09:15:34.871Z",
@@ -1065,7 +1160,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 878,
+      "line": 881,
       "value": {
         "seq": 48215,
         "ts": "2026-10-05T09:15:34.900Z",
@@ -1085,7 +1180,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 879,
+      "line": 882,
       "value": {
         "seq": 48216,
         "ts": "2026-10-05T09:15:36.140Z",
@@ -1104,7 +1199,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 880,
+      "line": 883,
       "value": {
         "seq": 48217,
         "ts": "2026-10-05T09:15:36.610Z",
@@ -1142,7 +1237,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 881,
+      "line": 884,
       "value": {
         "seq": 48218,
         "ts": "2026-10-05T09:15:36.640Z",
@@ -1162,7 +1257,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 882,
+      "line": 885,
       "value": {
         "after_seq": 48218,
         "ts": "2026-10-05T09:16:10.000Z",
@@ -1184,7 +1279,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 883,
+      "line": 886,
       "value": {
         "seq": 48219,
         "ts": "2026-10-05T09:17:02.311Z",
@@ -1204,7 +1299,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 884,
+      "line": 887,
       "value": {
         "seq": 48220,
         "ts": "2026-10-05T09:17:11.870Z",
@@ -1225,7 +1320,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 885,
+      "line": 888,
       "value": {
         "seq": 48221,
         "ts": "2026-10-05T09:17:11.905Z",
@@ -1245,7 +1340,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 886,
+      "line": 889,
       "value": {
         "seq": 48222,
         "ts": "2026-10-05T09:17:12.020Z",
@@ -1264,7 +1359,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 887,
+      "line": 890,
       "value": {
         "seq": 48223,
         "ts": "2026-10-05T09:17:12.020Z",
@@ -1284,7 +1379,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 893,
+      "line": 896,
       "value": {
         "seq": 48301,
         "ts": "2026-10-05T10:03:44.100Z",
@@ -1304,7 +1399,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 894,
+      "line": 897,
       "value": {
         "seq": 48302,
         "ts": "2026-10-05T10:03:44.100Z",
@@ -1331,7 +1426,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 895,
+      "line": 898,
       "value": {
         "seq": 48303,
         "ts": "2026-10-05T10:03:44.100Z",
@@ -1349,7 +1444,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 896,
+      "line": 899,
       "value": {
         "seq": 48304,
         "ts": "2026-10-05T10:04:14.100Z",
@@ -1369,7 +1464,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 897,
+      "line": 900,
       "value": {
         "seq": 48410,
         "ts": "2026-10-05T10:31:20.000Z",
@@ -1389,7 +1484,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 898,
+      "line": 901,
       "value": {
         "seq": 48411,
         "ts": "2026-10-05T10:31:20.000Z",
@@ -1407,7 +1502,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 899,
+      "line": 902,
       "value": {
         "seq": 48420,
         "ts": "2026-10-05T10:40:00.000Z",
@@ -1427,7 +1522,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 900,
+      "line": 903,
       "value": {
         "seq": 48421,
         "ts": "2026-10-05T10:40:00.000Z",
@@ -1461,7 +1556,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 901,
+      "line": 904,
       "value": {
         "seq": 48530,
         "ts": "2026-10-05T11:03:10.000Z",
@@ -1481,7 +1576,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 902,
+      "line": 905,
       "value": {
         "seq": 48531,
         "ts": "2026-10-05T11:03:10.000Z",
@@ -1507,7 +1602,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 903,
+      "line": 906,
       "value": {
         "seq": 48600,
         "ts": "2026-10-05T12:05:41.000Z",
@@ -1524,7 +1619,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 904,
+      "line": 907,
       "value": {
         "seq": 48700,
         "ts": "2026-10-05T12:30:00.000Z",
@@ -1542,7 +1637,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 905,
+      "line": 908,
       "value": {
         "seq": 48701,
         "ts": "2026-10-05T13:00:00.000Z",
@@ -1556,7 +1651,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 906,
+      "line": 909,
       "value": {
         "seq": 48000,
         "ts": "2026-10-05T08:55:02.000Z",
@@ -1569,6 +1664,999 @@
             "jobs_failed": 0,
             "orphans_found": 1,
             "audit_chain_ok": true
+          }
+        }
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/ApprovalRequest",
+      "line": 238,
+      "value": {
+        "id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+        "kind": "handoff",
+        "state": "pending",
+        "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+        "origin": "https://portal.example.org",
+        "allowed_scopes": [
+          "once",
+          "site",
+          "never"
+        ],
+        "reason_codes": [
+          "handoff.interrupted",
+          "session.first_use"
+        ],
+        "summary": {
+          "title": "dataset-v3.tar.zst",
+          "url_redacted": "https://portal.example.org/download/8841",
+          "total_bytes": 1288490188,
+          "source_kind": "browser_handoff"
+        },
+        "created_at": "2026-10-05T09:15:30.301Z",
+        "expires_at": "2026-10-06T09:15:30.301Z",
+        "decided_at": null,
+        "request_hash": "09e8478513076b8b79ed19675402421a3cee9eb3d4c73487daa7bd63a55003ae",
+        "requested_by": "cli_01M3V7ME00TBC6F3THCHXHRYWJ",
+        "revision": 1,
+        "facts": {
+          "t": "zeus.approval.facts.v1",
+          "approval_id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+          "revision": 1,
+          "kind": "handoff",
+          "requester": {
+            "kind": "human",
+            "role": "native_host",
+            "client_id": "cli_01M3V7ME00TBC6F3THCHXHRYWJ",
+            "label": "host"
+          },
+          "issued_at": "2026-10-05T09:15:30.301Z",
+          "expires_at": "2026-10-06T09:15:30.301Z",
+          "allowed_scopes": [
+            "once",
+            "site",
+            "never"
+          ],
+          "confirmation": {
+            "once": "gesture",
+            "site": "gesture"
+          },
+          "reason_codes": [
+            "handoff.interrupted",
+            "session.first_use"
+          ],
+          "origin": "https://portal.example.org",
+          "first_time_for_origin": true,
+          "browser": {
+            "name": "chrome",
+            "profile_id": "6f1c2a9e0b7d4e3fa5c8d2b1e0f9a7c3",
+            "incognito": false
+          },
+          "transfer": {
+            "job_ids": [
+              "job_01M45NHJ2AHWMXT8JVJ7BEEJX7"
+            ],
+            "total_bytes": 1288490188,
+            "unknown_size_count": 0,
+            "dest_dirs": [
+              "/home/ada/Downloads/Zeus"
+            ],
+            "dest_dirs_omitted": 0
+          },
+          "items": [
+            {
+              "job_id": "job_01M45NHJ2AHWMXT8JVJ7BEEJX7",
+              "untrusted_name": "dataset-v3.tar.zst",
+              "untrusted_url": "https://portal.example.org/download/8841",
+              "total_bytes": 1288490188
+            }
+          ],
+          "items_omitted": 0,
+          "agent_says_blake3": null
+        }
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/ApprovalRequest",
+      "line": 296,
+      "value": {
+        "id": "ap_01M465YFSGE0S6JG9A0WZWQ2F2",
+        "kind": "session_grant",
+        "state": "pending",
+        "job_id": "job_01M465YFRJ5SCBKZ1W5VGH7GR9",
+        "origin": "https://files.example.com",
+        "allowed_scopes": [
+          "once",
+          "site",
+          "never"
+        ],
+        "reason_codes": [
+          "session.required",
+          "session.first_use"
+        ],
+        "summary": {
+          "title": "q3-ledger.csv.gz",
+          "url_redacted": "https://files.example.com/exports/2026/q3-ledger.csv.gz",
+          "total_bytes": 734003200,
+          "source_kind": "agent"
+        },
+        "created_at": "2026-10-05T14:02:11.120Z",
+        "expires_at": "2026-10-06T14:02:11.120Z",
+        "decided_at": null,
+        "request_hash": "e597f6a196cf33172c91da16f2047d995f681858602741c00414358a0b5302b7",
+        "requested_by": "cli_01M3Y1JVC0FH2XJFVSFSEEB82F",
+        "revision": 2,
+        "facts": {
+          "t": "zeus.approval.facts.v1",
+          "approval_id": "ap_01M465YFSGE0S6JG9A0WZWQ2F2",
+          "revision": 2,
+          "kind": "session_grant",
+          "requester": {
+            "kind": "agent",
+            "role": "mcp",
+            "client_id": "cli_01M3Y1JVC0FH2XJFVSFSEEB82F",
+            "label": "claude-code",
+            "registered_at": "2026-10-02T10:12:00.000Z"
+          },
+          "issued_at": "2026-10-05T14:02:40.455Z",
+          "expires_at": "2026-10-06T14:02:11.120Z",
+          "allowed_scopes": [
+            "once",
+            "site",
+            "never"
+          ],
+          "confirmation": {
+            "once": "gesture",
+            "site": "gesture"
+          },
+          "reason_codes": [
+            "session.required",
+            "session.first_use"
+          ],
+          "origin": "https://files.example.com",
+          "first_time_for_origin": true,
+          "scope_hint": "site",
+          "run_id": null,
+          "transfer": {
+            "job_ids": [
+              "job_01M465YFRJ5SCBKZ1W5VGH7GR9",
+              "job_01M465ZCCT4R3CM8KB65RZRGDQ"
+            ],
+            "total_bytes": 734003200,
+            "unknown_size_count": 1,
+            "dest_dirs": [
+              "/home/ada/Downloads/Zeus/reports"
+            ],
+            "dest_dirs_omitted": 0
+          },
+          "items": [
+            {
+              "job_id": "job_01M465YFRJ5SCBKZ1W5VGH7GR9",
+              "untrusted_name": "q3-ledger.csv.gz",
+              "untrusted_url": "https://files.example.com/exports/2026/q3-ledger.csv.gz",
+              "total_bytes": 734003200
+            },
+            {
+              "job_id": "job_01M465ZCCT4R3CM8KB65RZRGDQ",
+              "untrusted_name": "q3-notes.pdf",
+              "untrusted_url": "https://files.example.com/exports/2026/q3-notes.pdf",
+              "total_bytes": null
+            }
+          ],
+          "items_omitted": 0,
+          "agent_says_blake3": "997d22b16ae10cc4b9a55f7525a9c7f195e5e225f661ccf0427ad922c728b930"
+        },
+        "agent_says": "Downloading the Q3 exports you asked for in this chat."
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/ApprovalRequest",
+      "line": 368,
+      "value": {
+        "id": "ap_01M485Z8785RCEFDWFQYPQW37A",
+        "kind": "workflow_plan",
+        "state": "pending",
+        "run_id": "run_01M485Z86WQ4D2XNB7S0HM3K1V",
+        "origin": "https://portal.example.org",
+        "allowed_scopes": [
+          "workflow"
+        ],
+        "reason_codes": [
+          "workflow.plan_ready",
+          "requester.service"
+        ],
+        "summary": {
+          "title": "2026 conference papers",
+          "total_bytes": 3328599654,
+          "source_kind": "workflow"
+        },
+        "created_at": "2026-10-06T08:41:05.000Z",
+        "expires_at": "2026-10-13T08:41:05.000Z",
+        "decided_at": null,
+        "request_hash": "fb327bf89e049c3baf272cfb080415fa326f00af97d43cc013e6dc45f5b26502",
+        "requested_by": "cli_01M481X360C3DC8V29SPS7ZJNY",
+        "revision": 1,
+        "facts": {
+          "t": "zeus.approval.facts.v1",
+          "approval_id": "ap_01M485Z8785RCEFDWFQYPQW37A",
+          "revision": 1,
+          "kind": "workflow_plan",
+          "requester": {
+            "kind": "service",
+            "role": "service",
+            "client_id": "cli_01M481X360C3DC8V29SPS7ZJNY",
+            "label": "ogun",
+            "registered_at": "2026-10-06T07:30:00.000Z"
+          },
+          "issued_at": "2026-10-06T08:41:05.000Z",
+          "expires_at": "2026-10-13T08:41:05.000Z",
+          "allowed_scopes": [
+            "workflow"
+          ],
+          "confirmation": {
+            "workflow": "typed_code"
+          },
+          "reason_codes": [
+            "workflow.plan_ready",
+            "requester.service"
+          ],
+          "plan_id": "plan_01M485XMF0G5R39QSV0ZZ239PE",
+          "plan_blake3": "8c34f7016f32728e9fee583f8509c3ff0f08553f081362d6ef355a5b631babbd",
+          "run_id": "run_01M485Z86WQ4D2XNB7S0HM3K1V",
+          "renewal_of": null,
+          "untrusted_title": "2026 conference papers",
+          "allowed_domains": [
+            "portal.example.org"
+          ],
+          "allowed_domains_omitted": 0,
+          "session_origin": "https://portal.example.org",
+          "budgets": {
+            "max_pages": 200,
+            "max_files": 1240,
+            "max_bytes": 3328599654,
+            "max_duration_ms": 7200000,
+            "max_depth": 3
+          },
+          "pace": {
+            "min_interval_ms": 2000,
+            "max_concurrency_per_host": 1
+          },
+          "robots_txt": "obey",
+          "dest_dir": "/home/ada/Downloads/Zeus/portal-2026",
+          "estimate": {
+            "files_low": 1100,
+            "files_high": 1240,
+            "bytes_low": 2684354560,
+            "bytes_high": 3328599654
+          },
+          "agent_says_blake3": null
+        }
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/ApprovalRequest",
+      "line": 421,
+      "value": {
+        "id": "ap_01M45TC900WT1S4TZV708J04JP",
+        "kind": "retry_escalation",
+        "state": "pending",
+        "job_id": "job_01M45SSZ20WN6VYFYEM4GP8SZD",
+        "origin": "https://portal.example.org",
+        "allowed_scopes": [],
+        "reason_codes": [
+          "retry.exhausted",
+          "url.expired"
+        ],
+        "summary": {
+          "title": "annual-report.pdf",
+          "url_redacted": "https://portal.example.org/files/annual-report.pdf",
+          "total_bytes": 734003200,
+          "source_kind": "browser_handoff"
+        },
+        "created_at": "2026-10-05T10:40:00.000Z",
+        "expires_at": "2026-10-12T10:40:00.000Z",
+        "decided_at": null,
+        "request_hash": "d34239794e9294eb22cfe01bc2132d587cdd2d9231c7e19c01ad43110428dd27",
+        "requested_by": "cli_01M3V7ME00TBC6F3THCHXHRYWJ",
+        "revision": 1,
+        "facts": {
+          "t": "zeus.approval.facts.v1",
+          "approval_id": "ap_01M45TC900WT1S4TZV708J04JP",
+          "revision": 1,
+          "kind": "retry_escalation",
+          "requester": {
+            "kind": "human",
+            "role": "native_host",
+            "client_id": "cli_01M3V7ME00TBC6F3THCHXHRYWJ",
+            "label": "host"
+          },
+          "issued_at": "2026-10-05T10:40:00.000Z",
+          "expires_at": "2026-10-12T10:40:00.000Z",
+          "allowed_scopes": [],
+          "confirmation": {
+            "approve": "gesture"
+          },
+          "reason_codes": [
+            "retry.exhausted",
+            "url.expired"
+          ],
+          "job_id": "job_01M45SSZ20WN6VYFYEM4GP8SZD",
+          "origin": "https://portal.example.org",
+          "untrusted_name": "annual-report.pdf",
+          "error": {
+            "code": "url.expired",
+            "class": "url_expired"
+          },
+          "refreshes_used": 3,
+          "bytes_done": 402653184,
+          "bytes_total": 734003200,
+          "grant_id": "gr_01M45NHPJP04TX6B1CJVQVQAK9",
+          "agent_says_blake3": null
+        }
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/ApprovalRequest",
+      "line": 466,
+      "value": {
+        "id": "ap_01M46DTY9CA76DBNDKZPA3JBQF",
+        "kind": "policy_exception",
+        "state": "pending",
+        "job_id": "job_01M46DTY8EWXT1PRSJ9WKFBV2M",
+        "origin": "https://downloads.example.net",
+        "allowed_scopes": [],
+        "reason_codes": [
+          "policy.path_outside_roots"
+        ],
+        "summary": {
+          "title": "toolchain-1.4.2.tar.xz",
+          "url_redacted": "https://downloads.example.net/releases/toolchain-1.4.2.tar.xz",
+          "total_bytes": 52428800,
+          "source_kind": "agent"
+        },
+        "created_at": "2026-10-05T16:20:03.500Z",
+        "expires_at": "2026-10-06T16:20:03.500Z",
+        "decided_at": null,
+        "request_hash": "9a98c1241687654f1a8164c2976682446e9ff01f1963366f732bb4c7d8dbec07",
+        "requested_by": "cli_01M3Y1JVC0FH2XJFVSFSEEB82F",
+        "revision": 1,
+        "facts": {
+          "t": "zeus.approval.facts.v1",
+          "approval_id": "ap_01M46DTY9CA76DBNDKZPA3JBQF",
+          "revision": 1,
+          "kind": "policy_exception",
+          "requester": {
+            "kind": "agent",
+            "role": "mcp",
+            "client_id": "cli_01M3Y1JVC0FH2XJFVSFSEEB82F",
+            "label": "claude-code",
+            "registered_at": "2026-10-02T10:12:00.000Z"
+          },
+          "issued_at": "2026-10-05T16:20:03.500Z",
+          "expires_at": "2026-10-06T16:20:03.500Z",
+          "allowed_scopes": [],
+          "confirmation": {
+            "approve": "typed_code"
+          },
+          "reason_codes": [
+            "policy.path_outside_roots"
+          ],
+          "rule": "path_outside_roots",
+          "operation": "write",
+          "job_id": "job_01M46DTY8EWXT1PRSJ9WKFBV2M",
+          "origin": "https://downloads.example.net",
+          "subject_path": "/home/ada/src/build-tools/vendor",
+          "untrusted_name": "toolchain-1.4.2.tar.xz",
+          "quarantine_reasons": [],
+          "agent_says_blake3": "b8a001ac6784f04845b643da9bd9933d64c24577ca6f93de4102558a6c20f534"
+        },
+        "agent_says": "Save it next to the project so the build can find it."
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/ApprovalRequest",
+      "line": 517,
+      "value": {
+        "id": "ap_01M48E6RV011Z2QV57EPB01YAD",
+        "kind": "destructive_op",
+        "state": "pending",
+        "allowed_scopes": [],
+        "reason_codes": [
+          "files.delete",
+          "files.move"
+        ],
+        "summary": {
+          "title": "Organise ~/Downloads/Zeus",
+          "total_bytes": 5153960755,
+          "source_kind": "agent"
+        },
+        "created_at": "2026-10-06T11:05:00.000Z",
+        "expires_at": "2026-10-07T11:05:00.000Z",
+        "decided_at": null,
+        "request_hash": "5224b282c2a54a76c855655bcf19d11238a6ffd5bc8e942a1dd14f23c2e63dea",
+        "requested_by": "cli_01M3Y1JVC0FH2XJFVSFSEEB82F",
+        "revision": 1,
+        "facts": {
+          "t": "zeus.approval.facts.v1",
+          "approval_id": "ap_01M48E6RV011Z2QV57EPB01YAD",
+          "revision": 1,
+          "kind": "destructive_op",
+          "requester": {
+            "kind": "agent",
+            "role": "mcp",
+            "client_id": "cli_01M3Y1JVC0FH2XJFVSFSEEB82F",
+            "label": "claude-code",
+            "registered_at": "2026-10-02T10:12:00.000Z"
+          },
+          "issued_at": "2026-10-06T11:05:00.000Z",
+          "expires_at": "2026-10-07T11:05:00.000Z",
+          "allowed_scopes": [],
+          "confirmation": {
+            "approve": "typed_code"
+          },
+          "reason_codes": [
+            "files.delete",
+            "files.move"
+          ],
+          "operation_set_blake3": "a9c5b5ba55cfc1157add49b1df898f20647aa6ca8a1b0869ee40663c25860aa2",
+          "plan_id": "plan_01M48E65A0ZXG82HY4A0G3Z8TD",
+          "counts": {
+            "delete": 31,
+            "overwrite": 0,
+            "move": 212,
+            "rename": 40
+          },
+          "total_bytes": 5153960755,
+          "to_trash": true,
+          "quarantined_count": 0,
+          "sample": [
+            {
+              "op": "delete",
+              "path": "/home/ada/Downloads/Zeus/old/report-final-FINAL.pdf",
+              "to": null,
+              "size_bytes": 2202010
+            },
+            {
+              "op": "move",
+              "path": "/home/ada/Downloads/Zeus/inbox/a1b2.pdf",
+              "to": "/home/ada/Downloads/Zeus/papers/2026/chen-quantum-routing.pdf",
+              "size_bytes": 1048576
+            }
+          ],
+          "sample_omitted": 281,
+          "agent_says_blake3": null
+        }
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/ApprovalDecision",
+      "line": 587,
+      "value": {
+        "approval_id": "ap_01M465YFSGE0S6JG9A0WZWQ2F2",
+        "request_hash": "e597f6a196cf33172c91da16f2047d995f681858602741c00414358a0b5302b7",
+        "outcome": "approve",
+        "scope": "once",
+        "channel": "cli_interactive",
+        "confirmation": "gesture",
+        "idempotency_key": "tty-18422-ap_01M465YFSGE0S6JG9A0WZWQ2F2"
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/ApprovalDecision",
+      "line": 599,
+      "value": {
+        "approval_id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+        "request_hash": "09e8478513076b8b79ed19675402421a3cee9eb3d4c73487daa7bd63a55003ae",
+        "outcome": "deny",
+        "scope": "never",
+        "channel": "extension_popup"
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/DecisionRecord",
+      "line": 635,
+      "value": {
+        "approval_id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+        "revision": 1,
+        "request_hash": "09e8478513076b8b79ed19675402421a3cee9eb3d4c73487daa7bd63a55003ae",
+        "outcome": "approve",
+        "scope": "site",
+        "actor": {
+          "kind": "human",
+          "surface": "extension_popup",
+          "client_id": "cli_01M3V7ME00TBC6F3THCHXHRYWJ"
+        },
+        "decided_at": "2026-10-05T09:15:34.870Z",
+        "grant_ids": [
+          "gr_01M45NHPJP04TX6B1CJVQVQAK9"
+        ],
+        "evidence": {
+          "surface": "extension_popup",
+          "role": "native_host",
+          "client_id": "cli_01M3V7ME00TBC6F3THCHXHRYWJ",
+          "credential_kind": "human",
+          "effective_kind": "human",
+          "exe_verified": true,
+          "peer_pid": 23140,
+          "tty": "not_applicable",
+          "confirmation": "gesture",
+          "extension": {
+            "browser": "chrome",
+            "attested_extension": "abcdefghijklmnopabcdefghijklmnop",
+            "profile_id": "6f1c2a9e0b7d4e3fa5c8d2b1e0f9a7c3",
+            "connection_id": "conn_01M45MS5HRSRFGHDEW4KQXZXQN",
+            "user_gesture": true,
+            "parent_verified": true
+          }
+        }
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/DecisionRecord",
+      "line": 667,
+      "value": {
+        "approval_id": "ap_01M465YFSGE0S6JG9A0WZWQ2F2",
+        "revision": 2,
+        "request_hash": "e597f6a196cf33172c91da16f2047d995f681858602741c00414358a0b5302b7",
+        "outcome": "approve",
+        "scope": "once",
+        "actor": {
+          "kind": "human",
+          "surface": "cli_interactive",
+          "client_id": "cli_01M3V7ME01HNR0ATMA0D0XY9CW"
+        },
+        "decided_at": "2026-10-05T14:03:02.310Z",
+        "grant_ids": [
+          "gr_01M46601S6FRJ8B3Z889X861XE",
+          "gr_01M46601S6ATDHX8RHW753JHHV"
+        ],
+        "evidence": {
+          "surface": "cli_interactive",
+          "role": "cli",
+          "client_id": "cli_01M3V7ME01HNR0ATMA0D0XY9CW",
+          "credential_kind": "admin",
+          "effective_kind": "admin",
+          "exe_verified": true,
+          "peer_pid": 18422,
+          "tty": "verified",
+          "confirmation": "gesture"
+        }
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/DecisionRecord",
+      "line": 691,
+      "value": {
+        "approval_id": "ap_01M45TC900WT1S4TZV708J04JP",
+        "revision": 1,
+        "request_hash": "d34239794e9294eb22cfe01bc2132d587cdd2d9231c7e19c01ad43110428dd27",
+        "outcome": "expire",
+        "actor": {
+          "kind": "system"
+        },
+        "decided_at": "2026-10-12T10:40:00.000Z",
+        "grant_ids": [],
+        "system_reason": "deadline"
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/GrantRecord",
+      "line": 816,
+      "value": {
+        "id": "gr_01M46601S6FRJ8B3Z889X861XE",
+        "origin": "https://files.example.com",
+        "scope": "once",
+        "state": "consumed",
+        "created_at": "2026-10-05T14:03:02.310Z",
+        "expires_at": "2026-10-06T14:03:02.310Z",
+        "job_id": "job_01M465YFRJ5SCBKZ1W5VGH7GR9",
+        "approval_id": "ap_01M465YFSGE0S6JG9A0WZWQ2F2",
+        "decided_by": {
+          "kind": "human",
+          "surface": "cli_interactive",
+          "client_id": "cli_01M3V7ME01HNR0ATMA0D0XY9CW"
+        },
+        "uses": 2,
+        "last_used_at": "2026-10-05T14:05:40.000Z",
+        "revoked_at": null,
+        "renewable": false,
+        "renewal_count": 0
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/GrantRecord",
+      "line": 835,
+      "value": {
+        "id": "gr_01M45NHPJP04TX6B1CJVQVQAK9",
+        "origin": "https://portal.example.org",
+        "scope": "site",
+        "state": "active",
+        "created_at": "2026-10-05T09:15:34.870Z",
+        "expires_at": "2026-10-06T09:15:34.870Z",
+        "approval_id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+        "decided_by": {
+          "kind": "human",
+          "surface": "extension_popup"
+        },
+        "uses": 1,
+        "last_used_at": "2026-10-05T09:15:36.140Z",
+        "revoked_at": null,
+        "renewable": false,
+        "renewal_count": 0
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/GrantRecord",
+      "line": 862,
+      "value": {
+        "id": "gr_01M3RRNJM04D9FTTF4SY2YMFE8",
+        "origin": "https://portal.example.org",
+        "scope": "workflow",
+        "state": "active",
+        "created_at": "2026-09-30T09:00:00.000Z",
+        "expires_at": "2026-10-13T08:52:10.000Z",
+        "run_id": "run_01M3RRNJM041DSY9CRWM6A07TQ",
+        "approval_id": "ap_01M3RRK4G0T5PVF241SY96S258",
+        "decided_by": {
+          "kind": "human",
+          "surface": "tui"
+        },
+        "uses": 412,
+        "last_used_at": "2026-10-06T08:51:00.000Z",
+        "revoked_at": null,
+        "renewable": true,
+        "renewal_count": 1,
+        "renewed_at": "2026-10-06T08:52:10.000Z"
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "domain#/$defs/Event",
+      "line": 884,
+      "value": {
+        "seq": 52001,
+        "ts": "2026-10-06T08:52:10.000Z",
+        "type": "grant.renewed",
+        "data": {
+          "grant": {
+            "id": "gr_01M3RRNJM04D9FTTF4SY2YMFE8",
+            "origin": "https://portal.example.org",
+            "scope": "workflow",
+            "state": "active",
+            "created_at": "2026-09-30T09:00:00.000Z",
+            "expires_at": "2026-10-13T08:52:10.000Z",
+            "run_id": "run_01M3RRNJM041DSY9CRWM6A07TQ",
+            "approval_id": "ap_01M3RRK4G0T5PVF241SY96S258",
+            "decided_by": {
+              "kind": "human",
+              "surface": "tui"
+            },
+            "uses": 412,
+            "last_used_at": "2026-10-06T08:51:00.000Z",
+            "revoked_at": null,
+            "renewable": true,
+            "renewal_count": 1,
+            "renewed_at": "2026-10-06T08:52:10.000Z"
+          }
+        }
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/GrantRecord",
+      "line": 921,
+      "value": {
+        "id": "gr_01M480RFA0TEV0HDZZE5JVV8P8",
+        "origin": "https://media.example.net",
+        "scope": "site",
+        "state": "revoked",
+        "created_at": "2026-10-06T07:10:00.000Z",
+        "expires_at": "2026-10-07T07:10:00.000Z",
+        "approval_id": "ap_01M480QJZRWDM2R3XWHFKTKFF2",
+        "decided_by": {
+          "kind": "human",
+          "surface": "extension_popup"
+        },
+        "uses": 3,
+        "last_used_at": "2026-10-06T07:44:10.000Z",
+        "revoked_at": "2026-10-06T09:12:45.120Z",
+        "revoked_by": {
+          "kind": "human",
+          "surface": "tui",
+          "client_id": "cli_01M3V7ME01HNR0ATMA0D0XY9CW"
+        },
+        "revocation_reason": "kill_switch",
+        "renewable": false,
+        "renewal_count": 0
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/GrantRecord",
+      "line": 948,
+      "value": {
+        "id": "gr_01M488S650Y77C1PWHEESXYDY9",
+        "origin": "https://ads.example.net",
+        "scope": "never",
+        "state": "active",
+        "created_at": "2026-10-06T09:30:12.000Z",
+        "expires_at": null,
+        "approval_id": "ap_01M488RGNGRYGAMFEXDWRQTXS1",
+        "decided_by": {
+          "kind": "human",
+          "surface": "extension_popup"
+        },
+        "uses": 0,
+        "last_used_at": null,
+        "revoked_at": null,
+        "renewable": false,
+        "renewal_count": 0
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
+      "line": 1060,
+      "value": {
+        "v": 1,
+        "id": "e3",
+        "type": "approval.decide",
+        "body": {
+          "approval_id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
+          "request_hash": "09e8478513076b8b79ed19675402421a3cee9eb3d4c73487daa7bd63a55003ae",
+          "decision": "approve",
+          "scope": "site",
+          "confirmation": "gesture",
+          "ui": {
+            "surface": "extension_popup",
+            "user_gesture": true
+          }
+        }
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/KillSwitchRequest",
+      "line": 1181,
+      "value": {
+        "action": "engage",
+        "surface": "tui",
+        "reason": "Agent tried to rename my thesis folder"
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "approvals.v1#/$defs/KillSwitchResult",
+      "line": 1185,
+      "value": {
+        "engaged": true,
+        "changed": true,
+        "grants_revoked": 3,
+        "jobs_paused": 5,
+        "approvals_pending": 2
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "domain#/$defs/Event",
+      "line": 1190,
+      "value": {
+        "seq": 52101,
+        "ts": "2026-10-06T09:12:45.120Z",
+        "type": "grant.revoked",
+        "data": {
+          "grant_id": "gr_01M480RFA0TEV0HDZZE5JVV8P8",
+          "origin": "https://media.example.net",
+          "by": {
+            "kind": "human",
+            "surface": "tui",
+            "client_id": "cli_01M3V7ME01HNR0ATMA0D0XY9CW"
+          }
+        }
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "domain#/$defs/Event",
+      "line": 1191,
+      "value": {
+        "seq": 52104,
+        "ts": "2026-10-06T09:12:45.120Z",
+        "type": "daemon.kill_switch",
+        "data": {
+          "engaged": true,
+          "grants_revoked": 3,
+          "jobs_paused": 5,
+          "by": {
+            "kind": "human",
+            "surface": "tui",
+            "client_id": "cli_01M3V7ME01HNR0ATMA0D0XY9CW"
+          }
+        }
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "domain#/$defs/Event",
+      "line": 1424,
+      "value": {
+        "seq": 51024,
+        "ts": "2026-10-05T14:02:40.455Z",
+        "type": "approval.requested",
+        "job_id": "job_01M465ZCCT4R3CM8KB65RZRGDQ",
+        "data": {
+          "approval": {
+            "id": "ap_01M465YFSGE0S6JG9A0WZWQ2F2",
+            "kind": "session_grant",
+            "state": "pending",
+            "job_id": "job_01M465YFRJ5SCBKZ1W5VGH7GR9",
+            "origin": "https://files.example.com",
+            "allowed_scopes": [
+              "once",
+              "site",
+              "never"
+            ],
+            "reason_codes": [
+              "session.required",
+              "session.first_use"
+            ],
+            "summary": {
+              "title": "q3-ledger.csv.gz",
+              "url_redacted": "https://files.example.com/exports/2026/q3-ledger.csv.gz",
+              "total_bytes": 734003200,
+              "source_kind": "agent"
+            },
+            "created_at": "2026-10-05T14:02:11.120Z",
+            "expires_at": "2026-10-06T14:02:11.120Z",
+            "decided_at": null,
+            "request_hash": "e597f6a196cf33172c91da16f2047d995f681858602741c00414358a0b5302b7",
+            "requested_by": "cli_01M3Y1JVC0FH2XJFVSFSEEB82F",
+            "revision": 2
+          }
+        }
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "domain#/$defs/Event",
+      "line": 1425,
+      "value": {
+        "seq": 51031,
+        "ts": "2026-10-05T14:03:02.310Z",
+        "type": "approval.decided",
+        "data": {
+          "approval_id": "ap_01M465YFSGE0S6JG9A0WZWQ2F2",
+          "kind": "session_grant",
+          "outcome": "approve",
+          "scope": "once",
+          "actor": {
+            "kind": "human",
+            "surface": "cli_interactive",
+            "client_id": "cli_01M3V7ME01HNR0ATMA0D0XY9CW"
+          },
+          "grant_id": "gr_01M46601S6FRJ8B3Z889X861XE"
+        }
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "domain#/$defs/Event",
+      "line": 1426,
+      "value": {
+        "seq": 51032,
+        "ts": "2026-10-05T14:03:02.310Z",
+        "type": "grant.created",
+        "job_id": "job_01M465YFRJ5SCBKZ1W5VGH7GR9",
+        "data": {
+          "grant": {
+            "id": "gr_01M46601S6FRJ8B3Z889X861XE",
+            "origin": "https://files.example.com",
+            "scope": "once",
+            "state": "active",
+            "created_at": "2026-10-05T14:03:02.310Z",
+            "expires_at": "2026-10-06T14:03:02.310Z",
+            "job_id": "job_01M465YFRJ5SCBKZ1W5VGH7GR9",
+            "approval_id": "ap_01M465YFSGE0S6JG9A0WZWQ2F2",
+            "decided_by": {
+              "kind": "human",
+              "surface": "cli_interactive",
+              "client_id": "cli_01M3V7ME01HNR0ATMA0D0XY9CW"
+            },
+            "uses": 0,
+            "last_used_at": null,
+            "revoked_at": null,
+            "renewable": false,
+            "renewal_count": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "domain#/$defs/Event",
+      "line": 1427,
+      "value": {
+        "seq": 51033,
+        "ts": "2026-10-05T14:03:02.310Z",
+        "type": "grant.created",
+        "job_id": "job_01M465ZCCT4R3CM8KB65RZRGDQ",
+        "data": {
+          "grant": {
+            "id": "gr_01M46601S6ATDHX8RHW753JHHV",
+            "origin": "https://files.example.com",
+            "scope": "once",
+            "state": "active",
+            "created_at": "2026-10-05T14:03:02.310Z",
+            "expires_at": "2026-10-06T14:03:02.310Z",
+            "job_id": "job_01M465ZCCT4R3CM8KB65RZRGDQ",
+            "approval_id": "ap_01M465YFSGE0S6JG9A0WZWQ2F2",
+            "decided_by": {
+              "kind": "human",
+              "surface": "cli_interactive",
+              "client_id": "cli_01M3V7ME01HNR0ATMA0D0XY9CW"
+            },
+            "uses": 0,
+            "last_used_at": null,
+            "revoked_at": null,
+            "renewable": false,
+            "renewal_count": 0
+          }
+        }
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "domain#/$defs/Event",
+      "line": 1428,
+      "value": {
+        "seq": 51034,
+        "ts": "2026-10-05T14:03:02.310Z",
+        "type": "job.state_changed",
+        "job_id": "job_01M465YFRJ5SCBKZ1W5VGH7GR9",
+        "data": {
+          "from": "awaiting_approval",
+          "to": "queued",
+          "transition": "S30",
+          "cause": "approval_approved",
+          "actor": {
+            "kind": "human",
+            "surface": "cli_interactive",
+            "client_id": "cli_01M3V7ME01HNR0ATMA0D0XY9CW"
+          }
+        }
+      }
+    },
+    {
+      "source": "07-approvals-trust-surface-and-consent.md",
+      "ref": "domain#/$defs/Event",
+      "line": 1429,
+      "value": {
+        "seq": 51035,
+        "ts": "2026-10-05T14:03:02.310Z",
+        "type": "job.state_changed",
+        "job_id": "job_01M465ZCCT4R3CM8KB65RZRGDQ",
+        "data": {
+          "from": "awaiting_approval",
+          "to": "queued",
+          "transition": "S30",
+          "cause": "approval_approved",
+          "actor": {
+            "kind": "human",
+            "surface": "cli_interactive",
+            "client_id": "cli_01M3V7ME01HNR0ATMA0D0XY9CW"
           }
         }
       }

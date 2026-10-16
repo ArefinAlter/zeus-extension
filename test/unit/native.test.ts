@@ -1,3 +1,4 @@
+import { withBinding } from '../helpers/approvals';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HOST_NAME } from '../../src/lib/protocol';
 import { World } from '../harness/world';
@@ -394,7 +395,7 @@ it('connects to the registered host name', async () => {
 });
 
 function pendingApproval() {
-  return {
+  return withBinding({
     id: 'ap_01M45NHJ2AHWMXT8JVJ7BEEJ01',
     kind: 'handoff',
     state: 'pending',
@@ -411,7 +412,7 @@ function pendingApproval() {
     created_at: '2026-10-05T09:15:30.301Z',
     expires_at: '2026-10-06T09:15:30.301Z',
     decided_at: null,
-  };
+  });
 }
 
 function bigDownload(size: number) {

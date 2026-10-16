@@ -1,14 +1,16 @@
 {
   "note": "sha256 of the normalised (LF) content of each copied contract. Do not edit by hand: run npm run sync:schema.",
   "source_markdown_sha256": {
-    "02-native-messaging-v1.md": "712453187579801de9f061a61ea42b402329424c6f25650a2b6d9452f7963ce3",
-    "01-domain-model.md": "40cee42fb90951fb5156ae0e219aa045d9ea55ddadb0d60104a14b415ee663cd"
+    "02-native-messaging-v1.md": "1f0cf22de849c50a58b9e5bfd5badc581a0a75a1172a2afe23ac12bfc778383b",
+    "01-domain-model.md": "4b5a160f1d1ad8ca7f15a151104c5885649cd124acf068871d465c6686d04a43",
+    "07-approvals-trust-surface-and-consent.md": "d42d5adf1d0e5d9b790791eb1f23507846c4b081115278178a9e560a9b0f3497"
   },
   "files": {
-    "native-messaging.v1.schema.json": "d104dc67b08c605fb09ca5e0c74912e2a4797ab3eed84818ed02b8ad7f91b2b2",
-    "common.schema.json": "c007e04f8feaab6fc0307eb5b9024f0733ae8de983cbd8733e841045408321eb",
-    "domain.schema.json": "b521f009565fdb0375cb484ae35a7bb700435e8a5cd1d14a9c752d65457a6f6e",
+    "native-messaging.v1.schema.json": "5a3e8a77ee5933f560d108effd7bbefdcf2915e4d6525dd4de4fceca07f38ef5",
+    "common.schema.json": "fbda414d30dfa9373591ba68a12039327df8ea5a96203d3a926323dce841b8be",
+    "approvals.v1.schema.json": "b64935e2b33346a7bcb17763d8d05f37fc668fbb80e7fe5a0500e2550da2d437",
+    "domain.schema.json": "5aab32b3885e836152b66ab5c15e8960b7752559c9fae744d68821e97a4f9e9a",
     "redaction-vectors.v1.json": "8f937e2533d5c195b071b4dec06d8f54474bb5090785247500b60fa2e239a75d",
-    "examples/spec-examples.json": "9df8579eb4a0aab7d1f21d1f20adf8e12ffa7fc9549bfccadbbac608edae285e"
+    "examples/spec-examples.json": "f8905401b23624ca6a56e7db194fcf574d5384c49db0c5d1f33135af661734ff"
   }
 }

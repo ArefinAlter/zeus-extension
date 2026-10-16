@@ -60,7 +60,7 @@ export type BodyPlan = { mode: 'stream'; limit: number | null } | { mode: 'hold'
 /**
  * The daemon classifies the status; the extension only guarantees it never labels bytes with
  * offsets they do not have. A 206 streams. A 200 to a ranged request that starts at 0 streams the
- * first `length` bytes; a 200 to a ranged request that starts later (the server ignored Range)
+ * full body under the credit window; a 200 to a ranged request that starts later (the server ignored Range)
  * holds, because its bytes would carry the wrong offsets. Anything that is not a success holds
  * and waits for the daemon's cancel.
  */
@@ -68,7 +68,7 @@ export function planBody(status: number, range: RangeBody['range']): BodyPlan {
   if (status === 206) return { mode: 'stream', limit: range === null ? null : range.length };
   if (status === 200) {
     if (range === null) return { mode: 'stream', limit: null };
-    return range.offset === 0 ? { mode: 'stream', limit: range.length } : { mode: 'hold' };
+    return range.offset === 0 ? { mode: 'stream', limit: null } : { mode: 'hold' };
   }
   return { mode: 'hold' };
 }
@@ -295,7 +295,9 @@ export class FetchProxy {
     try {
       res = await this.deps.env.fetch(b.url, {
         credentials: 'include',
-        redirect: 'follow',
+        // A redirect can attach the browser's cookies before script sees its destination.
+        // Until redirects can be authorized before following, refuse every redirect chain.
+        redirect: 'error',
         cache: 'no-store',
         headers,
         signal: stream.controller.signal,

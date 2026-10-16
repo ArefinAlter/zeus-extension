@@ -3,7 +3,7 @@
 // inside the click handler, which is the only place a browser lets that prompt appear, and only
 // then sends the decision, attested with the gesture that the browser's own user-activation flag
 // confirmed. Text from remote servers is shown with textContent only.
-import { needsBrowserAccess } from '../lib/approval';
+import { approvalBinding, bindCode, needsBrowserAccess, normalizeBindCode } from '../lib/approval';
 import { t, errorText } from '../lib/messages';
 import { hostPattern } from '../lib/origin';
 import type { ExtApi } from '../lib/platform';
@@ -41,6 +41,9 @@ export function mountPopup(api: ExtApi): { refresh(): Promise<void> } {
   let notice: string | null = null;
   let busy = false;
   let refreshTimer: ReturnType<typeof setTimeout> | null = null;
+  const firstShown = new Map<string, number>();
+  const typedCodes = new Map<string, string>();
+  const approvalCards = new Map<string, { signature: string; element: HTMLElement }>();
 
   async function send<T = unknown>(request: UiRequest): Promise<UiResponse<T>> {
     try {
@@ -92,6 +95,27 @@ export function mountPopup(api: ExtApi): { refresh(): Promise<void> } {
     // Captured before any await: the click is the gesture, and only the browser's own flag counts.
     const gesture = event.isTrusted ? api.env.isUserActive() : false;
     if (busy) return;
+    const binding = approvalBinding(approval);
+    if (!binding) {
+      showNotice(tr('errApprovalIntegrity'));
+      return;
+    }
+    const required =
+      button.decision === 'deny' ? 'gesture' : binding.confirmation[button.scope ?? 'approve'];
+    if (
+      button.decision === 'approve' &&
+      Date.now() - (firstShown.get(binding.hash) ?? Date.now()) < 750
+    )
+      return;
+    const typedCode = typedCodes.get(binding.hash) ?? '';
+    if (
+      required === 'typed_code' &&
+      normalizeBindCode(typedCode) !== normalizeBindCode(binding.code)
+    ) {
+      showNotice(tr('errConfirmationCode'));
+      return;
+    }
+    if (required !== 'gesture' && required !== 'typed_code') return;
     busy = true;
     showNotice(null);
     try {
@@ -109,6 +133,10 @@ export function mountPopup(api: ExtApi): { refresh(): Promise<void> } {
       const answer = await send({
         cmd: 'approval.decide',
         approval_id: approval.id,
+        request_hash: binding.hash,
+        revision: binding.revision,
+        confirmation: required,
+        ...(required === 'typed_code' ? { typed_code: typedCode } : {}),
         decision: button.decision,
         user_gesture: gesture,
         surface: 'extension_popup',
@@ -145,7 +173,73 @@ export function mountPopup(api: ExtApi): { refresh(): Promise<void> } {
     return h('div', { class: 'fact' }, h('dt', {}, tr(labelKey)), h('dd', {}, value));
   }
 
+  function boundFactRows(value: unknown, path: string[] = []): HTMLElement[] {
+    const labels: Record<string, string> = {
+      requester: 'Asked by',
+      client_id: 'Client',
+      label: 'Name',
+      role: 'Channel',
+      kind: 'Type',
+      origin: 'Website',
+      first_time_for_origin: 'First use of this website',
+      transfer: 'Files',
+      job_ids: 'Downloads',
+      total_bytes: 'Total size',
+      unknown_size_count: 'Files with unknown size',
+      dest_dirs: 'Save to',
+      dest_dirs_omitted: 'Other folders',
+      items: 'Files to fetch',
+      items_omitted: 'Other files',
+      untrusted_name: 'Website supplied name',
+      untrusted_url: 'Website supplied link',
+      browser: 'Browser',
+      name: 'Name',
+      incognito: 'Private window',
+      scope_hint: 'Requested duration',
+      run_id: 'Plan run',
+      job_id: 'Download',
+      bytes_done: 'Already saved',
+      bytes_total: 'Total size',
+      error: 'Problem',
+      code: 'Reason',
+      class: 'Category',
+      refreshes_used: 'Link refreshes used',
+    };
+    const hidden = new Set([
+      't',
+      'approval_id',
+      'revision',
+      'issued_at',
+      'expires_at',
+      'confirmation',
+      'allowed_scopes',
+      'reason_codes',
+      'agent_says_blake3',
+    ]);
+    if (Array.isArray(value))
+      return value.flatMap((child, i) => boundFactRows(child, [...path, String(i + 1)]));
+    if (typeof value === 'object' && value !== null)
+      return Object.entries(value).flatMap(([key, child]) =>
+        path.length === 0 && hidden.has(key)
+          ? []
+          : boundFactRows(child, [...path, labels[key] ?? key.replaceAll('_', ' ')]),
+      );
+    const label = path.join(' · ');
+    const text =
+      value === null ? 'Not known' : typeof value === 'string' ? value : JSON.stringify(value);
+    return [
+      h('div', { class: 'fact' }, h('dt', {}, label), h('dd', {}, displayText(text, 16_384))),
+    ];
+  }
+
   function approvalCard(approval: Approval, snap: Snapshot): HTMLElement {
+    // Progress updates must not rebuild unchanged review facts or endlessly restart arming.
+    // A changed request, busy state or expiry minute creates a genuinely new review rendering.
+    const signature = JSON.stringify({ approval, busy, minute: Math.floor(snap.now_ms / 60_000) });
+    const cached = approvalCards.get(approval.id);
+    if (cached?.signature === signature) return cached.element;
+    const binding = approvalBinding(approval);
+    if (binding) firstShown.set(binding.hash, Date.now());
     const title = displayText(approval.summary.title, 100);
     const origin = approval.origin ?? '';
     const needsAccess = needsBrowserAccess(approval);
@@ -169,34 +263,91 @@ export function mountPopup(api: ExtApi): { refresh(): Promise<void> } {
         ? []
         : [fact('labelRequestedBy', displayText(approval.summary.requested_by, 80))]),
     );
-    return h(
+    const card = h(
       'article',
       { class: 'card approval', 'aria-label': tr(approvalKindKey(approval.kind)) },
       h('h3', {}, tr(approvalKindKey(approval.kind))),
       facts,
+      binding
+        ? h(
+            'div',
+            { class: 'binding-facts' },
+            h(
+              'p',
+              {},
+              `${tr('labelRequestCode')}: ${bindCode(binding.hash)} · ${binding.hash.slice(0, 16)}`,
+            ),
+            h('dl', { class: 'facts bound-facts' }, ...boundFactRows(binding.facts)),
+            binding.agentSays
+              ? h(
+                  'blockquote',
+                  { class: 'agent-says' },
+                  h('strong', {}, tr('labelAgentText')),
+                  h('p', {}, displayText(binding.agentSays, 280)),
+                )
+              : null,
+            Object.values(binding.confirmation).includes('typed_code')
+              ? h(
+                  'label',
+                  {},
+                  tr('labelConfirmationCode'),
+                  h('input', {
+                    type: 'text',
+                    autocomplete: 'off',
+                    spellcheck: 'false',
+                    'aria-label': tr('labelConfirmationCode'),
+                    value: typedCodes.get(binding.hash) ?? '',
+                    oninput: (event) =>
+                      typedCodes.set(binding.hash, (event.target as HTMLInputElement).value),
+                  }),
+                )
+              : null,
+          )
+        : h('p', { class: 'notice' }, tr('errApprovalIntegrity')),
       reasons.length > 0 ? h('ul', { class: 'reasons' }, ...reasons) : null,
       needsAccess ? h('p', { class: 'notice' }, tr('cookieNotice')) : null,
       h('p', { class: 'muted' }, tr('labelExpires', formatDuration(Math.max(0, expiresMs)))),
       h(
         'div',
         { class: 'actions' },
-        ...decisionButtons(approval).map((button) =>
-          h(
-            'button',
-            {
-              type: 'button',
-              class: 'btn',
-              'data-style': button.style,
-              disabled: busy,
-              onclick: (event) => {
-                void decide(approval, button, event);
+        ...decisionButtons(approval)
+          .filter(
+            (button) =>
+              binding !== null &&
+              (button.decision === 'deny' ||
+                ['gesture', 'typed_code'].includes(
+                  String(binding.confirmation[button.scope ?? 'approve']),
+                )),
+          )
+          .map((button) => {
+            const control = h(
+              'button',
+              {
+                type: 'button',
+                class: 'btn',
+                'data-style': button.style,
+                disabled:
+                  busy ||
+                  (button.decision === 'approve' &&
+                    binding !== null &&
+                    Date.now() - (firstShown.get(binding.hash) ?? Date.now()) < 750),
+                onclick: (event) => {
+                  void decide(approval, button, event);
+                },
               },
-            },
-            tr(button.labelKey),
-          ),
-        ),
+              tr(button.labelKey),
+            );
+            if (button.decision === 'approve' && !busy) {
+              setTimeout(() => {
+                if (control.isConnected && !busy) control.disabled = false;
+              }, 760);
+            }
+            return control;
+          }),
       ),
     );
+    approvalCards.set(approval.id, { signature, element: card });
+    return card;
   }
 
   function accessCard(origin: string): HTMLElement {
@@ -274,6 +425,9 @@ export function mountPopup(api: ExtApi): { refresh(): Promise<void> } {
     const root = document.getElementById('app');
     if (!root || !snapshot) return;
     const snap = snapshot;
+    const focused = root.contains(document.activeElement) ? document.activeElement : null;
+    const currentApprovals = new Set(snap.approvals.map((approval) => approval.id));
+    for (const id of approvalCards.keys()) if (!currentApprovals.has(id)) approvalCards.delete(id);
     clear(root);
 
     const banner = linkBanner(snap.link);
@@ -305,6 +459,30 @@ export function mountPopup(api: ExtApi): { refresh(): Promise<void> } {
         ),
       );
     }
+    if (snap.link.capabilities.includes('kill_switch'))
+      root.append(
+        h(
+          'div',
+          { class: 'actions' },
+          ...(['engage', 'release'] as const).map((action) =>
+            h(
+              'button',
+              {
+                type: 'button',
+                class: 'btn',
+                onclick: (event) => {
+                  void command({
+                    cmd: 'kill_switch',
+                    action,
+                    user_gesture: event.isTrusted && api.env.isUserActive(),
+                  });
+                },
+              },
+              tr(action === 'engage' ? 'btnStopAll' : 'btnReleaseStop'),
+            ),
+          ),
+        ),
+      );
     if (notice !== null) root.append(h('p', { class: 'notice', role: 'alert' }, notice));
 
     const needAccess = snap.consent.filter((c) => !c.has_browser_permission).map((c) => c.origin);
@@ -379,6 +557,8 @@ export function mountPopup(api: ExtApi): { refresh(): Promise<void> } {
     ) {
       root.append(h('p', { class: 'empty' }, tr('emptyState')));
     }
+    if (focused instanceof HTMLInputElement && focused.isConnected)
+      focused.focus({ preventScroll: true });
   }
 
   // ---------- start ----------

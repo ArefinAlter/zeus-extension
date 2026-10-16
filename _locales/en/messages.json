@@ -508,5 +508,26 @@
   },
   "optBrowserPermissionNo": {
     "message": "browser access missing"
+  },
+  "errApprovalIntegrity": {
+    "message": "This request failed an integrity check. Refresh or update Zeus before deciding."
+  },
+  "errConfirmationCode": {
+    "message": "Type the confirmation code shown on this request."
+  },
+  "labelRequestCode": {
+    "message": "Request code"
+  },
+  "labelAgentText": {
+    "message": "AI says — untrusted text, not checked by Zeus"
+  },
+  "labelConfirmationCode": {
+    "message": "Type the request code to confirm"
+  },
+  "btnStopAll": {
+    "message": "Stop all work"
+  },
+  "btnReleaseStop": {
+    "message": "Release stop (keep jobs paused)"
   }
 }

@@ -6,7 +6,7 @@
 // any other extension.
 import type { Env } from '../lib/env';
 import { ZeusError } from '../lib/errors';
-import { needsBrowserAccess } from '../lib/approval';
+import { approvalBinding, needsBrowserAccess, normalizeBindCode } from '../lib/approval';
 import { hostPattern } from '../lib/origin';
 import type { Approval, SessionGrant } from '../lib/protocol';
 import type { UiError } from '../lib/ui-protocol';
@@ -19,6 +19,10 @@ type Scope = 'once' | 'site' | 'workflow' | 'never';
 
 export interface DecideRequest {
   approval_id: string;
+  request_hash: string;
+  revision: number;
+  confirmation: 'gesture' | 'typed_code';
+  typed_code?: string;
   decision: 'approve' | 'deny';
   scope?: Scope;
   user_gesture: boolean;
@@ -55,7 +59,7 @@ export class ApprovalCenter {
       const expires = Date.parse(a.expires_at);
       if (!Number.isNaN(expires) && expires <= now) this.pending.delete(id);
     }
-    return [...this.pending.values()].sort((a, b) => a.created_at.localeCompare(b.created_at));
+    return [...this.pending.values()].sort((a, b) => a.expires_at.localeCompare(b.expires_at));
   }
 
   size(): number {
@@ -75,6 +79,26 @@ export class ApprovalCenter {
   // ---------- from the daemon ----------
 
   async onPending(approval: Approval): Promise<void> {
+    // Domain events intentionally omit facts. Retrieve the full request before displaying it.
+    if (!('facts' in approval)) {
+      const response = await this.link.request('approval.list', { limit: 100 });
+      if (response.type === 'approval.list.response') {
+        for (const full of response.body.approvals) await this.onPending(full);
+      }
+      return;
+    }
+    const previous = this.pending.get(approval.id);
+    const incomingBinding = approvalBinding(approval);
+    const previousBinding = previous ? approvalBinding(previous) : null;
+    if (
+      previousBinding &&
+      incomingBinding &&
+      (incomingBinding.revision < previousBinding.revision ||
+        (incomingBinding.revision === previousBinding.revision &&
+          incomingBinding.hash !== previousBinding.hash))
+    )
+      return;
+
     if (approval.state !== 'pending') {
       this.onDecided(approval.id);
       return;
@@ -82,7 +106,7 @@ export class ApprovalCenter {
     const known = this.pending.has(approval.id);
     this.pending.set(approval.id, approval);
     const shownBefore = await this.store.wasApprovalDisplayed(approval.id);
-    await this.store.markApprovalDisplayed(approval.id);
+    if (incomingBinding) await this.store.markApprovalDisplayed(approval.id);
     this.hooks.changed();
     if (!known && !shownBefore) await this.notifier.approvalPending(approval);
   }
@@ -133,6 +157,13 @@ export class ApprovalCenter {
     if (!this.link.hasCapability('approvals'))
       return fail('nm.capability_missing', 'The daemon cannot take decisions from the browser.');
 
+    const binding = approvalBinding(approval);
+    if (!binding || req.request_hash !== binding.hash || req.revision !== binding.revision) {
+      return fail(
+        'policy.request_hash_mismatch',
+        'This request changed or failed its integrity check. Review it again.',
+      );
+    }
     if (req.decision === 'approve') {
       if (req.scope === 'never')
         return fail('nm.schema_violation', 'Approve cannot carry the never scope.');
@@ -142,6 +173,15 @@ export class ApprovalCenter {
       ) {
         return fail('nm.schema_violation', 'That scope is not allowed for this approval.');
       }
+      const required = binding.confirmation[req.scope ?? 'approve'];
+      if (required === 'os_auth' || (required !== 'gesture' && required !== 'typed_code'))
+        return fail('policy.human_required', 'This request needs a newer trust surface.');
+      if (
+        required === 'typed_code' &&
+        (req.confirmation !== 'typed_code' ||
+          normalizeBindCode(req.typed_code ?? '') !== normalizeBindCode(binding.code))
+      )
+        return fail('policy.human_required', 'Type the displayed confirmation code.');
       if (
         needsBrowserAccess(approval) &&
         approval.origin !== undefined &&
@@ -160,13 +200,19 @@ export class ApprovalCenter {
     try {
       response = await this.link.request('approval.decide', {
         approval_id: approval.id,
+        request_hash: binding.hash,
+        confirmation: req.confirmation,
         decision: req.decision,
         ...(req.scope === undefined ? {} : { scope: req.scope }),
         ui: { surface: req.surface, user_gesture: true },
       });
     } catch (e) {
       if (e instanceof ZeusError) {
-        if (e.envelope.code === 'nm.conflict' || e.envelope.code === 'nm.not_found')
+        if (
+          e.envelope.code === 'nm.conflict' ||
+          e.envelope.code === 'nm.not_found' ||
+          e.envelope.code === 'policy.request_hash_mismatch'
+        )
           this.onDecided(approval.id);
         return fail(e.envelope.code, e.envelope.message);
       }
@@ -175,8 +221,25 @@ export class ApprovalCenter {
     if (response.type !== 'approval.decide.response')
       return fail('nm.internal', 'Unexpected answer to the decision.');
 
-    this.pending.delete(approval.id);
+    const decidedBinding = approvalBinding(response.body.approval);
+    if (
+      !decidedBinding ||
+      decidedBinding.hash !== binding.hash ||
+      decidedBinding.revision !== binding.revision
+    )
+      return fail(
+        'policy.request_hash_mismatch',
+        'The decision response does not match the request you reviewed.',
+      );
     const grant = response.body.grant ?? null;
+    if (
+      grant &&
+      (grant.approval_id !== approval.id ||
+        grant.origin !== approval.origin ||
+        grant.decided_by.kind !== 'human')
+    )
+      return fail('nm.conflict', 'The permission does not match this approval.');
+    this.pending.delete(approval.id);
     if (grant) await this.recordGrant(grant, 'ui', approval);
     this.hooks.changed();
     return { ok: true, approval: response.body.approval, grant };

@@ -1,3 +1,4 @@
+import { withBinding } from '../helpers/approvals';
 // @vitest-environment happy-dom
 // The popup and options pages run against the real background worker (wired to a scripted daemon
 // in the World harness) in a DOM environment: what a person sees, and what a click sends.
@@ -27,7 +28,7 @@ afterEach(() => {
 });
 
 function pendingApproval(over: Record<string, unknown> = {}): Record<string, unknown> {
-  return {
+  return withBinding({
     id: approvalId(1),
     kind: 'handoff',
     state: 'pending',
@@ -45,7 +46,7 @@ function pendingApproval(over: Record<string, unknown> = {}): Record<string, unk
     expires_at: '2026-10-06T09:15:30.301Z',
     decided_at: null,
     ...over,
-  };
+  });
 }
 
 const app = (): HTMLElement => document.getElementById('app') as HTMLElement;
@@ -76,14 +77,35 @@ async function flush(w: World): Promise<void> {
 async function showApproval(w: World, over: Record<string, unknown> = {}): Promise<void> {
   w.daemon.send('approval.pending', { approval: pendingApproval(over) });
   await flush(w);
+  await w.advance(800);
 }
 
 describe('popup: approvals', () => {
+  it('preserves an unchanged armed review across progress refreshes and rearms changed facts', async () => {
+    const w = await new World().boot();
+    await showApproval(w);
+    const popup = mountPopup(w.ext.api);
+    await popup.refresh();
+    const original = button('Allow once');
+    expect(original.disabled).toBe(true);
+    await w.advance(800);
+    expect(original.disabled).toBe(false);
+    await popup.refresh();
+    expect(button('Allow once')).toBe(original);
+    expect(original.disabled).toBe(false);
+    w.daemon.send('approval.pending', { approval: pendingApproval({ revision: 2 }) });
+    await flush(w);
+    await popup.refresh();
+    expect(button('Allow once')).not.toBe(original);
+    expect(button('Allow once').disabled).toBe(true);
+  });
+
   it('shows the daemon-computed facts and one button per allowed decision', async () => {
     const w = await new World().boot();
     await showApproval(w);
     const popup = mountPopup(w.ext.api);
     await popup.refresh();
+    await w.advance(800);
     expect(document.getElementById('status')?.textContent).toBe('Connected to Zeus');
     expect(text()).toContain('Finish a failed download');
     expect(text()).toContain('dataset-v3.tar.zst');
@@ -135,6 +157,7 @@ describe('popup: approvals', () => {
     await showApproval(w);
     const popup = mountPopup(w.ext.api);
     await popup.refresh();
+    await w.advance(800);
 
     trustedClick(button('Allow this site for 24 hours'));
     await flush(w);
@@ -143,7 +166,7 @@ describe('popup: approvals', () => {
       { permissions: ['cookies'], origins: [`${ORIGIN}/*`] },
     ]);
     const decide = w.daemon.sent('approval.decide')[0];
-    expect(decide?.body).toEqual({
+    expect(decide?.body).toMatchObject({
       approval_id: approvalId(1),
       decision: 'approve',
       scope: 'site',
@@ -159,6 +182,7 @@ describe('popup: approvals', () => {
     await showApproval(w);
     const popup = mountPopup(w.ext.api);
     await popup.refresh();
+    await w.advance(800);
     trustedClick(button('Allow once'));
     await flush(w);
     expect(w.daemon.sent('approval.decide')).toHaveLength(0);
@@ -171,6 +195,7 @@ describe('popup: approvals', () => {
     await showApproval(w);
     const popup = mountPopup(w.ext.api);
     await popup.refresh();
+    await w.advance(800);
     button('Don’t allow').click(); // element.click() is not a trusted event
     await flush(w);
     expect(w.daemon.sent('approval.decide')).toHaveLength(0);
@@ -195,6 +220,7 @@ describe('popup: approvals', () => {
     await showApproval(w);
     const popup = mountPopup(w.ext.api);
     await popup.refresh();
+    await w.advance(800);
     trustedClick(button('Never for this site'));
     await flush(w);
     expect(w.daemon.sent('approval.decide')[0]?.body).toMatchObject({
@@ -215,6 +241,7 @@ describe('popup: approvals', () => {
     });
     const popup = mountPopup(w.ext.api);
     await popup.refresh();
+    await w.advance(800);
     expect(app().querySelector('img')).toBeNull();
     expect(app().querySelector('b')).toBeNull();
     expect(text()).toContain('<img src=x onerror=alert(1)>');
@@ -233,6 +260,7 @@ describe('popup: approvals', () => {
     });
     const popup = mountPopup(w.ext.api);
     await popup.refresh();
+    await w.advance(800);
     expect(buttons().map((b) => b.textContent)).toEqual(['Approve', 'Don’t allow']);
     expect(text()).toContain('A download keeps failing');
     expect(text()).toContain('Zeus used up its automatic retries.');
@@ -248,6 +276,7 @@ describe('popup: status and lists', () => {
     await w.advance(300);
     const popup = mountPopup(w.ext.api);
     await popup.refresh();
+    await w.advance(800);
     expect(document.getElementById('status')?.textContent).toBe('Zeus app not found');
     expect(document.getElementById('status')?.dataset.tone).toBe('error');
     expect(text()).toContain('run: zeus native-host install');
@@ -261,6 +290,7 @@ describe('popup: status and lists', () => {
     const w = await new World().boot();
     const popup = mountPopup(w.ext.api);
     await popup.refresh();
+    await w.advance(800);
     expect(text()).toContain('Nothing needs your attention.');
   });
 
@@ -337,6 +367,7 @@ describe('popup: status and lists', () => {
     await flush(w);
     const popup = mountPopup(w.ext.api);
     await popup.refresh();
+    await w.advance(800);
     expect(text()).toContain('report.pdf');
     expect(text()).toContain('Downloading');
     expect(text()).toContain('512 B / 1.00 KiB');
@@ -367,6 +398,7 @@ describe('popup: status and lists', () => {
     });
     const popup = mountPopup(w.ext.api);
     await popup.refresh();
+    await w.advance(800);
     expect(text()).toContain(
       'The browser blocked this file for safety. Zeus will not override that.',
     );
@@ -375,6 +407,7 @@ describe('popup: status and lists', () => {
     await flush(w);
     expect(w.daemon.sent('handoff.offer')).toHaveLength(1);
     await popup.refresh();
+    await w.advance(800);
     expect(text()).toContain('Sent to Zeus');
   });
 
@@ -389,6 +422,7 @@ describe('popup: status and lists', () => {
     });
     const popup = mountPopup(w.ext.api);
     await popup.refresh();
+    await w.advance(800);
     expect(text()).toContain('Browser access needed');
     trustedClick(button(`Allow browser access to ${ORIGIN}`));
     await flush(w);

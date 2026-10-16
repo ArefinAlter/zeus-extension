@@ -28,7 +28,7 @@ async function buildTarget(target) {
   rmSync(out, { recursive: true, force: true });
   mkdirSync(out, { recursive: true });
 
-  await build({
+  const bundled = await build({
     entryPoints: {
       'background/index': join(repoRoot, 'src/background/index.ts'),
       'popup/popup': join(repoRoot, 'src/popup/popup.ts'),
@@ -36,6 +36,7 @@ async function buildTarget(target) {
     },
     outdir: out,
     bundle: true,
+    metafile: true,
     format: 'iife', // no module loader, no dynamic import: one self-contained file per entry
     platform: 'browser',
     target: ESBUILD_TARGET[target],
@@ -48,6 +49,11 @@ async function buildTarget(target) {
       __ZEUS_TARGET__: JSON.stringify(target),
     },
   });
+  for (const file of Object.keys(bundled.metafile.inputs)) {
+    const normalized = file.replaceAll('\\', '/');
+    if (normalized.includes('node_modules/') && !normalized.includes('node_modules/@noble/hashes/'))
+      throw new Error(`Unapproved third-party code in browser bundle: ${file}`);
+  }
 
   /** @type {[string, string][]} */
   const staticFiles = [
@@ -56,6 +62,7 @@ async function buildTarget(target) {
     ['src/options/options.html', 'options/options.html'],
     ['src/options/options.css', 'options/options.css'],
     ['src/shared/ui.css', 'shared/ui.css'],
+    ['THIRD_PARTY_NOTICES.md', 'THIRD_PARTY_NOTICES.md'],
   ];
   for (const [from, to] of staticFiles) {
     mkdirSync(join(out, to, '..'), { recursive: true });

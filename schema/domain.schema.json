@@ -219,7 +219,15 @@
         "bytes_total": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" }, { "type": "null" }] },
         "last_error": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/ErrorEnvelope" }, { "type": "null" }] },
         "created_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
-        "updated_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }
+        "updated_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
+        "state_seq": {
+          "description": "seq of the durable event that put the job into its current state (job.created or job.state_changed). Filled by the daemon API (05 section 9.2).",
+          "$ref": "https://zeus.invalid/schema/common#/$defs/EventSeq"
+        },
+        "rate_ewma": { "description": "progress.rate_ewma (bytes per second).", "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        "eta_s": { "description": "progress.eta_s.", "type": ["integer", "null"], "minimum": 0 },
+        "path": { "description": "result.path; completed jobs only.", "type": "string", "maxLength": 4096 },
+        "sha256": { "description": "result.sha256; completed jobs only.", "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256" }
       }
     },
     "SessionGrant": {
@@ -241,7 +249,19 @@
         "last_used_at": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }, { "type": "null" }] },
         "revoked_at": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }, { "type": "null" }] },
         "renewable": { "type": "boolean" },
-        "renewal_count": { "type": "integer", "minimum": 0 }
+        "renewal_count": { "type": "integer", "minimum": 0 },
+        "renewed_at": {
+          "description": "Instant of the latest renewal (07 section 6.3); null or absent when never renewed.",
+          "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }, { "type": "null" }]
+        },
+        "revoked_by": {
+          "description": "Who revoked the grant; present when state is revoked (07 section 6.4).",
+          "$ref": "#/$defs/Actor"
+        },
+        "revocation_reason": {
+          "description": "Why the grant was revoked: a human request, the kill switch, or a never entry for the same origin.",
+          "enum": ["user_request", "kill_switch", "origin_blocked"]
+        }
       }
     },
     "Actor": {
@@ -249,7 +269,7 @@
       "required": ["kind"],
       "properties": {
         "kind": { "enum": ["human", "agent", "cli", "extension", "engine", "policy", "system"] },
-        "surface": { "enum": ["extension_popup", "extension_options", "extension_sidepanel", "extension_notification", "tui", "cli_interactive", "mcp", "a2a", "jsonrpc"] },
+        "surface": { "enum": ["extension_popup", "extension_options", "extension_sidepanel", "extension_notification", "tui", "cli_interactive", "gui", "os_notification", "mcp", "a2a", "jsonrpc"] },
         "client_id": { "type": "string", "maxLength": 128 }
       }
     },
@@ -257,7 +277,7 @@
       "enum": ["handoff", "session_grant", "retry_escalation", "policy_exception", "workflow_plan", "destructive_op"]
     },
     "Approval": {
-      "description": "A pending or decided request for a human decision. Only a human trust surface may decide one (docs/spec/07-approvals.md).",
+      "description": "A pending or decided request for a human decision. Only a human trust surface may decide one (docs/spec/07-approvals-trust-surface-and-consent.md). The members request_hash, requested_by, revision, facts and agent_says are added by spec 07: events carry the entity without facts and agent_says; trust surfaces, and the client that caused the approval, receive the full ApprovalRequest (approvals.v1.schema.json, 07 section 4.8).",
       "type": "object",
       "required": ["id", "kind", "state", "allowed_scopes", "reason_codes", "summary", "created_at", "expires_at"],
       "properties": {
@@ -267,6 +287,30 @@
         "job_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/JobId" },
         "run_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/RunId" },
         "origin": { "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" },
+        "request_hash": {
+          "description": "Daemon-computed BLAKE3 over the JCS form of facts (07 section 4.6). A decision must name it.",
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256"
+        },
+        "requested_by": {
+          "description": "Credential id of the requesting client, or the literal daemon for approvals the daemon raised itself. Set by the daemon from the authenticated connection.",
+          "type": "string",
+          "maxLength": 128
+        },
+        "revision": {
+          "description": "Starts at 1 and increases each time the daemon amends the pending approval (a job joins or leaves a batch); every revision has its own request_hash (07 section 4.7).",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "facts": {
+          "description": "The exact daemon-computed facts the request_hash covers (approvals.v1.schema.json RequestFacts). Present only in the full ApprovalRequest.",
+          "type": "object"
+        },
+        "agent_says": {
+          "description": "Free text supplied by the requester, sanitised, at most 280 characters. Untrusted: shown only in a separate, labelled field (07 section 4.5). Present only in the full ApprovalRequest.",
+          "type": "string",
+          "maxLength": 280
+        },
         "allowed_scopes": { "type": "array", "items": { "$ref": "#/$defs/GrantScope" }, "uniqueItems": true },
         "reason_codes": {
           "type": "array",
@@ -328,7 +372,8 @@
         "grant_expired",
         "policy",
         "recovered",
-        "crash_loop"
+        "crash_loop",
+        "workflow_runner"
       ]
     },
     "SuggestedAction": {
@@ -368,6 +413,7 @@
         { "$ref": "#/$defs/EvGrantCreated" },
         { "$ref": "#/$defs/EvGrantRevoked" },
         { "$ref": "#/$defs/EvGrantExpired" },
+        { "$ref": "#/$defs/EvGrantRenewed" },
         { "$ref": "#/$defs/EvApprovalRequested" },
         { "$ref": "#/$defs/EvApprovalDecided" },
         { "$ref": "#/$defs/EvJobVerified" },
@@ -375,7 +421,8 @@
         { "$ref": "#/$defs/EvJobCompleted" },
         { "$ref": "#/$defs/EvJobFailed" },
         { "$ref": "#/$defs/EvDaemonStarted" },
-        { "$ref": "#/$defs/EvDaemonStopping" }
+        { "$ref": "#/$defs/EvDaemonStopping" },
+        { "$ref": "#/$defs/EvDaemonKillSwitch" }
       ]
     },
 
@@ -587,6 +634,17 @@
         }
       ]
     },
+    "EvGrantRenewed": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "grant.renewed" },
+            "data": { "type": "object", "required": ["grant"], "properties": { "grant": { "$ref": "#/$defs/SessionGrant" } } }
+          }
+        }
+      ]
+    },
     "EvApprovalRequested": {
       "allOf": [
         { "$ref": "#/$defs/EventBase" },
@@ -750,6 +808,26 @@
               "type": "object",
               "required": ["reason"],
               "properties": { "reason": { "enum": ["user_request", "signal", "upgrade", "fatal_error"] } }
+            }
+          }
+        }
+      ]
+    },
+    "EvDaemonKillSwitch": {
+      "allOf": [
+        { "$ref": "#/$defs/EventBase" },
+        {
+          "properties": {
+            "type": { "const": "daemon.kill_switch" },
+            "data": {
+              "type": "object",
+              "required": ["engaged", "grants_revoked", "jobs_paused", "by"],
+              "properties": {
+                "engaged": { "type": "boolean", "description": "True after an engage, false after a release (07 section 8)." },
+                "grants_revoked": { "type": "integer", "minimum": 0 },
+                "jobs_paused": { "type": "integer", "minimum": 0 },
+                "by": { "$ref": "#/$defs/Actor" }
+              }
             }
           }
         }

@@ -20,6 +20,11 @@
     },
     "ConnectionId": { "type": "string", "pattern": "^conn_[0-7][0-9A-HJKMNP-TV-Z]{25}$" },
     "ChainId": { "type": "string", "pattern": "^chain_[0-7][0-9A-HJKMNP-TV-Z]{25}$" },
+    "ArtifactId": {
+      "description": "One artifact record (13). Minted by the artifact store instance that holds the record; local to that store.",
+      "type": "string",
+      "pattern": "^art_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
     "EventSeq": {
       "description": "Monotonic event sequence number. Textual form (URIs, cursors) is ev_<decimal>.",
       "type": "integer",

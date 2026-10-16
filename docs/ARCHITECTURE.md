@@ -97,6 +97,6 @@ The worker opens the native port at start (a connected port keeps a Chrome 105+ 
 
 ## Known limits
 
-- A credentialed `fetch` that the origin redirects to a CDN without CORS headers and without the user's host permission for the CDN fails with `fetch.network_error`. Extending host access across redirects needs a user gesture and is a product decision (see open issues in the specs).
+- Proxy requests use `redirect: error`: every redirect chain fails before a target request. This is a deliberate restriction until destination consent can be checked before the browser attaches cookies. A generic `fetch.network_error` does not distinguish a redirect rejection from network failure. Resolve a safe final URL first; no automatic redirect escalation is implemented.
 - Partitioned (CHIPS) cookies are requested by partition key on a best-effort basis; the exact `topLevelSite` form accepted by each browser is unverified.
 - Private-window support (`incognito` capability) is declared only when the user allowed the extension in private windows and depends on being able to identify the private cookie store.
