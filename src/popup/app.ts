@@ -3,7 +3,13 @@
 // inside the click handler, which is the only place a browser lets that prompt appear, and only
 // then sends the decision, attested with the gesture that the browser's own user-activation flag
 // confirmed. Text from remote servers is shown with textContent only.
-import { approvalBinding, bindCode, needsBrowserAccess, normalizeBindCode } from '../lib/approval';
+import {
+  approvalBinding,
+  approvalRequiresTerminal,
+  bindCode,
+  needsBrowserAccess,
+  normalizeBindCode,
+} from '../lib/approval';
 import { t, errorText } from '../lib/messages';
 import { hostPattern } from '../lib/origin';
 import type { ExtApi } from '../lib/platform';
@@ -303,7 +309,15 @@ export function mountPopup(api: ExtApi): { refresh(): Promise<void> } {
                 )
               : null,
           )
-        : h('p', { class: 'notice' }, tr('errApprovalIntegrity')),
+        : h(
+            'p',
+            { class: 'notice' },
+            tr(
+              approvalRequiresTerminal(approval)
+                ? 'hintCloudTerminalReview'
+                : 'errApprovalIntegrity',
+            ),
+          ),
       reasons.length > 0 ? h('ul', { class: 'reasons' }, ...reasons) : null,
       needsAccess ? h('p', { class: 'notice' }, tr('cookieNotice')) : null,
       h('p', { class: 'muted' }, tr('labelExpires', formatDuration(Math.max(0, expiresMs)))),

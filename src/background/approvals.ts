@@ -6,7 +6,12 @@
 // any other extension.
 import type { Env } from '../lib/env';
 import { ZeusError } from '../lib/errors';
-import { approvalBinding, needsBrowserAccess, normalizeBindCode } from '../lib/approval';
+import {
+  approvalBinding,
+  approvalRequiresTerminal,
+  needsBrowserAccess,
+  normalizeBindCode,
+} from '../lib/approval';
 import { hostPattern } from '../lib/origin';
 import type { Approval, SessionGrant } from '../lib/protocol';
 import type { UiError } from '../lib/ui-protocol';
@@ -156,6 +161,12 @@ export class ApprovalCenter {
       return fail('nm.conflict', 'This approval has expired.');
     if (!this.link.hasCapability('approvals'))
       return fail('nm.capability_missing', 'The daemon cannot take decisions from the browser.');
+
+    if (approvalRequiresTerminal(approval))
+      return fail(
+        'policy.human_required',
+        'Review cloud deliveries in an interactive Zeus terminal.',
+      );
 
     const binding = approvalBinding(approval);
     if (!binding || req.request_hash !== binding.hash || req.revision !== binding.revision) {

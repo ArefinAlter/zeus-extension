@@ -4,6 +4,7 @@
 // one source of truth and no hand-written validator to drift.
 import commonSchema from '../../schema/common.schema.json';
 import approvalSchema from '../../schema/approvals.v1.schema.json';
+import cloudSchema from '../../schema/cloud.v1.schema.json';
 import domainSchema from '../../schema/domain.schema.json';
 import nmSchema from '../../schema/native-messaging.v1.schema.json';
 import { exceedsDepth, SchemaSet, type Issue, type SchemaObject } from './jsonschema';
@@ -44,7 +45,13 @@ export const NM_SCHEMA_ID = 'https://zeus.invalid/schema/native-messaging.v1';
 export const DOMAIN_SCHEMA_ID = 'https://zeus.invalid/schema/domain';
 export const COMMON_SCHEMA_ID = 'https://zeus.invalid/schema/common';
 
-export const schemas = new SchemaSet([commonSchema, domainSchema, approvalSchema, nmSchema]);
+export const schemas = new SchemaSet([
+  commonSchema,
+  domainSchema,
+  cloudSchema,
+  approvalSchema,
+  nmSchema,
+]);
 
 export const nmRef = (def: string): string => `${NM_SCHEMA_ID}#/$defs/${def}`;
 export const domainRef = (def: string): string => `${DOMAIN_SCHEMA_ID}#/$defs/${def}`;

@@ -979,7 +979,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Approval",
-      "line": 375,
+      "line": 376,
       "value": {
         "id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
         "kind": "handoff",
@@ -1018,7 +1018,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 876,
+      "line": 877,
       "value": {
         "seq": 48210,
         "ts": "2026-10-05T09:15:30.250Z",
@@ -1049,7 +1049,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 877,
+      "line": 878,
       "value": {
         "seq": 48211,
         "ts": "2026-10-05T09:15:30.301Z",
@@ -1087,7 +1087,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 878,
+      "line": 879,
       "value": {
         "seq": 48212,
         "ts": "2026-10-05T09:15:34.870Z",
@@ -1109,7 +1109,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 879,
+      "line": 880,
       "value": {
         "seq": 48213,
         "ts": "2026-10-05T09:15:34.870Z",
@@ -1139,7 +1139,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 880,
+      "line": 881,
       "value": {
         "seq": 48214,
         "ts": "2026-10-05T09:15:34.871Z",
@@ -1160,7 +1160,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 881,
+      "line": 882,
       "value": {
         "seq": 48215,
         "ts": "2026-10-05T09:15:34.900Z",
@@ -1180,7 +1180,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 882,
+      "line": 883,
       "value": {
         "seq": 48216,
         "ts": "2026-10-05T09:15:36.140Z",
@@ -1199,7 +1199,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 883,
+      "line": 884,
       "value": {
         "seq": 48217,
         "ts": "2026-10-05T09:15:36.610Z",
@@ -1237,7 +1237,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 884,
+      "line": 885,
       "value": {
         "seq": 48218,
         "ts": "2026-10-05T09:15:36.640Z",
@@ -1257,7 +1257,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 885,
+      "line": 886,
       "value": {
         "after_seq": 48218,
         "ts": "2026-10-05T09:16:10.000Z",
@@ -1279,7 +1279,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 886,
+      "line": 887,
       "value": {
         "seq": 48219,
         "ts": "2026-10-05T09:17:02.311Z",
@@ -1299,7 +1299,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 887,
+      "line": 888,
       "value": {
         "seq": 48220,
         "ts": "2026-10-05T09:17:11.870Z",
@@ -1320,7 +1320,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 888,
+      "line": 889,
       "value": {
         "seq": 48221,
         "ts": "2026-10-05T09:17:11.905Z",
@@ -1340,7 +1340,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 889,
+      "line": 890,
       "value": {
         "seq": 48222,
         "ts": "2026-10-05T09:17:12.020Z",
@@ -1359,7 +1359,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 890,
+      "line": 891,
       "value": {
         "seq": 48223,
         "ts": "2026-10-05T09:17:12.020Z",
@@ -1379,7 +1379,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 896,
+      "line": 897,
       "value": {
         "seq": 48301,
         "ts": "2026-10-05T10:03:44.100Z",
@@ -1399,7 +1399,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 897,
+      "line": 898,
       "value": {
         "seq": 48302,
         "ts": "2026-10-05T10:03:44.100Z",
@@ -1426,7 +1426,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 898,
+      "line": 899,
       "value": {
         "seq": 48303,
         "ts": "2026-10-05T10:03:44.100Z",
@@ -1444,7 +1444,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 899,
+      "line": 900,
       "value": {
         "seq": 48304,
         "ts": "2026-10-05T10:04:14.100Z",
@@ -1464,7 +1464,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 900,
+      "line": 901,
       "value": {
         "seq": 48410,
         "ts": "2026-10-05T10:31:20.000Z",
@@ -1484,7 +1484,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 901,
+      "line": 902,
       "value": {
         "seq": 48411,
         "ts": "2026-10-05T10:31:20.000Z",
@@ -1502,7 +1502,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 902,
+      "line": 903,
       "value": {
         "seq": 48420,
         "ts": "2026-10-05T10:40:00.000Z",
@@ -1522,7 +1522,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 903,
+      "line": 904,
       "value": {
         "seq": 48421,
         "ts": "2026-10-05T10:40:00.000Z",
@@ -1556,7 +1556,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 904,
+      "line": 905,
       "value": {
         "seq": 48530,
         "ts": "2026-10-05T11:03:10.000Z",
@@ -1576,7 +1576,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 905,
+      "line": 906,
       "value": {
         "seq": 48531,
         "ts": "2026-10-05T11:03:10.000Z",
@@ -1602,7 +1602,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 906,
+      "line": 907,
       "value": {
         "seq": 48600,
         "ts": "2026-10-05T12:05:41.000Z",
@@ -1619,7 +1619,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 907,
+      "line": 908,
       "value": {
         "seq": 48700,
         "ts": "2026-10-05T12:30:00.000Z",
@@ -1637,7 +1637,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 908,
+      "line": 909,
       "value": {
         "seq": 48701,
         "ts": "2026-10-05T13:00:00.000Z",
@@ -1651,7 +1651,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 909,
+      "line": 910,
       "value": {
         "seq": 48000,
         "ts": "2026-10-05T08:55:02.000Z",
@@ -1671,7 +1671,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/ApprovalRequest",
-      "line": 238,
+      "line": 242,
       "value": {
         "id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
         "kind": "handoff",
@@ -1759,7 +1759,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/ApprovalRequest",
-      "line": 296,
+      "line": 300,
       "value": {
         "id": "ap_01M465YFSGE0S6JG9A0WZWQ2F2",
         "kind": "session_grant",
@@ -1853,7 +1853,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/ApprovalRequest",
-      "line": 368,
+      "line": 372,
       "value": {
         "id": "ap_01M485Z8785RCEFDWFQYPQW37A",
         "kind": "workflow_plan",
@@ -1938,7 +1938,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/ApprovalRequest",
-      "line": 421,
+      "line": 425,
       "value": {
         "id": "ap_01M45TC900WT1S4TZV708J04JP",
         "kind": "retry_escalation",
@@ -2001,7 +2001,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/ApprovalRequest",
-      "line": 466,
+      "line": 470,
       "value": {
         "id": "ap_01M46DTY9CA76DBNDKZPA3JBQF",
         "kind": "policy_exception",
@@ -2060,7 +2060,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/ApprovalRequest",
-      "line": 517,
+      "line": 521,
       "value": {
         "id": "ap_01M48E6RV011Z2QV57EPB01YAD",
         "kind": "destructive_op",
@@ -2136,7 +2136,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/ApprovalDecision",
-      "line": 587,
+      "line": 591,
       "value": {
         "approval_id": "ap_01M465YFSGE0S6JG9A0WZWQ2F2",
         "request_hash": "e597f6a196cf33172c91da16f2047d995f681858602741c00414358a0b5302b7",
@@ -2150,7 +2150,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/ApprovalDecision",
-      "line": 599,
+      "line": 603,
       "value": {
         "approval_id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
         "request_hash": "09e8478513076b8b79ed19675402421a3cee9eb3d4c73487daa7bd63a55003ae",
@@ -2162,7 +2162,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/DecisionRecord",
-      "line": 635,
+      "line": 639,
       "value": {
         "approval_id": "ap_01M45NHJ3XS0QXG9T42HHN2YR8",
         "revision": 1,
@@ -2202,7 +2202,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/DecisionRecord",
-      "line": 667,
+      "line": 671,
       "value": {
         "approval_id": "ap_01M465YFSGE0S6JG9A0WZWQ2F2",
         "revision": 2,
@@ -2235,7 +2235,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/DecisionRecord",
-      "line": 691,
+      "line": 695,
       "value": {
         "approval_id": "ap_01M45TC900WT1S4TZV708J04JP",
         "revision": 1,
@@ -2252,7 +2252,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/GrantRecord",
-      "line": 816,
+      "line": 820,
       "value": {
         "id": "gr_01M46601S6FRJ8B3Z889X861XE",
         "origin": "https://files.example.com",
@@ -2277,7 +2277,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/GrantRecord",
-      "line": 835,
+      "line": 839,
       "value": {
         "id": "gr_01M45NHPJP04TX6B1CJVQVQAK9",
         "origin": "https://portal.example.org",
@@ -2300,7 +2300,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/GrantRecord",
-      "line": 862,
+      "line": 866,
       "value": {
         "id": "gr_01M3RRNJM04D9FTTF4SY2YMFE8",
         "origin": "https://portal.example.org",
@@ -2325,7 +2325,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "domain#/$defs/Event",
-      "line": 884,
+      "line": 888,
       "value": {
         "seq": 52001,
         "ts": "2026-10-06T08:52:10.000Z",
@@ -2357,7 +2357,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/GrantRecord",
-      "line": 921,
+      "line": 925,
       "value": {
         "id": "gr_01M480RFA0TEV0HDZZE5JVV8P8",
         "origin": "https://media.example.net",
@@ -2386,7 +2386,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/GrantRecord",
-      "line": 948,
+      "line": 952,
       "value": {
         "id": "gr_01M488S650Y77C1PWHEESXYDY9",
         "origin": "https://ads.example.net",
@@ -2409,7 +2409,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 1060,
+      "line": 1064,
       "value": {
         "v": 1,
         "id": "e3",
@@ -2430,7 +2430,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/KillSwitchRequest",
-      "line": 1181,
+      "line": 1185,
       "value": {
         "action": "engage",
         "surface": "tui",
@@ -2440,7 +2440,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "approvals.v1#/$defs/KillSwitchResult",
-      "line": 1185,
+      "line": 1189,
       "value": {
         "engaged": true,
         "changed": true,
@@ -2452,7 +2452,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "domain#/$defs/Event",
-      "line": 1190,
+      "line": 1194,
       "value": {
         "seq": 52101,
         "ts": "2026-10-06T09:12:45.120Z",
@@ -2471,7 +2471,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "domain#/$defs/Event",
-      "line": 1191,
+      "line": 1195,
       "value": {
         "seq": 52104,
         "ts": "2026-10-06T09:12:45.120Z",
@@ -2491,7 +2491,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "domain#/$defs/Event",
-      "line": 1424,
+      "line": 1428,
       "value": {
         "seq": 51024,
         "ts": "2026-10-05T14:02:40.455Z",
@@ -2532,7 +2532,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "domain#/$defs/Event",
-      "line": 1425,
+      "line": 1429,
       "value": {
         "seq": 51031,
         "ts": "2026-10-05T14:03:02.310Z",
@@ -2554,7 +2554,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "domain#/$defs/Event",
-      "line": 1426,
+      "line": 1430,
       "value": {
         "seq": 51032,
         "ts": "2026-10-05T14:03:02.310Z",
@@ -2587,7 +2587,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "domain#/$defs/Event",
-      "line": 1427,
+      "line": 1431,
       "value": {
         "seq": 51033,
         "ts": "2026-10-05T14:03:02.310Z",
@@ -2620,7 +2620,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "domain#/$defs/Event",
-      "line": 1428,
+      "line": 1432,
       "value": {
         "seq": 51034,
         "ts": "2026-10-05T14:03:02.310Z",
@@ -2642,7 +2642,7 @@
     {
       "source": "07-approvals-trust-surface-and-consent.md",
       "ref": "domain#/$defs/Event",
-      "line": 1429,
+      "line": 1433,
       "value": {
         "seq": 51035,
         "ts": "2026-10-05T14:03:02.310Z",

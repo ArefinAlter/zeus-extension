@@ -1,4 +1,4 @@
-import { withBinding } from '../helpers/approvals';
+import { cloudApproval, withBinding } from '../helpers/approvals';
 // @vitest-environment happy-dom
 // The popup and options pages run against the real background worker (wired to a scripted daemon
 // in the World harness) in a DOM environment: what a person sees, and what a click sends.
@@ -81,6 +81,20 @@ async function showApproval(w: World, over: Record<string, unknown> = {}): Promi
 }
 
 describe('popup: approvals', () => {
+  it('directs cloud review to the terminal without offering browser decisions', async () => {
+    const w = await new World().boot();
+    w.daemon.send('approval.pending', { approval: cloudApproval() });
+    await flush(w);
+    const popup = mountPopup(w.ext.api);
+    await popup.refresh();
+    await w.advance(800);
+    expect(text()).toContain('Deliver to cloud storage');
+    expect(text()).toContain('Review this cloud delivery in an interactive Zeus terminal.');
+    expect(buttons()).toHaveLength(0);
+    expect(w.daemon.sent('approval.decide')).toHaveLength(0);
+    expect(w.missingKeys()).toEqual([]);
+  });
+
   it('preserves an unchanged armed review across progress refreshes and rearms changed facts', async () => {
     const w = await new World().boot();
     await showApproval(w);

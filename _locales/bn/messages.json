@@ -529,5 +529,11 @@
   },
   "btnReleaseStop": {
     "message": "বন্ধ অবস্থা তুলুন (কাজ বিরত থাকবে)"
+  },
+  "approvalKindCloudDelivery": {
+    "message": "ক্লাউডে ফাইল পাঠান"
+  },
+  "hintCloudTerminalReview": {
+    "message": "Zeus টার্মিনালে এই ক্লাউডে পাঠানোর অনুরোধটি পর্যালোচনা করুন। ব্রাউজার থেকে অনুমোদন দেওয়া যায় না।"
   }
 }

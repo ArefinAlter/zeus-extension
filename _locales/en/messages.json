@@ -529,5 +529,11 @@
   },
   "btnReleaseStop": {
     "message": "Release stop (keep jobs paused)"
+  },
+  "approvalKindCloudDelivery": {
+    "message": "Deliver to cloud storage"
+  },
+  "hintCloudTerminalReview": {
+    "message": "Review this cloud delivery in an interactive Zeus terminal. Browser approval is unavailable."
   }
 }

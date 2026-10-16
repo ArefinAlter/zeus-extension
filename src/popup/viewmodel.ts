@@ -59,6 +59,7 @@ const KIND_KEYS: Record<string, string> = {
   policy_exception: 'approvalKindPolicyException',
   workflow_plan: 'approvalKindWorkflowPlan',
   destructive_op: 'approvalKindDestructiveOp',
+  cloud_delivery: 'approvalKindCloudDelivery',
 };
 export const approvalKindKey = (kind: string): string => KIND_KEYS[kind] ?? 'approvalKindOther';
 

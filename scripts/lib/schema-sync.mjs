@@ -9,6 +9,7 @@ export const SCHEMA_FILES = [
   'native-messaging.v1.schema.json',
   'common.schema.json',
   'approvals.v1.schema.json',
+  'cloud.v1.schema.json',
   'domain.schema.json',
   'redaction-vectors.v1.json',
 ];

@@ -22,6 +22,7 @@ const ANNOTATIONS = new Set([
   'title',
   'description',
   'default',
+  'writeOnly',
   'x-zeus-secret',
 ]);
 const SCHEMA_VALUED = new Set(['items', 'additionalProperties', 'propertyNames', 'not']);

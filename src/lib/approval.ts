@@ -4,6 +4,11 @@ import type { Approval } from './protocol.generated';
 /** Approval kinds whose approval lets the extension release session material for `origin`. */
 const SESSION_KINDS: ReadonlySet<string> = new Set(['handoff', 'session_grant', 'workflow_plan']);
 
+/** Cloud writes are currently approved only on the physical Zeus terminal trust surface. */
+export function approvalRequiresTerminal(approval: Approval): boolean {
+  return approval.kind === 'cloud_delivery';
+}
+
 /**
  * True when approving this approval will lead to a release of cookies for its origin, so the
  * browser's optional host and cookie permissions must be granted first.
@@ -70,6 +75,7 @@ export interface ApprovalBinding {
 
 /** Recompute the binding before offering Approve. Unsupported facts fail closed. */
 export function approvalBinding(approval: Approval): ApprovalBinding | null {
+  if (approvalRequiresTerminal(approval)) return null;
   try {
     const raw = approval as unknown as Record<string, unknown>;
     if (!schemas.isValid(`${APPROVAL_SCHEMA}#/$defs/ApprovalRequest`, approval)) return null;

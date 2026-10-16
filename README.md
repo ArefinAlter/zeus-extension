@@ -7,7 +7,7 @@ The Manifest V3 browser extension of [Zeus](https://github.com/ArefinAlter/zeus)
 ## What it is for
 
 - **Download rescue.** An interrupted browser download is offered to Zeus (`handoff.offer`), which finishes it with resumable, verified transfers.
-- **Trust surface.** The popup shows approvals the daemon computed facts for. Only a human click in an extension page can approve; an agent cannot.
+- **Trust surface.** The popup shows approvals the daemon computed facts for. Supported browser decisions require a human click; an agent cannot approve. Cloud delivery requests direct the user to an interactive Zeus terminal and offer no browser decision.
 - **Session oracle.** After the user approves a site, and only for that site, the extension releases the cookies the browser would send, for at most 15 minutes, on a request from the daemon that passes the extension's own consent check.
 - **In-browser fetch fallback.** When a server refuses the daemon, the user's own browser performs the (ordinary, credentialed) fetch and streams the bytes to the daemon under flow control.
 

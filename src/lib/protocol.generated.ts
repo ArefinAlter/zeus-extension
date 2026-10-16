@@ -2849,6 +2849,21 @@ to: (string | null)
 size_bytes: (number | null)
 }]
 sample_omitted: number
+}) | (FactsCommon & {
+kind?: "cloud_delivery"
+/**
+ * @maxItems 0
+ */
+allowed_scopes?: []
+delivery_id: string
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+plan_blake3: string
+plan: CloudPlanView
+shares_full_source_url_with_provider: boolean
+remote_byte_cap_enforced: boolean
+remote_cancellation_supported: boolean
 }))
 /**
  * Sanitised free text of the requester, at most 280 characters. Untrusted (07 section 4.5). Absent when the requester gave none.
@@ -2862,7 +2877,7 @@ next_cursor: (string | null)
  */
 export interface Approval {
 id: string
-kind: ("handoff" | "session_grant" | "retry_escalation" | "policy_exception" | "workflow_plan" | "destructive_op")
+kind: ("handoff" | "session_grant" | "retry_escalation" | "policy_exception" | "workflow_plan" | "destructive_op" | "cloud_delivery")
 state: ("pending" | "approved" | "denied" | "expired" | "canceled")
 job_id?: string
 run_id?: string
@@ -2938,7 +2953,7 @@ export interface FactsCommon {
 t: "zeus.approval.facts.v1"
 approval_id: string
 revision: number
-kind: ("handoff" | "session_grant" | "retry_escalation" | "policy_exception" | "workflow_plan" | "destructive_op")
+kind: ("handoff" | "session_grant" | "retry_escalation" | "policy_exception" | "workflow_plan" | "destructive_op" | "cloud_delivery")
 requester: (RequesterClient | RequesterDaemon)
 /**
  * RFC 3339 UTC instant, always with exactly three fractional digits and the Z designator.
@@ -3050,6 +3065,95 @@ untrusted_url: string
  * Size reported by the server or the browser; null when unknown.
  */
 total_bytes: (number | null)
+}
+/**
+ * Redacted, immutable dry-run plan returned to every caller.
+ */
+export interface CloudPlanView {
+/**
+ * Account alias.
+ */
+account_id: string
+/**
+ * Exact authorized account revision.
+ */
+account_revision: number
+/**
+ * Explicitly accepted weaker remote guarantees.
+ */
+allow_unbounded_remote: boolean
+/**
+ * Reserved delivery ULID; retries of this plan never create a second remote object.
+ */
+delivery_id: string
+/**
+ * Configured destination root.
+ */
+destination: string
+/**
+ * Source SHA-256 when known.
+ */
+expected_sha256?: (string | null)
+/**
+ * Deadline to submit and approve this plan.
+ */
+expires_at: string
+/**
+ * True only when Zeus can enforce the transmitted byte ceiling.
+ */
+hard_byte_cap: boolean
+/**
+ * Maximum bytes authorized locally.
+ */
+max_bytes: number
+/**
+ * Maximum local operation lifetime.
+ */
+max_seconds: number
+/**
+ * Explicit mode.
+ */
+mode: ("staged_upload" | "stream_upload" | "remote_import")
+/**
+ * Canonical hash bound by the human approval.
+ */
+plan_hash: string
+/**
+ * Prefixed plan ULID.
+ */
+plan_id: string
+/**
+ * Provider family.
+ */
+provider: ("google_drive" | "yandex_disk" | "rclone" | "baidu_netdisk")
+/**
+ * True only when the provider can enforce cancellation.
+ */
+remote_cancellation_supported: boolean
+/**
+ * Final unique remote object name.
+ */
+remote_name: string
+/**
+ * Exact planned bytes.
+ */
+size_bytes: number
+/**
+ * Hash of the complete private source identity.
+ */
+source_hash: string
+/**
+ * Source job identity or URL origin; all URL paths and query strings withheld.
+ */
+source_redacted: string
+/**
+ * The requested mode is available with these exact constraints.
+ */
+supported: boolean
+/**
+ * Machine-readable unavailable capability.
+ */
+unsupported_reason?: (("remote_import_unavailable" | "remote_cancellation_unavailable" | "known_size_required" | "known_block_hashes_required" | "staged_digest_required" | "resume_unavailable" | "provider_unavailable" | "backend_not_ready" | "remote_hash_unavailable") | null)
 }
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
@@ -4921,6 +5025,21 @@ to: (string | null)
 size_bytes: (number | null)
 }]
 sample_omitted: number
+}) | (FactsCommon & {
+kind?: "cloud_delivery"
+/**
+ * @maxItems 0
+ */
+allowed_scopes?: []
+delivery_id: string
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+plan_blake3: string
+plan: CloudPlanView
+shares_full_source_url_with_provider: boolean
+remote_byte_cap_enforced: boolean
+remote_cancellation_supported: boolean
 }))
 /**
  * Sanitised free text of the requester, at most 280 characters. Untrusted (07 section 4.5). Absent when the requester gave none.
@@ -5124,7 +5243,7 @@ approval: Approval
 type?: "approval.decided"
 data?: {
 approval_id: string
-kind: ("handoff" | "session_grant" | "retry_escalation" | "policy_exception" | "workflow_plan" | "destructive_op")
+kind: ("handoff" | "session_grant" | "retry_escalation" | "policy_exception" | "workflow_plan" | "destructive_op" | "cloud_delivery")
 outcome: ("approve" | "deny" | "expire" | "cancel")
 scope?: ("once" | "site" | "workflow" | "never")
 actor: Actor

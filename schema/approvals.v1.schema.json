@@ -395,6 +395,51 @@
         }
       ]
     },
+    "FactsCloudDelivery": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/FactsCommon"
+        },
+        {
+          "type": "object",
+          "required": [
+            "delivery_id",
+            "plan_blake3",
+            "plan",
+            "shares_full_source_url_with_provider",
+            "remote_byte_cap_enforced",
+            "remote_cancellation_supported"
+          ],
+          "properties": {
+            "kind": {
+              "const": "cloud_delivery"
+            },
+            "allowed_scopes": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "delivery_id": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/CloudDeliveryId"
+            },
+            "plan_blake3": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256"
+            },
+            "plan": {
+              "$ref": "https://zeus.invalid/schema/cloud.v1#/$defs/CloudPlanView"
+            },
+            "shares_full_source_url_with_provider": {
+              "type": "boolean"
+            },
+            "remote_byte_cap_enforced": {
+              "type": "boolean"
+            },
+            "remote_cancellation_supported": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
     "RequestFacts": {
       "description": "The exact daemon-computed facts the request_hash covers and the trust surface renders (07 section 4.4). At most 16 KiB in JCS form.",
       "oneOf": [
@@ -403,7 +448,8 @@
         { "$ref": "#/$defs/FactsRetryEscalation" },
         { "$ref": "#/$defs/FactsPolicyException" },
         { "$ref": "#/$defs/FactsWorkflowPlan" },
-        { "$ref": "#/$defs/FactsDestructiveOp" }
+        { "$ref": "#/$defs/FactsDestructiveOp" },
+        { "$ref": "#/$defs/FactsCloudDelivery" }
       ]
     },
     "ApprovalBase": {

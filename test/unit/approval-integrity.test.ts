@@ -7,7 +7,9 @@ import {
   canonicalFacts,
   normalizeBindCode,
 } from '../../src/lib/approval';
-import type { Approval } from '../../src/lib/protocol';
+import { schemas, type Approval } from '../../src/lib/protocol';
+import { cloudApproval } from '../helpers/approvals';
+import { ajvValid } from '../helpers/ajv';
 import { specExamples } from '../helpers/examples';
 import { World } from '../harness/world';
 
@@ -26,6 +28,35 @@ beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
 describe('approval integrity, spec07', () => {
+  it('accepts cloud facts as contract data but refuses browser authorization', async () => {
+    const request = cloudApproval();
+    const ref = 'https://zeus.invalid/schema/approvals.v1#/$defs/ApprovalRequest';
+    expect(schemas.validate(ref, request)).toEqual([]);
+    expect(ajvValid(ref, request)).toBe(true);
+    expect(bind(request)).toBeNull();
+    const w = await new World().boot();
+    w.daemon.send('approval.pending', { approval: request });
+    await w.settle();
+    expect(w.bg.approvals.get(request.id as string)?.kind).toBe('cloud_delivery');
+    for (const decision of ['approve', 'deny']) {
+      const answer = await w.ext.sendFromPage({
+        cmd: 'approval.decide',
+        approval_id: request.id,
+        request_hash: request.request_hash,
+        revision: request.revision,
+        decision,
+        confirmation: 'typed_code',
+        typed_code: bindCode(request.request_hash as string),
+        user_gesture: true,
+        surface: 'extension_popup',
+      });
+      expect(answer).toMatchObject({ ok: false, error: { code: 'policy.human_required' } });
+    }
+    expect(w.daemon.sent('approval.decide')).toHaveLength(0);
+    expect(w.ext.permissionRequests).toHaveLength(0);
+    expect(await w.bg.store.listConsent()).toHaveLength(0);
+  });
+
   it('recomputes the normative handoff vector and bind code', () => {
     const binding = bind(sample());
     expect(binding?.hash).toBe('09e8478513076b8b79ed19675402421a3cee9eb3d4c73487daa7bd63a55003ae');

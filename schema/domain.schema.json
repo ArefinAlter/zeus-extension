@@ -274,7 +274,7 @@
       }
     },
     "ApprovalKind": {
-      "enum": ["handoff", "session_grant", "retry_escalation", "policy_exception", "workflow_plan", "destructive_op"]
+      "enum": ["handoff", "session_grant", "retry_escalation", "policy_exception", "workflow_plan", "destructive_op", "cloud_delivery"]
     },
     "Approval": {
       "description": "A pending or decided request for a human decision. Only a human trust surface may decide one (docs/spec/07-approvals-trust-surface-and-consent.md). The members request_hash, requested_by, revision, facts and agent_says are added by spec 07: events carry the entity without facts and agent_says; trust surfaces, and the client that caused the approval, receive the full ApprovalRequest (approvals.v1.schema.json, 07 section 4.8).",
