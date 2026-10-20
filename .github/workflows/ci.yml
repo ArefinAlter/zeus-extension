@@ -1,5 +1,5 @@
 # Required checks for the browser extension. The schema copies come from the zeus repository's docs/spec
-# (public), checked out beside this repository: the branch with the same name when it exists, otherwise main.
+# (public), pinned to the revision used to generate this branch's schema copies.
 # A passing build is not installed-browser acceptance; that remains a manual release gate.
 name: CI
 
@@ -24,22 +24,11 @@ jobs:
       - uses: actions/checkout@v5
         with:
           path: zeus-extension
-      - name: Resolve zeus ref
-        id: app
-        shell: bash
-        env:
-          BRANCH: ${{ github.head_ref || github.ref_name }}
-        run: |
-          set -euo pipefail
-          if git ls-remote --exit-code --heads https://github.com/ArefinAlter/zeus.git "$BRANCH" >/dev/null 2>&1; then
-            echo "ref=$BRANCH" >> "$GITHUB_OUTPUT"
-          else
-            echo "ref=main" >> "$GITHUB_OUTPUT"
-          fi
       - uses: actions/checkout@v5
         with:
           repository: ArefinAlter/zeus
-          ref: ${{ steps.app.outputs.ref }}
+          # Advance this pin together with schema/ when synchronizing contracts.
+          ref: e114e99dc09c79b51bd8e9d640230fb9b67d649b
           path: zeus
       - uses: actions/setup-node@v5
         with:
