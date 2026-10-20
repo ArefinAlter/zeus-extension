@@ -1018,7 +1018,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 879,
+      "line": 881,
       "value": {
         "seq": 48210,
         "ts": "2026-10-05T09:15:30.250Z",
@@ -1049,7 +1049,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 880,
+      "line": 882,
       "value": {
         "seq": 48211,
         "ts": "2026-10-05T09:15:30.301Z",
@@ -1087,7 +1087,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 881,
+      "line": 883,
       "value": {
         "seq": 48212,
         "ts": "2026-10-05T09:15:34.870Z",
@@ -1109,7 +1109,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 882,
+      "line": 884,
       "value": {
         "seq": 48213,
         "ts": "2026-10-05T09:15:34.870Z",
@@ -1139,7 +1139,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 883,
+      "line": 885,
       "value": {
         "seq": 48214,
         "ts": "2026-10-05T09:15:34.871Z",
@@ -1160,7 +1160,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 884,
+      "line": 886,
       "value": {
         "seq": 48215,
         "ts": "2026-10-05T09:15:34.900Z",
@@ -1180,7 +1180,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 885,
+      "line": 887,
       "value": {
         "seq": 48216,
         "ts": "2026-10-05T09:15:36.140Z",
@@ -1199,7 +1199,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 886,
+      "line": 888,
       "value": {
         "seq": 48217,
         "ts": "2026-10-05T09:15:36.610Z",
@@ -1237,7 +1237,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 887,
+      "line": 889,
       "value": {
         "seq": 48218,
         "ts": "2026-10-05T09:15:36.640Z",
@@ -1257,7 +1257,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 888,
+      "line": 890,
       "value": {
         "after_seq": 48218,
         "ts": "2026-10-05T09:16:10.000Z",
@@ -1279,7 +1279,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 889,
+      "line": 891,
       "value": {
         "seq": 48219,
         "ts": "2026-10-05T09:17:02.311Z",
@@ -1299,7 +1299,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 890,
+      "line": 892,
       "value": {
         "seq": 48220,
         "ts": "2026-10-05T09:17:11.870Z",
@@ -1320,7 +1320,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 891,
+      "line": 893,
       "value": {
         "seq": 48221,
         "ts": "2026-10-05T09:17:11.905Z",
@@ -1340,7 +1340,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 892,
+      "line": 894,
       "value": {
         "seq": 48222,
         "ts": "2026-10-05T09:17:12.020Z",
@@ -1359,7 +1359,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 893,
+      "line": 895,
       "value": {
         "seq": 48223,
         "ts": "2026-10-05T09:17:12.020Z",
@@ -1379,7 +1379,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 899,
+      "line": 901,
       "value": {
         "seq": 48301,
         "ts": "2026-10-05T10:03:44.100Z",
@@ -1399,7 +1399,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 900,
+      "line": 902,
       "value": {
         "seq": 48302,
         "ts": "2026-10-05T10:03:44.100Z",
@@ -1426,7 +1426,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 901,
+      "line": 903,
       "value": {
         "seq": 48303,
         "ts": "2026-10-05T10:03:44.100Z",
@@ -1444,7 +1444,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 902,
+      "line": 904,
       "value": {
         "seq": 48304,
         "ts": "2026-10-05T10:04:14.100Z",
@@ -1464,7 +1464,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 903,
+      "line": 905,
       "value": {
         "seq": 48410,
         "ts": "2026-10-05T10:31:20.000Z",
@@ -1484,7 +1484,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 904,
+      "line": 906,
       "value": {
         "seq": 48411,
         "ts": "2026-10-05T10:31:20.000Z",
@@ -1502,7 +1502,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 905,
+      "line": 907,
       "value": {
         "seq": 48420,
         "ts": "2026-10-05T10:40:00.000Z",
@@ -1522,7 +1522,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 906,
+      "line": 908,
       "value": {
         "seq": 48421,
         "ts": "2026-10-05T10:40:00.000Z",
@@ -1556,7 +1556,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 907,
+      "line": 909,
       "value": {
         "seq": 48530,
         "ts": "2026-10-05T11:03:10.000Z",
@@ -1576,7 +1576,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 908,
+      "line": 910,
       "value": {
         "seq": 48531,
         "ts": "2026-10-05T11:03:10.000Z",
@@ -1602,7 +1602,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 909,
+      "line": 911,
       "value": {
         "seq": 48600,
         "ts": "2026-10-05T12:05:41.000Z",
@@ -1619,7 +1619,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 910,
+      "line": 912,
       "value": {
         "seq": 48700,
         "ts": "2026-10-05T12:30:00.000Z",
@@ -1637,7 +1637,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 911,
+      "line": 913,
       "value": {
         "seq": 48701,
         "ts": "2026-10-05T13:00:00.000Z",
@@ -1651,7 +1651,7 @@
     {
       "source": "01-domain-model.md",
       "ref": "domain#/$defs/Event",
-      "line": 912,
+      "line": 914,
       "value": {
         "seq": 48000,
         "ts": "2026-10-05T08:55:02.000Z",

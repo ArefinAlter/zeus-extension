@@ -1152,6 +1152,7 @@ kind?: "destructive_op"
  */
 operation_set_blake3: string
 plan_id: (string | null)
+artifact_plan?: ArtifactLifecyclePlan
 counts: {
 delete: number
 overwrite: number
@@ -3067,6 +3068,47 @@ untrusted_url: string
 total_bytes: (number | null)
 }
 /**
+ * An exact artifact tombstone or protection change; the expected record hash binds its prior revision.
+ */
+export interface ArtifactLifecyclePlan {
+version: 1
+/**
+ * One artifact record (13). Minted by the artifact store instance that holds the record; local to that store.
+ */
+artifact_id: string
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+expected_record_blake3: string
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+blake3: string
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+sha256: string
+/**
+ * Unsigned byte count or offset. Bounded by 2^53-1 so every JSON implementation represents it exactly.
+ */
+size_bytes: number
+quarantined: boolean
+current_retention: ("keep" | "evictable")
+current_retain_until: (string | null)
+operation: ({
+kind: "delete"
+} | {
+kind: "set_retention"
+retention: ("keep" | "evictable")
+retain_until: (string | null)
+})
+requires_approval: true
+/**
+ * RFC 3339 UTC instant, always with exactly three fractional digits and the Z designator.
+ */
+expires_at: string
+}
+/**
  * Redacted, immutable dry-run plan returned to every caller.
  */
 export interface CloudPlanView {
@@ -3328,6 +3370,7 @@ kind?: "destructive_op"
  */
 operation_set_blake3: string
 plan_id: (string | null)
+artifact_plan?: ArtifactLifecyclePlan
 counts: {
 delete: number
 overwrite: number

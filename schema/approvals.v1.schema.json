@@ -348,6 +348,43 @@
         }
       ]
     },
+    "ArtifactLifecyclePlan": {
+      "description": "An exact artifact tombstone or protection change; the expected record hash binds its prior revision.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "artifact_id", "expected_record_blake3", "blake3", "sha256", "size_bytes", "quarantined", "current_retention", "current_retain_until", "operation", "requires_approval", "expires_at"],
+      "properties": {
+        "version": { "const": 1 },
+        "artifact_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/ArtifactId" },
+        "expected_record_blake3": { "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256" },
+        "blake3": { "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256" },
+        "sha256": { "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256" },
+        "size_bytes": { "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" },
+        "quarantined": { "type": "boolean" },
+        "current_retention": { "enum": ["keep", "evictable"] },
+        "current_retain_until": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }, { "type": "null" }] },
+        "operation": {
+          "oneOf": [
+            {
+              "type": "object", "additionalProperties": false,
+              "required": ["kind"],
+              "properties": { "kind": { "const": "delete" } }
+            },
+            {
+              "type": "object", "additionalProperties": false,
+              "required": ["kind", "retention", "retain_until"],
+              "properties": {
+                "kind": { "const": "set_retention" },
+                "retention": { "enum": ["keep", "evictable"] },
+                "retain_until": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }, { "type": "null" }] }
+              }
+            }
+          ]
+        },
+        "requires_approval": { "const": true },
+        "expires_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }
+      }
+    },
     "FactsDestructiveOp": {
       "allOf": [
         { "$ref": "#/$defs/FactsCommon" },
@@ -360,6 +397,7 @@
               "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256"
             },
             "plan_id": { "oneOf": [{ "$ref": "#/$defs/PlanId" }, { "type": "null" }] },
+            "artifact_plan": { "$ref": "#/$defs/ArtifactLifecyclePlan" },
             "counts": {
               "type": "object",
               "required": ["delete", "overwrite", "move", "rename"],
