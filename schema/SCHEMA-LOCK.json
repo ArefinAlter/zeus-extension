@@ -2,8 +2,8 @@
   "note": "sha256 of the normalised (LF) content of each copied contract. Do not edit by hand: run npm run sync:schema.",
   "source_markdown_sha256": {
     "02-native-messaging-v1.md": "1f0cf22de849c50a58b9e5bfd5badc581a0a75a1172a2afe23ac12bfc778383b",
-    "01-domain-model.md": "18649c153461bb2e43a10710b9a8a378283f626669e09968a2a5d73d4c1fde72",
-    "07-approvals-trust-surface-and-consent.md": "f3b05e9f09d8eb70bab37acf2fe215caedf4488a5885b71f219616f5cad6669c"
+    "01-domain-model.md": "c4d5046c5b57785d8ed39db71475a0f047f6730250ad667b758cfc9a44940fe4",
+    "07-approvals-trust-surface-and-consent.md": "d114d2618bf21311d33e49435e61499e1f61e7c125bd516cfd0132357384951a"
   },
   "files": {
     "native-messaging.v1.schema.json": "5a3e8a77ee5933f560d108effd7bbefdcf2915e4d6525dd4de4fceca07f38ef5",
@@ -12,6 +12,6 @@
     "cloud.v1.schema.json": "c154cd96bb5925ca945299fed52f7d56976ea2858ea99928df9999aa38a8a0b1",
     "domain.schema.json": "c31fc7e6b0bdf34d984d4093a5e0f31d58f845ce831cdeb58673a5ae773649bf",
     "redaction-vectors.v1.json": "8f937e2533d5c195b071b4dec06d8f54474bb5090785247500b60fa2e239a75d",
-    "examples/spec-examples.json": "323ab18ce6ceab0a7f1a5361f386197f6659a2b95d03da6ac72f76680bfd8283"
+    "examples/spec-examples.json": "5f79428ec34ff99655281a84d1524c19ee664c3292319e1f335e41e1fc74e6bb"
   }
 }

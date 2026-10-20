@@ -1,0 +1,65 @@
+# Required checks for the browser extension. The schema copies come from the zeus repository's docs/spec
+# (public), checked out beside this repository: the branch with the same name when it exists, otherwise main.
+# A passing build is not installed-browser acceptance; that remains a manual release gate.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  extension:
+    name: Typecheck, lint, test and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: zeus-extension
+      - name: Resolve zeus ref
+        id: app
+        shell: bash
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads https://github.com/ArefinAlter/zeus.git "$BRANCH" >/dev/null 2>&1; then
+            echo "ref=$BRANCH" >> "$GITHUB_OUTPUT"
+          else
+            echo "ref=main" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v5
+        with:
+          repository: ArefinAlter/zeus
+          ref: ${{ steps.app.outputs.ref }}
+          path: zeus
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: zeus-extension/package-lock.json
+      - working-directory: zeus-extension
+        run: npm ci
+      - name: Schema copies match zeus docs/spec
+        working-directory: zeus-extension
+        run: node scripts/sync-schema.mjs --check --require-source --from ../zeus
+      - working-directory: zeus-extension
+        run: npm run typecheck
+      - working-directory: zeus-extension
+        run: npm run lint
+      - working-directory: zeus-extension
+        run: npm test
+      - working-directory: zeus-extension
+        run: npm run build
+      - working-directory: zeus-extension
+        run: npm run build:store
+      - working-directory: zeus-extension
+        run: npm run check
