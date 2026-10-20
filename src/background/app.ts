@@ -88,6 +88,7 @@ export function createBackground(
         'url_refresh.refetch',
         'url_refresh.download_api',
         'fetch_proxy',
+        'kill_switch',
       ];
       if (await api.extension.isAllowedIncognitoAccess().catch(() => false))
         capabilities.push('incognito');

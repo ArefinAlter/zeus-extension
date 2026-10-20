@@ -6,7 +6,7 @@
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
  * via the `definition` "ExtensionToDaemonMessage".
  */
-export type ExtensionToDaemonMessage = (HelloMessage | PingMessage | PongMessage | ByeMessage | ErrorMessage | HandoffOfferMessage | HandoffWithdrawMessage | SessionResponseMessage | UrlRefreshResponseMessage | FetchHeadMessage | FetchChunkMessage | FetchEndMessage | FetchErrorMessage | ApprovalListMessage | ApprovalDecideMessage | EventsSubscribeMessage | EventsUnsubscribeMessage | JobListMessage | JobControlMessage | GrantListMessage | GrantRevokeMessage)
+export type ExtensionToDaemonMessage = (HelloMessage | PingMessage | PongMessage | ByeMessage | ErrorMessage | HandoffOfferMessage | HandoffWithdrawMessage | SessionResponseMessage | UrlRefreshResponseMessage | FetchHeadMessage | FetchChunkMessage | FetchEndMessage | FetchErrorMessage | ApprovalListMessage | ApprovalDecideMessage | EventsSubscribeMessage | EventsUnsubscribeMessage | JobListMessage | JobControlMessage | GrantListMessage | GrantRevokeMessage | KillSwitchMessage)
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
  * via the `definition` "HelloMessage".
@@ -67,7 +67,7 @@ body: HandoffOfferBody
 })
 /**
  * chrome.downloads.InterruptReason (verified 2026-10-05) plus UNKNOWN for values an implementation cannot map.
- * 
+ *
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
  * via the `definition` "InterruptReason".
  */
@@ -233,9 +233,17 @@ body: GrantRevokeBody
 })
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
+ * via the `definition` "KillSwitchMessage".
+ */
+export type KillSwitchMessage = (Envelope & {
+type?: "kill_switch"
+body: KillSwitchBody
+})
+/**
+ * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
  * via the `definition` "DaemonToExtensionMessage".
  */
-export type DaemonToExtensionMessage = (HelloAckMessage | PingMessage | PongMessage | ByeMessage | ErrorMessage | HandoffAcceptMessage | HandoffRejectMessage | SessionRequestMessage | UrlRefreshRequestMessage | FetchRangeMessage | FetchCreditMessage | FetchCancelMessage | ApprovalListResponseMessage | ApprovalPendingMessage | ApprovalDecideResponseMessage | EventsSubscribeResponseMessage | JobEventMessage | JobListResponseMessage | JobControlResponseMessage | GrantListResponseMessage | GrantRevokeResponseMessage)
+export type DaemonToExtensionMessage = (HelloAckMessage | PingMessage | PongMessage | ByeMessage | ErrorMessage | HandoffAcceptMessage | HandoffRejectMessage | SessionRequestMessage | UrlRefreshRequestMessage | FetchRangeMessage | FetchCreditMessage | FetchCancelMessage | ApprovalListResponseMessage | ApprovalPendingMessage | ApprovalDecideResponseMessage | EventsSubscribeResponseMessage | JobEventMessage | JobListResponseMessage | JobControlResponseMessage | GrantListResponseMessage | GrantRevokeResponseMessage | KillSwitchResponseMessage)
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
  * via the `definition` "HelloAckMessage".
@@ -398,6 +406,14 @@ body: GrantListResponseBody
 export type GrantRevokeResponseMessage = (Envelope & {
 type?: "grant.revoke.response"
 body: GrantRevokeResponseBody
+})
+/**
+ * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
+ * via the `definition` "KillSwitchResponseMessage".
+ */
+export type KillSwitchResponseMessage = (Envelope & {
+type?: "kill_switch.response"
+body: KillSwitchResult
 })
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
@@ -716,6 +732,14 @@ cursor?: string
  */
 export interface ApprovalDecideBody {
 approval_id: string
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+request_hash: string
+/**
+ * How the human confirmed: gesture (a click or key press after the input delay), typed_code (the bind code typed), os_auth (an operating-system user verification run by the daemon; later). Ordered gesture < typed_code < os_auth (07 section 7.7).
+ */
+confirmation?: ("gesture" | "typed_code" | "os_auth")
 decision: ("approve" | "deny")
 scope?: ("once" | "site" | "workflow" | "never")
 ui: {
@@ -775,6 +799,20 @@ limit?: number
  */
 export interface GrantRevokeBody {
 grant_id: string
+}
+/**
+ * Engage or release the kill switch from an extension page or notification (07 section 8). Release is refused from extension_notification.
+ *
+ * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
+ * via the `definition` "KillSwitchBody".
+ */
+export interface KillSwitchBody {
+action: ("engage" | "release")
+reason?: string
+ui: {
+surface: ("extension_popup" | "extension_options" | "extension_sidepanel" | "extension_notification")
+user_gesture: true
+}
 }
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
@@ -946,16 +984,1901 @@ reason: ("job_canceled" | "job_paused" | "superseded" | "shutdown" | "protocol_v
 export interface ApprovalListResponseBody {
 /**
  * @maxItems 100
+ *
+ * Items: The full approval as stored in the journal and as trust surfaces receive it: the 01 Approval entity plus request_hash, requested_by, revision, facts and agent_says (07 section 4).
  */
-approvals: Approval[]
+approvals: (Approval & {
+/**
+ * hex(BLAKE3(JCS(facts))) (07 section 4.6).
+ */
+request_hash: string
+/**
+ * facts.requester.client_id, or daemon.
+ */
+requested_by: (string | "daemon")
+revision: number
+/**
+ * The exact daemon-computed facts the request_hash covers and the trust surface renders (07 section 4.4). At most 16 KiB in JCS form.
+ */
+facts: ((FactsCommon & {
+kind?: "handoff"
+/**
+ * Web origin: scheme, ASCII (punycode) lowercase host, non-default port only. No path, query or fragment.
+ */
+origin: string
+first_time_for_origin: boolean
+browser: {
+name: ("chrome" | "edge" | "brave" | "chromium" | "firefox" | "other")
+profile_id?: string
+incognito: boolean
+}
+transfer: TransferFacts
+/**
+ * @maxItems 20
+ */
+items: []|[FactItem]|[FactItem, FactItem]|[FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]
+items_omitted: number
+}) | (FactsCommon & {
+kind?: "session_grant"
+/**
+ * Web origin: scheme, ASCII (punycode) lowercase host, non-default port only. No path, query or fragment.
+ */
+origin: string
+first_time_for_origin: boolean
+/**
+ * The scope the requester suggested; the human chooses.
+ */
+scope_hint: ("once" | "site" | "workflow" | null)
+run_id: (string | null)
+/**
+ * Null for a sessions.request that names no job yet.
+ */
+transfer: (TransferFacts | null)
+/**
+ * @maxItems 20
+ */
+items: []|[FactItem]|[FactItem, FactItem]|[FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]
+items_omitted: number
+}) | (FactsCommon & {
+kind?: "retry_escalation"
+job_id: string
+origin: (string | null)
+/**
+ * A file name or title that a server or an agent chose, after the display sanitiser. Rendered as untrusted text (07 section 10.1).
+ */
+untrusted_name: (string | null)
+error: {
+/**
+ * Stable machine string: <namespace>.<reason>, lowercase snake_case. Never translated, never reused for a different meaning.
+ */
+code: string
+/**
+ * Coarse, stable failure class. The first nine drive retry policy for jobs (01-domain-model section 8); the remainder classify protocol-level errors.
+ */
+class: ("transient_network" | "throttled" | "auth_expired" | "url_expired" | "blocked" | "permanent" | "disk" | "integrity" | "policy_denied" | "invalid_request" | "not_found" | "conflict" | "unauthenticated" | "unsupported" | "unavailable" | "timeout" | "internal")
+}
+refreshes_used: number
+/**
+ * Unsigned byte count or offset. Bounded by 2^53-1 so every JSON implementation represents it exactly.
+ */
+bytes_done: number
+bytes_total: (number | null)
+grant_id: (string | null)
+}) | (FactsCommon & {
+kind?: "policy_exception"
+/**
+ * The rule the exception bends, for this one subject only.
+ */
+rule: ("path_outside_roots" | "quarantined_file")
+operation: ("write" | "open" | "convert" | "move" | "delete")
+job_id: (string | null)
+origin: (string | null)
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+subject_path: string
+/**
+ * A file name or title that a server or an agent chose, after the display sanitiser. Rendered as untrusted text (07 section 10.1).
+ */
+untrusted_name: (string | null)
+quarantine_reasons: ("executable_type" | "mime_mismatch" | "html_disguised" | "archive_limits" | "av_flagged" | "untrusted_origin" | "session_derived")[]
+}) | (FactsCommon & {
+kind?: "workflow_plan"
+/**
+ * Workflow plan id (prefix plan_, reserved in 00-conventions section 5.1; plans are defined by spec 08).
+ */
+plan_id: string
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+plan_blake3: string
+/**
+ * The run the plan would start (08 creates it, awaiting approval, before raising the approval) or the run being renewed. Null only when no run exists yet.
+ */
+run_id: (string | null)
+/**
+ * The workflow grant this approval would renew (07 section 6.3); null otherwise.
+ */
+renewal_of: (string | null)
+/**
+ * A file name or title that a server or an agent chose, after the display sanitiser. Rendered as untrusted text (07 section 10.1).
+ */
+untrusted_title: (string | null)
+/**
+ * @minItems 1
+ * @maxItems 20
+ */
+allowed_domains: [string]|[string, string]|[string, string, string]|[string, string, string, string]|[string, string, string, string, string]|[string, string, string, string, string, string]|[string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]
+allowed_domains_omitted: number
+session_origin: (string | null)
+budgets: {
+max_pages: number
+max_files: number
+/**
+ * Unsigned byte count or offset. Bounded by 2^53-1 so every JSON implementation represents it exactly.
+ */
+max_bytes: number
+max_duration_ms: number
+max_depth: number
+}
+pace: {
+min_interval_ms: number
+max_concurrency_per_host: number
+}
+robots_txt: "obey"
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+dest_dir: string
+/**
+ * The dry run estimate: P10 (low) and P90 (high) of files and bytes (08); null when no dry run ran.
+ */
+estimate: ({
+files_low: number
+files_high: number
+/**
+ * Unsigned byte count or offset. Bounded by 2^53-1 so every JSON implementation represents it exactly.
+ */
+bytes_low: number
+/**
+ * Unsigned byte count or offset. Bounded by 2^53-1 so every JSON implementation represents it exactly.
+ */
+bytes_high: number
+} | null)
+}) | (FactsCommon & {
+kind?: "destructive_op"
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+operation_set_blake3: string
+plan_id: (string | null)
+artifact_plan?: ArtifactLifecyclePlan
+counts: {
+delete: number
+overwrite: number
+move: number
+rename: number
+}
+/**
+ * Unsigned byte count or offset. Bounded by 2^53-1 so every JSON implementation represents it exactly.
+ */
+total_bytes: number
+to_trash: boolean
+quarantined_count: number
+/**
+ * @maxItems 20
+ */
+sample: []|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]
+sample_omitted: number
+}) | (FactsCommon & {
+kind?: "cloud_delivery"
+/**
+ * @maxItems 0
+ */
+allowed_scopes?: []
+delivery_id: string
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+plan_blake3: string
+plan: CloudPlanView
+shares_full_source_url_with_provider: boolean
+remote_byte_cap_enforced: boolean
+remote_cancellation_supported: boolean
+}))
+/**
+ * Sanitised free text of the requester, at most 280 characters. Untrusted (07 section 4.5). Absent when the requester gave none.
+ */
+agent_says?: string
+})[]
 next_cursor: (string | null)
 }
 /**
- * A pending or decided request for a human decision. Only a human trust surface may decide one (docs/spec/07-approvals.md).
+ * A pending or decided request for a human decision. Only a human trust surface may decide one (docs/spec/07-approvals-trust-surface-and-consent.md). The members request_hash, requested_by, revision, facts and agent_says are added by spec 07: events carry the entity without facts and agent_says; trust surfaces, and the client that caused the approval, receive the full ApprovalRequest (approvals.v1.schema.json, 07 section 4.8).
  */
 export interface Approval {
 id: string
-kind: ("handoff" | "session_grant" | "retry_escalation" | "policy_exception" | "workflow_plan" | "destructive_op")
+kind: ("handoff" | "session_grant" | "retry_escalation" | "policy_exception" | "workflow_plan" | "destructive_op" | "cloud_delivery")
 state: ("pending" | "approved" | "denied" | "expired" | "canceled")
 job_id?: string
 run_id?: string
@@ -963,6 +2886,28 @@ run_id?: string
  * Web origin: scheme, ASCII (punycode) lowercase host, non-default port only. No path, query or fragment.
  */
 origin?: string
+/**
+ * Daemon-computed BLAKE3 over the JCS form of facts (07 section 4.6). A decision must name it.
+ */
+request_hash?: string
+/**
+ * Credential id of the requesting client, or the literal daemon for approvals the daemon raised itself. Set by the daemon from the authenticated connection.
+ */
+requested_by?: string
+/**
+ * Starts at 1 and increases each time the daemon amends the pending approval (a job joins or leaves a batch); every revision has its own request_hash (07 section 4.7).
+ */
+revision?: number
+/**
+ * The exact daemon-computed facts the request_hash covers (approvals.v1.schema.json RequestFacts). Present only in the full ApprovalRequest.
+ */
+facts?: {
+
+}
+/**
+ * Free text supplied by the requester, sanitised, at most 280 characters. Untrusted: shown only in a separate, labelled field (07 section 4.5). Present only in the full ApprovalRequest.
+ */
+agent_says?: string
 allowed_scopes: ("once" | "site" | "workflow" | "never")[]
 /**
  * Why the approval is needed, e.g. handoff.interrupted, session.first_use, retry.exhausted.
@@ -996,15 +2941,2154 @@ grant_id?: string
 }
 export interface Actor {
 kind: ("human" | "agent" | "cli" | "extension" | "engine" | "policy" | "system")
-surface?: ("extension_popup" | "extension_options" | "extension_sidepanel" | "extension_notification" | "tui" | "cli_interactive" | "mcp" | "a2a" | "jsonrpc")
+surface?: ("extension_popup" | "extension_options" | "extension_sidepanel" | "extension_notification" | "tui" | "cli_interactive" | "gui" | "os_notification" | "mcp" | "a2a" | "jsonrpc")
 client_id?: string
+}
+/**
+ * Members every facts object has (07 section 4.4).
+ */
+export interface FactsCommon {
+/**
+ * Facts format and hash domain separator. Any change to the members of a kind is a new value.
+ */
+t: "zeus.approval.facts.v1"
+approval_id: string
+revision: number
+kind: ("handoff" | "session_grant" | "retry_escalation" | "policy_exception" | "workflow_plan" | "destructive_op" | "cloud_delivery")
+requester: (RequesterClient | RequesterDaemon)
+/**
+ * RFC 3339 UTC instant, always with exactly three fractional digits and the Z designator.
+ */
+issued_at: string
+/**
+ * RFC 3339 UTC instant, always with exactly three fractional digits and the Z designator.
+ */
+expires_at: string
+allowed_scopes: ("once" | "site" | "workflow" | "never")[]
+confirmation: ConfirmationMap
+/**
+ * @maxItems 8
+ */
+reason_codes: []|[string]|[string, string]|[string, string, string]|[string, string, string, string]|[string, string, string, string, string]|[string, string, string, string, string, string]|[string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string]
+/**
+ * BLAKE3 of the UTF-8 bytes of agent_says, so the hash binds the text the human saw; null when there is none.
+ */
+agent_says_blake3: (string | null)
+}
+/**
+ * The authenticated client whose request caused the approval. Every member comes from the credential store and the connection, never from a self-declared name.
+ */
+export interface RequesterClient {
+kind: ("agent" | "service" | "human" | "admin")
+/**
+ * The concrete program behind a connection (spec 05).
+ */
+role: ("cli" | "tui" | "gui" | "native_host" | "mcp" | "a2a" | "service" | "embedded" | "test")
+/**
+ * Credential id of a daemon API client (00-conventions section 5.1 reserves the prefix cli_).
+ */
+client_id: string
+/**
+ * Name given to the credential by the installer (cli, agent, host) or by the human who created it (zeus clients add --name). Not chosen by the client at connect time.
+ */
+label: string
+/**
+ * RFC 3339 UTC instant, always with exactly three fractional digits and the Z designator.
+ */
+registered_at?: string
+}
+/**
+ * The daemon raised the approval on its own, with no attributable client.
+ */
+export interface RequesterDaemon {
+kind: "daemon"
+}
+/**
+ * Minimum confirmation per approve option: one key per scope in allowed_scopes other than never, or the single key approve when allowed_scopes is empty. A deny needs a gesture only.
+ */
+export interface ConfirmationMap {
+/**
+ * How the human confirmed: gesture (a click or key press after the input delay), typed_code (the bind code typed), os_auth (an operating-system user verification run by the daemon; later). Ordered gesture < typed_code < os_auth (07 section 7.7).
+ */
+once?: ("gesture" | "typed_code" | "os_auth")
+/**
+ * How the human confirmed: gesture (a click or key press after the input delay), typed_code (the bind code typed), os_auth (an operating-system user verification run by the daemon; later). Ordered gesture < typed_code < os_auth (07 section 7.7).
+ */
+site?: ("gesture" | "typed_code" | "os_auth")
+/**
+ * How the human confirmed: gesture (a click or key press after the input delay), typed_code (the bind code typed), os_auth (an operating-system user verification run by the daemon; later). Ordered gesture < typed_code < os_auth (07 section 7.7).
+ */
+workflow?: ("gesture" | "typed_code" | "os_auth")
+/**
+ * How the human confirmed: gesture (a click or key press after the input delay), typed_code (the bind code typed), os_auth (an operating-system user verification run by the daemon; later). Ordered gesture < typed_code < os_auth (07 section 7.7).
+ */
+approve?: ("gesture" | "typed_code" | "os_auth")
+}
+/**
+ * What the jobs covered by the approval will transfer.
+ */
+export interface TransferFacts {
+/**
+ * Every job the approval covers, in the order they joined it.
+ *
+ * @minItems 1
+ * @maxItems 50
+ */
+job_ids: [string, ...(string)[]]
+/**
+ * Sum of the known sizes; null when no size is known.
+ */
+total_bytes: (number | null)
+unknown_size_count: number
+/**
+ * @minItems 1
+ * @maxItems 8
+ *
+ * Items: Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+dest_dirs: [string]|[string, string]|[string, string, string]|[string, string, string, string]|[string, string, string, string, string]|[string, string, string, string, string, string]|[string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string]
+dest_dirs_omitted: number
+}
+/**
+ * One download covered by the approval.
+ */
+export interface FactItem {
+job_id: string
+/**
+ * A file name or title that a server or an agent chose, after the display sanitiser. Rendered as untrusted text (07 section 10.1).
+ */
+untrusted_name: (string | null)
+/**
+ * URL after the log or record redaction function of 00-conventions section 8 (no userinfo, no fragment, query dropped or sanitised).
+ */
+untrusted_url: string
+/**
+ * Size reported by the server or the browser; null when unknown.
+ */
+total_bytes: (number | null)
+}
+/**
+ * An exact artifact tombstone or protection change; the expected record hash binds its prior revision.
+ */
+export interface ArtifactLifecyclePlan {
+version: 1
+/**
+ * One artifact record (13). Minted by the artifact store instance that holds the record; local to that store.
+ */
+artifact_id: string
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+expected_record_blake3: string
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+blake3: string
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+sha256: string
+/**
+ * Unsigned byte count or offset. Bounded by 2^53-1 so every JSON implementation represents it exactly.
+ */
+size_bytes: number
+quarantined: boolean
+current_retention: ("keep" | "evictable")
+current_retain_until: (string | null)
+operation: ({
+kind: "delete"
+} | {
+kind: "set_retention"
+retention: ("keep" | "evictable")
+retain_until: (string | null)
+})
+requires_approval: true
+/**
+ * RFC 3339 UTC instant, always with exactly three fractional digits and the Z designator.
+ */
+expires_at: string
+}
+/**
+ * Redacted, immutable dry-run plan returned to every caller.
+ */
+export interface CloudPlanView {
+/**
+ * Account alias.
+ */
+account_id: string
+/**
+ * Exact authorized account revision.
+ */
+account_revision: number
+/**
+ * Explicitly accepted weaker remote guarantees.
+ */
+allow_unbounded_remote: boolean
+/**
+ * Reserved delivery ULID; retries of this plan never create a second remote object.
+ */
+delivery_id: string
+/**
+ * Configured destination root.
+ */
+destination: string
+/**
+ * Source SHA-256 when known.
+ */
+expected_sha256?: (string | null)
+/**
+ * Deadline to submit and approve this plan.
+ */
+expires_at: string
+/**
+ * True only when Zeus can enforce the transmitted byte ceiling.
+ */
+hard_byte_cap: boolean
+/**
+ * Maximum bytes authorized locally.
+ */
+max_bytes: number
+/**
+ * Maximum local operation lifetime.
+ */
+max_seconds: number
+/**
+ * Explicit mode.
+ */
+mode: ("staged_upload" | "stream_upload" | "remote_import")
+/**
+ * Canonical hash bound by the human approval.
+ */
+plan_hash: string
+/**
+ * Prefixed plan ULID.
+ */
+plan_id: string
+/**
+ * Provider family.
+ */
+provider: ("google_drive" | "yandex_disk" | "rclone" | "baidu_netdisk")
+/**
+ * True only when the provider can enforce cancellation.
+ */
+remote_cancellation_supported: boolean
+/**
+ * Final unique remote object name.
+ */
+remote_name: string
+/**
+ * Exact planned bytes.
+ */
+size_bytes: number
+/**
+ * Hash of the complete private source identity.
+ */
+source_hash: string
+/**
+ * Source job identity or URL origin; all URL paths and query strings withheld.
+ */
+source_redacted: string
+/**
+ * The requested mode is available with these exact constraints.
+ */
+supported: boolean
+/**
+ * Machine-readable unavailable capability.
+ */
+unsupported_reason?: (("remote_import_unavailable" | "remote_cancellation_unavailable" | "known_size_required" | "known_block_hashes_required" | "staged_digest_required" | "resume_unavailable" | "provider_unavailable" | "backend_not_ready" | "remote_hash_unavailable") | null)
 }
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
  * via the `definition` "ApprovalPendingBody".
  */
 export interface ApprovalPendingBody {
-approval: Approval
+/**
+ * The full approval as stored in the journal and as trust surfaces receive it: the 01 Approval entity plus request_hash, requested_by, revision, facts and agent_says (07 section 4).
+ */
+approval: (Approval & {
+/**
+ * hex(BLAKE3(JCS(facts))) (07 section 4.6).
+ */
+request_hash: string
+/**
+ * facts.requester.client_id, or daemon.
+ */
+requested_by: (string | "daemon")
+revision: number
+/**
+ * The exact daemon-computed facts the request_hash covers and the trust surface renders (07 section 4.4). At most 16 KiB in JCS form.
+ */
+facts: ((FactsCommon & {
+kind?: "handoff"
+/**
+ * Web origin: scheme, ASCII (punycode) lowercase host, non-default port only. No path, query or fragment.
+ */
+origin: string
+first_time_for_origin: boolean
+browser: {
+name: ("chrome" | "edge" | "brave" | "chromium" | "firefox" | "other")
+profile_id?: string
+incognito: boolean
+}
+transfer: TransferFacts
+/**
+ * @maxItems 20
+ */
+items: []|[FactItem]|[FactItem, FactItem]|[FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]
+items_omitted: number
+}) | (FactsCommon & {
+kind?: "session_grant"
+/**
+ * Web origin: scheme, ASCII (punycode) lowercase host, non-default port only. No path, query or fragment.
+ */
+origin: string
+first_time_for_origin: boolean
+/**
+ * The scope the requester suggested; the human chooses.
+ */
+scope_hint: ("once" | "site" | "workflow" | null)
+run_id: (string | null)
+/**
+ * Null for a sessions.request that names no job yet.
+ */
+transfer: (TransferFacts | null)
+/**
+ * @maxItems 20
+ */
+items: []|[FactItem]|[FactItem, FactItem]|[FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]|[FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem, FactItem]
+items_omitted: number
+}) | (FactsCommon & {
+kind?: "retry_escalation"
+job_id: string
+origin: (string | null)
+/**
+ * A file name or title that a server or an agent chose, after the display sanitiser. Rendered as untrusted text (07 section 10.1).
+ */
+untrusted_name: (string | null)
+error: {
+/**
+ * Stable machine string: <namespace>.<reason>, lowercase snake_case. Never translated, never reused for a different meaning.
+ */
+code: string
+/**
+ * Coarse, stable failure class. The first nine drive retry policy for jobs (01-domain-model section 8); the remainder classify protocol-level errors.
+ */
+class: ("transient_network" | "throttled" | "auth_expired" | "url_expired" | "blocked" | "permanent" | "disk" | "integrity" | "policy_denied" | "invalid_request" | "not_found" | "conflict" | "unauthenticated" | "unsupported" | "unavailable" | "timeout" | "internal")
+}
+refreshes_used: number
+/**
+ * Unsigned byte count or offset. Bounded by 2^53-1 so every JSON implementation represents it exactly.
+ */
+bytes_done: number
+bytes_total: (number | null)
+grant_id: (string | null)
+}) | (FactsCommon & {
+kind?: "policy_exception"
+/**
+ * The rule the exception bends, for this one subject only.
+ */
+rule: ("path_outside_roots" | "quarantined_file")
+operation: ("write" | "open" | "convert" | "move" | "delete")
+job_id: (string | null)
+origin: (string | null)
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+subject_path: string
+/**
+ * A file name or title that a server or an agent chose, after the display sanitiser. Rendered as untrusted text (07 section 10.1).
+ */
+untrusted_name: (string | null)
+quarantine_reasons: ("executable_type" | "mime_mismatch" | "html_disguised" | "archive_limits" | "av_flagged" | "untrusted_origin" | "session_derived")[]
+}) | (FactsCommon & {
+kind?: "workflow_plan"
+/**
+ * Workflow plan id (prefix plan_, reserved in 00-conventions section 5.1; plans are defined by spec 08).
+ */
+plan_id: string
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+plan_blake3: string
+/**
+ * The run the plan would start (08 creates it, awaiting approval, before raising the approval) or the run being renewed. Null only when no run exists yet.
+ */
+run_id: (string | null)
+/**
+ * The workflow grant this approval would renew (07 section 6.3); null otherwise.
+ */
+renewal_of: (string | null)
+/**
+ * A file name or title that a server or an agent chose, after the display sanitiser. Rendered as untrusted text (07 section 10.1).
+ */
+untrusted_title: (string | null)
+/**
+ * @minItems 1
+ * @maxItems 20
+ */
+allowed_domains: [string]|[string, string]|[string, string, string]|[string, string, string, string]|[string, string, string, string, string]|[string, string, string, string, string, string]|[string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]
+allowed_domains_omitted: number
+session_origin: (string | null)
+budgets: {
+max_pages: number
+max_files: number
+/**
+ * Unsigned byte count or offset. Bounded by 2^53-1 so every JSON implementation represents it exactly.
+ */
+max_bytes: number
+max_duration_ms: number
+max_depth: number
+}
+pace: {
+min_interval_ms: number
+max_concurrency_per_host: number
+}
+robots_txt: "obey"
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+dest_dir: string
+/**
+ * The dry run estimate: P10 (low) and P90 (high) of files and bytes (08); null when no dry run ran.
+ */
+estimate: ({
+files_low: number
+files_high: number
+/**
+ * Unsigned byte count or offset. Bounded by 2^53-1 so every JSON implementation represents it exactly.
+ */
+bytes_low: number
+/**
+ * Unsigned byte count or offset. Bounded by 2^53-1 so every JSON implementation represents it exactly.
+ */
+bytes_high: number
+} | null)
+}) | (FactsCommon & {
+kind?: "destructive_op"
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+operation_set_blake3: string
+plan_id: (string | null)
+artifact_plan?: ArtifactLifecyclePlan
+counts: {
+delete: number
+overwrite: number
+move: number
+rename: number
+}
+/**
+ * Unsigned byte count or offset. Bounded by 2^53-1 so every JSON implementation represents it exactly.
+ */
+total_bytes: number
+to_trash: boolean
+quarantined_count: number
+/**
+ * @maxItems 20
+ */
+sample: []|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]|[{
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}, {
+op: ("delete" | "overwrite" | "move" | "rename")
+/**
+ * Absolute canonical path on the daemon's host, after symlink resolution. Rendered through the display sanitiser with middle truncation (07 section 10.1).
+ */
+path: string
+to: (string | null)
+size_bytes: (number | null)
+}]
+sample_omitted: number
+}) | (FactsCommon & {
+kind?: "cloud_delivery"
+/**
+ * @maxItems 0
+ */
+allowed_scopes?: []
+delivery_id: string
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+plan_blake3: string
+plan: CloudPlanView
+shares_full_source_url_with_provider: boolean
+remote_byte_cap_enforced: boolean
+remote_cancellation_supported: boolean
+}))
+/**
+ * Sanitised free text of the requester, at most 280 characters. Untrusted (07 section 4.5). Absent when the requester gave none.
+ */
+agent_says?: string
+})
 }
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
@@ -1039,6 +5123,23 @@ last_used_at?: (string | null)
 revoked_at?: (string | null)
 renewable: boolean
 renewal_count?: number
+/**
+ * Instant of the latest renewal (07 section 6.3); null or absent when never renewed.
+ */
+renewed_at?: (string | null)
+revoked_by?: Actor1
+/**
+ * Why the grant was revoked: a human request, the kill switch, or a never entry for the same origin.
+ */
+revocation_reason?: ("user_request" | "kill_switch" | "origin_blocked")
+}
+/**
+ * Who revoked the grant; present when state is revoked (07 section 6.4).
+ */
+export interface Actor1 {
+kind: ("human" | "agent" | "cli" | "extension" | "engine" | "policy" | "system")
+surface?: ("extension_popup" | "extension_options" | "extension_sidepanel" | "extension_notification" | "tui" | "cli_interactive" | "gui" | "os_notification" | "mcp" | "a2a" | "jsonrpc")
+client_id?: string
 }
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
@@ -1082,7 +5183,7 @@ data?: {
 from: ("queued" | "probing" | "awaiting_approval" | "awaiting_session" | "downloading" | "paused" | "retry_scheduled" | "verifying" | "finalizing" | "completed" | "failed" | "canceled")
 to: ("queued" | "probing" | "awaiting_approval" | "awaiting_session" | "downloading" | "paused" | "retry_scheduled" | "verifying" | "finalizing" | "completed" | "failed" | "canceled")
 transition: string
-cause: ("created" | "user_request" | "scheduler" | "probe_ok" | "session_needed" | "approval_needed" | "approval_approved" | "approval_denied" | "approval_expired" | "session_delivered" | "session_deadline" | "refresh_impossible" | "retry_timer" | "retry_now" | "all_committed" | "verification_ok" | "integrity_restart" | "integrity_failed" | "finalized" | "finalize_error" | "error" | "escalation" | "grant_revoked" | "grant_expired" | "policy" | "recovered" | "crash_loop")
+cause: ("created" | "user_request" | "scheduler" | "probe_ok" | "session_needed" | "approval_needed" | "approval_approved" | "approval_denied" | "approval_expired" | "session_delivered" | "session_deadline" | "refresh_impossible" | "retry_timer" | "retry_now" | "all_committed" | "verification_ok" | "integrity_restart" | "integrity_failed" | "finalized" | "finalize_error" | "error" | "escalation" | "grant_revoked" | "grant_expired" | "policy" | "recovered" | "crash_loop" | "workflow_runner")
 actor: Actor
 }
 }) | (EventBase & {
@@ -1172,6 +5273,11 @@ grant_id: string
 origin: string
 }
 }) | (EventBase & {
+type?: "grant.renewed"
+data?: {
+grant: SessionGrant
+}
+}) | (EventBase & {
 type?: "approval.requested"
 data?: {
 approval: Approval
@@ -1180,7 +5286,7 @@ approval: Approval
 type?: "approval.decided"
 data?: {
 approval_id: string
-kind: ("handoff" | "session_grant" | "retry_escalation" | "policy_exception" | "workflow_plan" | "destructive_op")
+kind: ("handoff" | "session_grant" | "retry_escalation" | "policy_exception" | "workflow_plan" | "destructive_op" | "cloud_delivery")
 outcome: ("approve" | "deny" | "expire" | "cancel")
 scope?: ("once" | "site" | "workflow" | "never")
 actor: Actor
@@ -1259,6 +5365,17 @@ audit_chain_ok: boolean
 type?: "daemon.stopping"
 data?: {
 reason: ("user_request" | "signal" | "upgrade" | "fatal_error")
+}
+}) | (EventBase & {
+type?: "daemon.kill_switch"
+data?: {
+/**
+ * True after an engage, false after a release (07 section 8).
+ */
+engaged: boolean
+grants_revoked: number
+jobs_paused: number
+by: Actor
 }
 }))
 }
@@ -1359,6 +5476,26 @@ created_at: string
  * RFC 3339 UTC instant, always with exactly three fractional digits and the Z designator.
  */
 updated_at: string
+/**
+ * seq of the durable event that put the job into its current state (job.created or job.state_changed). Filled by the daemon API (05 section 9.2).
+ */
+state_seq?: number
+/**
+ * progress.rate_ewma (bytes per second).
+ */
+rate_ewma?: number
+/**
+ * progress.eta_s.
+ */
+eta_s?: (number | null)
+/**
+ * result.path; completed jobs only.
+ */
+path?: string
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+sha256?: string
 }
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
@@ -1383,6 +5520,20 @@ grants: SessionGrant[]
  */
 export interface GrantRevokeResponseBody {
 grant: SessionGrant
+}
+export interface KillSwitchResult {
+engaged: boolean
+/**
+ * False when the latch already had the requested value (the engage sweep still ran).
+ */
+changed: boolean
+grants_revoked: number
+jobs_paused: number
+approvals_pending: number
+/**
+ * True when the result was returned from the idempotency store instead of acting again (00-conventions section 5.4).
+ */
+replayed?: boolean
 }
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema

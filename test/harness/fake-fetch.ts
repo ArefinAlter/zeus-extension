@@ -64,6 +64,7 @@ export class FakeFetch {
     }
     if (signal?.aborted) throw abortError();
     if (spec.fail) throw spec.fail;
+    if (spec.redirected && init.redirect === 'error') throw new TypeError('Redirect refused');
     const pieces = spec.body ?? [];
     let index = 0;
     const countPull = (): void => {

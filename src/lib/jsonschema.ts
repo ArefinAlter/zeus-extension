@@ -22,9 +22,10 @@ const ANNOTATIONS = new Set([
   'title',
   'description',
   'default',
+  'writeOnly',
   'x-zeus-secret',
 ]);
-const SCHEMA_VALUED = new Set(['items', 'additionalProperties', 'propertyNames']);
+const SCHEMA_VALUED = new Set(['items', 'additionalProperties', 'propertyNames', 'not']);
 const SCHEMA_MAP = new Set(['properties']);
 const SCHEMA_LIST = new Set(['allOf', 'anyOf', 'oneOf']);
 const LEAF = new Set([
@@ -41,6 +42,7 @@ const LEAF = new Set([
   'maxItems',
   'uniqueItems',
   'maxProperties',
+  'minProperties',
   'required',
 ]);
 
@@ -161,6 +163,51 @@ export class SchemaSet {
     return this.validate(ref, value, 1).length === 0;
   }
 
+  /** Approval facts are closed: reject unrecognized members, including nested objects. */
+  isValidClosed(ref: string, value: unknown): boolean {
+    if (!this.isValid(ref, value)) return false;
+    const resolved = this.resolve(ref, '');
+    const inspect = (nodes: Resolved[], current: unknown): boolean => {
+      const expanded: Resolved[] = [];
+      const expand = (node: Resolved): void => {
+        if (!isObject(node.schema)) return;
+        const schema = node.schema;
+        expanded.push(node);
+        if (typeof schema.$ref === 'string') expand(this.resolve(schema.$ref, node.base));
+        if (Array.isArray(schema.allOf))
+          for (const sub of schema.allOf) expand({ schema: sub, base: node.base });
+        for (const key of ['oneOf', 'anyOf']) {
+          const alternatives = schema[key];
+          if (Array.isArray(alternatives))
+            for (const sub of alternatives) {
+              if (this.subValid(sub, node.base, current)) expand({ schema: sub, base: node.base });
+            }
+        }
+      };
+      nodes.forEach(expand);
+      if (Array.isArray(current)) {
+        const items = expanded.flatMap((n) =>
+          isObject(n.schema) && n.schema.items !== undefined
+            ? [{ schema: n.schema.items, base: n.base }]
+            : [],
+        );
+        return current.every((item) => inspect(items, item));
+      }
+      if (!isObject(current)) return true;
+      const properties = new Map<string, Resolved[]>();
+      for (const node of expanded) {
+        if (!isObject(node.schema) || !isObject(node.schema.properties)) continue;
+        for (const [key, sub] of Object.entries(node.schema.properties)) {
+          properties.set(key, [...(properties.get(key) ?? []), { schema: sub, base: node.base }]);
+        }
+      }
+      return Object.entries(current).every(
+        ([key, child]) => properties.has(key) && inspect(properties.get(key) ?? [], child),
+      );
+    };
+    return inspect([resolved], value);
+  }
+
   private assertSupported(schema: unknown, where: string): void {
     if (typeof schema === 'boolean') return;
     if (!isObject(schema)) throw new Error(`${where}: schema must be an object or boolean`);
@@ -276,6 +323,8 @@ export class SchemaSet {
       if (Array.isArray(list))
         for (const sub of list) this.check(sub, base, value, path, issues, limit);
     }
+    if (schema.not !== undefined && this.subValid(schema.not, base, value))
+      add('matches a forbidden shape');
     if (Array.isArray(schema.anyOf)) {
       const alternatives = schema.anyOf as unknown[];
       if (!alternatives.some((alt) => this.subValid(alt, base, value)))
@@ -316,6 +365,9 @@ export class SchemaSet {
     add: (message: string) => void,
   ): void {
     const keys = Object.keys(value);
+    if (typeof schema.minProperties === 'number' && keys.length < schema.minProperties) {
+      add(`must have at least ${schema.minProperties} properties`);
+    }
     if (typeof schema.maxProperties === 'number' && keys.length > schema.maxProperties) {
       add(`must have at most ${schema.maxProperties} properties`);
     }

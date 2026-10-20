@@ -83,7 +83,7 @@ describe('fetch.range happy path (spec 02 section 9)', () => {
     expect(req?.url).toBe(URL_);
     expect(req?.init).toMatchObject({
       credentials: 'include',
-      redirect: 'follow',
+      redirect: 'error',
       cache: 'no-store',
     });
     expect(req?.headers).toEqual({
@@ -155,7 +155,7 @@ describe('fetch.range happy path (spec 02 section 9)', () => {
     expect(w.daemon.violations).toEqual([]);
   });
 
-  it('reports a cross-origin redirect and continues when no cookies are involved', async () => {
+  it('refuses redirect chains before the browser can attach cookies to another origin', async () => {
     const w = await ready();
     w.fetcher.respondWith({
       ...ok206(OFFSET, 1000),
@@ -164,11 +164,12 @@ describe('fetch.range happy path (spec 02 section 9)', () => {
     });
     w.daemon.send('fetch.range', range({ range: { offset: OFFSET, length: 1000 } }));
     await run(w);
-    expect(framesOf(w, 'fetch.head')[0]?.body).toMatchObject({
-      redirected: true,
-      final_url: 'https://cdn.example.net/blob?sig=abc',
+    expect(w.fetcher.requests[0]?.init.redirect).toBe('error');
+    expect(framesOf(w, 'fetch.head')).toHaveLength(0);
+    expect(framesOf(w, 'fetch.chunk')).toHaveLength(0);
+    expect(framesOf(w, 'fetch.error')[0]?.body).toMatchObject({
+      error: { code: 'fetch.network_error' },
     });
-    expect(framesOf(w, 'fetch.end')[0]?.body).toMatchObject({ reason: 'complete', bytes: 1000 });
   });
 });
 
@@ -295,7 +296,7 @@ describe('what the extension refuses to stream', () => {
     expect(framesOf(w, 'fetch.chunk')).toHaveLength(0);
   });
 
-  it('truncates a 200 to a ranged request at offset 0 to the requested length', async () => {
+  it('streams a full 200 at offset zero so the daemon can switch to sequential transfer', async () => {
     const w = await ready();
     w.fetcher.respondWith({
       status: 200,
@@ -308,8 +309,8 @@ describe('what the extension refuses to stream', () => {
     );
     await run(w);
     const chunks = framesOf(w, 'fetch.chunk');
-    expect(chunks.map((c) => c.body.length)).toEqual([8192, 8192, 3616]);
-    expect(framesOf(w, 'fetch.end')[0]?.body).toMatchObject({ reason: 'complete', bytes: 20_000 });
+    expect(chunks.map((c) => c.body.length)).toEqual([8192, 8192, 8192, 8192, 8192, 8192, 848]);
+    expect(framesOf(w, 'fetch.end')[0]?.body).toMatchObject({ reason: 'complete', bytes: 50_000 });
   });
 
   it('never sends more bytes than the requested range even if the server overruns', async () => {
@@ -402,11 +403,11 @@ describe('consent and origin checks before any network access', () => {
     w.daemon.send('fetch.range', range({ range: { offset: OFFSET, length: 1000 } }));
     await run(w);
     expect(framesOf(w, 'fetch.error')[0]?.body).toMatchObject({
-      error: { code: 'fetch.cross_origin_denied', class: 'policy_denied' },
+      error: { code: 'fetch.network_error', class: 'transient_network' },
     });
     expect(framesOf(w, 'fetch.head')).toHaveLength(0);
     expect(framesOf(w, 'fetch.chunk')).toHaveLength(0);
-    expect(w.fetcher.cancelledBodies).toBe(1); // response bytes never reached the daemon
+    expect(w.fetcher.piecesPulled).toBe(0); // redirect rejected before any response body is exposed
   });
 
   it('stops a running stream when its consent is revoked', async () => {
@@ -661,7 +662,7 @@ describe('planBody', () => {
     expect(planBody(206, { offset: 5, length: 10 })).toEqual({ mode: 'stream', limit: 10 });
     expect(planBody(206, null)).toEqual({ mode: 'stream', limit: null });
     expect(planBody(200, null)).toEqual({ mode: 'stream', limit: null });
-    expect(planBody(200, { offset: 0, length: 10 })).toEqual({ mode: 'stream', limit: 10 });
+    expect(planBody(200, { offset: 0, length: 10 })).toEqual({ mode: 'stream', limit: null });
     expect(planBody(200, { offset: 1, length: 10 })).toEqual({ mode: 'hold' });
     for (const s of [204, 301, 403, 404, 416, 429, 500, 503])
       expect(planBody(s, null)).toEqual({ mode: 'hold' });

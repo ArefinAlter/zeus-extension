@@ -1,0 +1,54 @@
+# Required checks for the browser extension. The schema copies come from the zeus repository's docs/spec
+# (public), pinned to the revision used to generate this branch's schema copies.
+# A passing build is not installed-browser acceptance; that remains a manual release gate.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  extension:
+    name: Typecheck, lint, test and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: zeus-extension
+      - uses: actions/checkout@v5
+        with:
+          repository: ArefinAlter/zeus
+          # Advance this pin together with schema/ when synchronizing contracts.
+          ref: f4da89dee3b0485e49f0f2b112143315048be321
+          path: zeus
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: zeus-extension/package-lock.json
+      - working-directory: zeus-extension
+        run: npm ci
+      - name: Schema copies match zeus docs/spec
+        working-directory: zeus-extension
+        run: node scripts/sync-schema.mjs --check --require-source --from ../zeus
+      - working-directory: zeus-extension
+        run: npm run typecheck
+      - working-directory: zeus-extension
+        run: npm run lint
+      - working-directory: zeus-extension
+        run: npm test
+      - working-directory: zeus-extension
+        run: npm run build
+      - working-directory: zeus-extension
+        run: npm run build:store
+      - working-directory: zeus-extension
+        run: npm run check

@@ -1674,7 +1674,7 @@
           "type": "array",
           "maxItems": 100,
           "items": {
-            "$ref": "https://zeus.invalid/schema/domain#/$defs/Approval"
+            "$ref": "https://zeus.invalid/schema/approvals.v1#/$defs/ApprovalRequest"
           }
         },
         "next_cursor": {
@@ -1714,7 +1714,8 @@
       ],
       "properties": {
         "approval": {
-          "$ref": "https://zeus.invalid/schema/domain#/$defs/Approval"
+          "description": "The full approval with its facts (07 section 4.8).",
+          "$ref": "https://zeus.invalid/schema/approvals.v1#/$defs/ApprovalRequest"
         }
       }
     },
@@ -1742,12 +1743,21 @@
       "type": "object",
       "required": [
         "approval_id",
+        "request_hash",
         "decision",
         "ui"
       ],
       "properties": {
         "approval_id": {
           "$ref": "https://zeus.invalid/schema/common#/$defs/ApprovalId"
+        },
+        "request_hash": {
+          "description": "The hash the extension recomputed from the facts it displayed (07 section 4.6).",
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256"
+        },
+        "confirmation": {
+          "description": "How the human confirmed (07 section 7.7); absent means gesture.",
+          "$ref": "https://zeus.invalid/schema/approvals.v1#/$defs/ConfirmationLevel"
         },
         "decision": {
           "enum": [
@@ -1826,6 +1836,87 @@
             },
             "body": {
               "$ref": "#/$defs/ApprovalDecideResponseBody"
+            }
+          },
+          "required": [
+            "body",
+            "re"
+          ]
+        }
+      ]
+    },
+    "KillSwitchBody": {
+      "description": "Engage or release the kill switch from an extension page or notification (07 section 8). Release is refused from extension_notification.",
+      "type": "object",
+      "required": [
+        "action",
+        "ui"
+      ],
+      "properties": {
+        "action": {
+          "enum": [
+            "engage",
+            "release"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 280
+        },
+        "ui": {
+          "type": "object",
+          "required": [
+            "surface",
+            "user_gesture"
+          ],
+          "properties": {
+            "surface": {
+              "enum": [
+                "extension_popup",
+                "extension_options",
+                "extension_sidepanel",
+                "extension_notification"
+              ]
+            },
+            "user_gesture": {
+              "const": true
+            }
+          }
+        }
+      }
+    },
+    "KillSwitchMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "kill_switch"
+            },
+            "body": {
+              "$ref": "#/$defs/KillSwitchBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "KillSwitchResponseMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "kill_switch.response"
+            },
+            "body": {
+              "$ref": "https://zeus.invalid/schema/approvals.v1#/$defs/KillSwitchResult"
             }
           },
           "required": [
@@ -2364,6 +2455,9 @@
         },
         {
           "$ref": "#/$defs/GrantRevokeMessage"
+        },
+        {
+          "$ref": "#/$defs/KillSwitchMessage"
         }
       ]
     },
@@ -2431,6 +2525,9 @@
         },
         {
           "$ref": "#/$defs/GrantRevokeResponseMessage"
+        },
+        {
+          "$ref": "#/$defs/KillSwitchResponseMessage"
         }
       ]
     },

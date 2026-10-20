@@ -8,17 +8,23 @@ import { join, resolve } from 'node:path';
 export const SCHEMA_FILES = [
   'native-messaging.v1.schema.json',
   'common.schema.json',
+  'approvals.v1.schema.json',
+  'cloud.v1.schema.json',
   'domain.schema.json',
   'redaction-vectors.v1.json',
 ];
 
 /** Spec documents whose validated JSON fences become test fixtures. */
-export const EXAMPLE_SOURCES = ['02-native-messaging-v1.md', '01-domain-model.md'];
+export const EXAMPLE_SOURCES = [
+  '02-native-messaging-v1.md',
+  '01-domain-model.md',
+  '07-approvals-trust-surface-and-consent.md',
+];
 export const EXAMPLES_FILE = 'spec-examples.json';
 export const LOCK_FILE = 'SCHEMA-LOCK.json';
 
 /** Schemas the extension carries; examples against any other schema are not extracted. */
-const KNOWN_SCHEMAS = ['native-messaging.v1', 'domain', 'common'];
+const KNOWN_SCHEMAS = ['native-messaging.v1', 'domain', 'common', 'approvals.v1'];
 
 /** @param {string} text */
 export const normalizeNewlines = (text) => text.replace(/\r\n/g, '\n');

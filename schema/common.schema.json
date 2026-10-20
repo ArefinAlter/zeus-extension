@@ -4,6 +4,8 @@
   "title": "Zeus common definitions",
   "description": "Identifier formats, scalar types and the error envelope shared by every Zeus wire format. Normative text: docs/spec/00-conventions.md.",
   "$defs": {
+    "CloudPlanId": {"type": "string", "pattern": "^clp_[0-7][0-9A-HJKMNP-TV-Z]{25}$"},
+    "CloudDeliveryId": {"type": "string", "pattern": "^cld_[0-7][0-9A-HJKMNP-TV-Z]{25}$"},
     "Ulid": {
       "description": "26-character Crockford base32 ULID. The first character is 0-7 so the value fits in 128 bits.",
       "type": "string",
@@ -20,6 +22,11 @@
     },
     "ConnectionId": { "type": "string", "pattern": "^conn_[0-7][0-9A-HJKMNP-TV-Z]{25}$" },
     "ChainId": { "type": "string", "pattern": "^chain_[0-7][0-9A-HJKMNP-TV-Z]{25}$" },
+    "ArtifactId": {
+      "description": "One artifact record (13). Minted by the artifact store instance that holds the record; local to that store.",
+      "type": "string",
+      "pattern": "^art_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
     "EventSeq": {
       "description": "Monotonic event sequence number. Textual form (URIs, cursors) is ev_<decimal>.",
       "type": "integer",

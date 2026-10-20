@@ -33,6 +33,7 @@ describe('protocol tables derived from the schema', () => {
         'job.control.response',
         'job.event',
         'job.list.response',
+        'kill_switch.response',
         'ping',
         'pong',
         'session.request',
@@ -50,8 +51,8 @@ describe('protocol tables derived from the schema', () => {
     for (const type of Object.keys(REQUESTS)) expect(EXT_MESSAGE_DEFS.has(type)).toBe(true);
   });
 
-  it('knows all 19 events of the catalogue', () => {
-    expect(EVENT_DEFS.size).toBe(19);
+  it('knows all events of the current catalogue', () => {
+    expect(EVENT_DEFS.size).toBe(21);
   });
 });
 

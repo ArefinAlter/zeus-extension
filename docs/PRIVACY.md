@@ -30,7 +30,7 @@ Effective 2026-10-05. This is the text for the store listing's privacy policy fi
 
 ## Third parties
 
-None. The extension contains no third-party code at run time: the shipped files are built from this repository with no run-time dependencies (`npm run check` enforces this).
+No third-party services. The extension bundles the pinned `@noble/hashes` library solely to verify approval hashes locally. It makes no network requests. No code is downloaded or loaded at run time; `npm run check` restricts bundled runtime dependencies to this package. Its license is included in `THIRD_PARTY_NOTICES.md`.
 
 ## Changes and contact
 

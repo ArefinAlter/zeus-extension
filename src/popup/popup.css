@@ -9,3 +9,22 @@ body.popup {
   border-top: 1px solid var(--border);
   font-size: 12px;
 }
+
+.bound-facts {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.agent-says {
+  border-left: 2px solid currentColor;
+  margin: 12px 0;
+  padding-left: 10px;
+  font-style: italic;
+}
+.binding-facts input {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  padding: 8px;
+}

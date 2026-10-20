@@ -17,6 +17,10 @@ export type UiRequest =
   | {
       cmd: 'approval.decide';
       approval_id: string;
+      request_hash: string;
+      revision: number;
+      confirmation: 'gesture' | 'typed_code';
+      typed_code?: string;
       decision: 'approve' | 'deny';
       scope?: GrantScope;
       /** True only when the click handler observed a user activation (navigator.userActivation.isActive). */
@@ -28,6 +32,7 @@ export type UiRequest =
   | { cmd: 'grant.revoke'; grant_id: string }
   | { cmd: 'download.forward'; download_id: number }
   | { cmd: 'reconnect' }
+  | { cmd: 'kill_switch'; action: 'engage' | 'release'; user_gesture: boolean }
   | { cmd: 'settings.set'; patch: Partial<Settings> };
 
 export interface UiError {
@@ -88,6 +93,14 @@ export function parseUiRequest(raw: unknown): UiRequest | null {
       return { cmd: raw.cmd };
     case 'approval.decide': {
       if (typeof raw.approval_id !== 'string' || typeof raw.user_gesture !== 'boolean') return null;
+      if (
+        typeof raw.request_hash !== 'string' ||
+        !/^[a-f0-9]{64}$/.test(raw.request_hash) ||
+        !Number.isSafeInteger(raw.revision)
+      )
+        return null;
+      if (raw.confirmation !== 'gesture' && raw.confirmation !== 'typed_code') return null;
+      if (raw.typed_code !== undefined && typeof raw.typed_code !== 'string') return null;
       if (raw.decision !== 'approve' && raw.decision !== 'deny') return null;
       if (raw.surface !== 'extension_popup' && raw.surface !== 'extension_options') return null;
       if (raw.scope !== undefined && (typeof raw.scope !== 'string' || !SCOPES.includes(raw.scope)))
@@ -95,12 +108,21 @@ export function parseUiRequest(raw: unknown): UiRequest | null {
       return {
         cmd: 'approval.decide',
         approval_id: raw.approval_id,
+        request_hash: raw.request_hash,
+        revision: raw.revision as number,
+        confirmation: raw.confirmation,
+        ...(raw.typed_code === undefined ? {} : { typed_code: raw.typed_code }),
         decision: raw.decision,
         user_gesture: raw.user_gesture,
         surface: raw.surface,
         ...(raw.scope === undefined ? {} : { scope: raw.scope as GrantScope }),
       };
     }
+    case 'kill_switch':
+      return (raw.action === 'engage' || raw.action === 'release') &&
+        typeof raw.user_gesture === 'boolean'
+        ? { cmd: 'kill_switch', action: raw.action, user_gesture: raw.user_gesture }
+        : null;
     case 'job.control':
       if (
         typeof raw.job_id !== 'string' ||

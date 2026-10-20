@@ -59,6 +59,29 @@ export class UiService {
             granted: result.grant !== null,
           });
         }
+        case 'kill_switch': {
+          if (!request.user_gesture)
+            return {
+              ok: false,
+              error: { code: 'nm.user_gesture_required', message: 'This action needs a click.' },
+            };
+          const answer = await this.link.request('kill_switch', {
+            action: request.action,
+            ui: { surface: 'extension_popup', user_gesture: true },
+          });
+          if (answer.type !== 'kill_switch.response')
+            return {
+              ok: false,
+              error: { code: 'nm.internal', message: 'Unexpected stop response.' },
+            };
+          if (answer.body.engaged) {
+            for (const record of await this.store.listConsent())
+              await this.approvals.onGrantEnded(record.grant_id, record.origin);
+            this.approvals.clear();
+          }
+          this.hooks.changed();
+          return ok(answer.body);
+        }
         case 'job.control': {
           const answer = await this.link.request('job.control', {
             job_id: request.job_id,

@@ -1,0 +1,1081 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeus.invalid/schema/cloud.v1",
+  "title": "Zeus cloud delivery v1",
+  "description": "Spec 14 cloud delivery contracts. Derived from the implemented API with normative identifier, budget and secret annotations. Public output never includes private checkpoints.",
+  "$defs": {
+    "CapabilityReason": {
+      "description": "Stable, actionable capability reasons.",
+      "oneOf": [
+        {
+          "const": "remote_import_unavailable",
+          "description": "Provider has no verified URL-import implementation.",
+          "type": "string"
+        },
+        {
+          "const": "remote_cancellation_unavailable",
+          "description": "No official remote-operation cancellation implementation exists.",
+          "type": "string"
+        },
+        {
+          "const": "known_size_required",
+          "description": "This implementation requires exact content length.",
+          "type": "string"
+        },
+        {
+          "const": "known_block_hashes_required",
+          "description": "Baidu's upload protocol requires all 4 MiB block MD5 values before starting.",
+          "type": "string"
+        },
+        {
+          "const": "staged_digest_required",
+          "description": "The caller must supply the digest of its verified local file.",
+          "type": "string"
+        },
+        {
+          "const": "resume_unavailable",
+          "description": "This data path cannot replay bytes after restart.",
+          "type": "string"
+        },
+        {
+          "const": "provider_unavailable",
+          "description": "Native implementation is not available.",
+          "type": "string"
+        },
+        {
+          "const": "backend_not_ready",
+          "description": "Explicit provider feature discovery/configuration is required.",
+          "type": "string"
+        },
+        {
+          "const": "remote_hash_unavailable",
+          "description": "A promised expected hash cannot be checked from the provider's returned metadata.",
+          "type": "string"
+        }
+      ]
+    },
+    "CloudAccountMutationResult": {
+      "description": "Setup/revocation receipt.",
+      "properties": {
+        "account": {
+          "$ref": "#/$defs/CloudAccountView",
+          "description": "Current account scope."
+        },
+        "replayed": {
+          "description": "Durable receipt was reused.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "account",
+        "replayed"
+      ],
+      "type": "object"
+    },
+    "CloudAccountView": {
+      "description": "Nonsecret scope established by an independently verified human terminal.",
+      "properties": {
+        "account_id": {
+          "description": "Human-selected account alias.",
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,64}$"
+        },
+        "capabilities": {
+          "$ref": "#/$defs/ProviderCapabilities",
+          "description": "Actual implementation capabilities."
+        },
+        "destination": {
+          "description": "Configured remote folder, without credentials or local configuration paths.",
+          "type": "string"
+        },
+        "label": {
+          "description": "Untrusted display label.",
+          "type": "string"
+        },
+        "max_bytes_per_delivery": {
+          "description": "Human-established per-delivery byte ceiling.",
+          "minimum": 1,
+          "type": "integer",
+          "maximum": 9007199254740991
+        },
+        "provider": {
+          "$ref": "#/$defs/ProviderKind",
+          "description": "Provider family."
+        },
+        "revision": {
+          "description": "Immutable configuration revision, changed by updates and revocation.",
+          "minimum": 0,
+          "type": "integer",
+          "maximum": 9007199254740991
+        },
+        "revoked": {
+          "description": "Account cannot authorize new or continuing transfers.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "account_id",
+        "label",
+        "revision",
+        "provider",
+        "destination",
+        "capabilities",
+        "max_bytes_per_delivery",
+        "revoked"
+      ],
+      "type": "object"
+    },
+    "CloudAccountsConfigureParams": {
+      "additionalProperties": false,
+      "description": "Human-terminal-only account setup. The credential goes directly to the OS keyring.",
+      "properties": {
+        "account_id": {
+          "description": "Lowercase alias, 1–64 ASCII letters, digits, underscores or hyphens.",
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,64}$"
+        },
+        "config": {
+          "$ref": "#/$defs/ProviderConfig",
+          "description": "Explicit provider configuration; rclone never discovers ambient configuration."
+        },
+        "credential": {
+          "description": "Write-only credential. Omit to retain the existing token or for explicit rclone configuration.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-zeus-secret": true,
+          "writeOnly": true
+        },
+        "expected_revision": {
+          "description": "Required current revision for updates; absent only when creating an account.",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ],
+          "maximum": 9007199254740991
+        },
+        "idempotency_key": {
+          "description": "Durable request binding.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "label": {
+          "description": "Display label, at most 128 characters.",
+          "type": "string"
+        },
+        "max_bytes_per_delivery": {
+          "description": "Account scope ceiling.",
+          "minimum": 1,
+          "type": "integer",
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "account_id",
+        "label",
+        "config",
+        "max_bytes_per_delivery",
+        "idempotency_key"
+      ],
+      "type": "object"
+    },
+    "CloudAccountsListParams": {
+      "additionalProperties": false,
+      "description": "Enumerate configured account scopes; credentials and private config paths are withheld.",
+      "type": "object"
+    },
+    "CloudAccountsListResult": {
+      "description": "Account list.",
+      "properties": {
+        "accounts": {
+          "description": "Configured scopes.",
+          "items": {
+            "$ref": "#/$defs/CloudAccountView"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "accounts"
+      ],
+      "type": "object"
+    },
+    "CloudAccountsRevokeParams": {
+      "additionalProperties": false,
+      "description": "Human-terminal-only revocation invalidates approvals and stops local transfer work.",
+      "properties": {
+        "account_id": {
+          "description": "Account to revoke.",
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,64}$"
+        },
+        "expected_revision": {
+          "description": "Revision the person reviewed.",
+          "minimum": 0,
+          "type": "integer",
+          "maximum": 9007199254740991
+        },
+        "idempotency_key": {
+          "description": "Durable request binding.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "account_id",
+        "expected_revision",
+        "idempotency_key"
+      ],
+      "type": "object"
+    },
+    "CloudControlAction": {
+      "description": "Local control; cannot manufacture or extend human approval.",
+      "oneOf": [
+        {
+          "const": "pause",
+          "description": "Stop local reads and keep the checkpoint.",
+          "type": "string"
+        },
+        {
+          "const": "resume",
+          "description": "Resume only with the same still-authorized immutable plan.",
+          "type": "string"
+        },
+        {
+          "const": "cancel",
+          "description": "Request cancellation, preserving remote uncertainty.",
+          "type": "string"
+        }
+      ]
+    },
+    "CloudControlParams": {
+      "additionalProperties": false,
+      "description": "Idempotent control request.",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/CloudControlAction",
+          "description": "Requested action."
+        },
+        "delivery_id": {
+          "description": "Delivery identity.",
+          "type": "string",
+          "pattern": "^cld_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "idempotency_key": {
+          "description": "Durable request binding.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "delivery_id",
+        "action",
+        "idempotency_key"
+      ],
+      "type": "object"
+    },
+    "CloudDeliveryState": {
+      "description": "Durable delivery lifecycle, including ambiguous remote operations.",
+      "oneOf": [
+        {
+          "const": "awaiting_approval",
+          "description": "No remote work until an independently attested human decides.",
+          "type": "string"
+        },
+        {
+          "const": "queued",
+          "description": "Authorized and ready to start.",
+          "type": "string"
+        },
+        {
+          "const": "running",
+          "description": "Local transfer is active.",
+          "type": "string"
+        },
+        {
+          "const": "remote_pending",
+          "description": "Provider accepted an asynchronous import; not completed.",
+          "type": "string"
+        },
+        {
+          "const": "paused",
+          "description": "Paused; resuming still requires valid scope and approval.",
+          "type": "string"
+        },
+        {
+          "const": "reconciling",
+          "description": "A private checkpoint needs remote reconciliation before any retry.",
+          "type": "string"
+        },
+        {
+          "const": "completed",
+          "description": "Provider metadata was verified at the evidence level in artifact.",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "description": "Failed without claiming remote completion.",
+          "type": "string"
+        },
+        {
+          "const": "canceled",
+          "description": "Local work stopped and no continuing remote import was accepted.",
+          "type": "string"
+        },
+        {
+          "const": "remote_cancellation_unavailable",
+          "description": "Remote provider may continue despite local cancellation; checkpoint retained.",
+          "type": "string"
+        }
+      ]
+    },
+    "CloudDeliveryView": {
+      "description": "Public delivery status. Upload URLs, source query strings and credentials are never included.",
+      "properties": {
+        "approval_id": {
+          "description": "Human approval; absent only during recoverable approval creation.",
+          "pattern": "^ap_[0-7][0-9A-HJKMNP-TV-Z]{25}$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RemoteArtifact"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Actual remote completion evidence, never inferred from a 202."
+        },
+        "cleanup_pending": {
+          "default": false,
+          "description": "Zeus-owned staging cleanup must be retried; never refers to a user download file.",
+          "type": "boolean"
+        },
+        "committed_bytes": {
+          "description": "Confirmed provider bytes.",
+          "minimum": 0,
+          "type": "integer",
+          "maximum": 9007199254740991
+        },
+        "created_at": {
+          "description": "Creation time.",
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)\\.[0-9]{3}Z$",
+          "type": "string"
+        },
+        "delivery_id": {
+          "description": "Durable identity.",
+          "type": "string",
+          "pattern": "^cld_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "plan": {
+          "$ref": "#/$defs/CloudPlanView",
+          "description": "Exact immutable plan."
+        },
+        "reason": {
+          "description": "Sanitized stable reason code, no provider response text.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "state": {
+          "$ref": "#/$defs/CloudDeliveryState",
+          "description": "Current state."
+        },
+        "updated_at": {
+          "description": "Last durable change.",
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)\\.[0-9]{3}Z$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "delivery_id",
+        "plan",
+        "state",
+        "committed_bytes",
+        "created_at",
+        "updated_at"
+      ],
+      "type": "object"
+    },
+    "CloudGetParams": {
+      "additionalProperties": false,
+      "description": "Read a caller-owned delivery; human clients may inspect all.",
+      "properties": {
+        "delivery_id": {
+          "description": "Delivery identifier.",
+          "type": "string",
+          "pattern": "^cld_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        }
+      },
+      "required": [
+        "delivery_id"
+      ],
+      "type": "object"
+    },
+    "CloudListParams": {
+      "additionalProperties": false,
+      "description": "List visible deliveries, newest first, with a bounded result.",
+      "properties": {
+        "limit": {
+          "default": 50,
+          "description": "Result limit, 1–100; default 50.",
+          "minimum": 1,
+          "type": "integer",
+          "maximum": 100
+        }
+      },
+      "type": "object"
+    },
+    "CloudListResult": {
+      "description": "Bounded delivery list.",
+      "properties": {
+        "deliveries": {
+          "description": "Visible deliveries.",
+          "items": {
+            "$ref": "#/$defs/CloudDeliveryView"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "deliveries"
+      ],
+      "type": "object"
+    },
+    "CloudMutationResult": {
+      "description": "Mutation receipt.",
+      "properties": {
+        "delivery": {
+          "$ref": "#/$defs/CloudDeliveryView",
+          "description": "Durable delivery view."
+        },
+        "replayed": {
+          "description": "Durable receipt was reused.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "delivery",
+        "replayed"
+      ],
+      "type": "object"
+    },
+    "CloudPlanParams": {
+      "additionalProperties": false,
+      "description": "Compute a dry-run plan. Does not fetch source bytes or mutate the remote destination.",
+      "properties": {
+        "account_id": {
+          "description": "Existing configured account scope.",
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,64}$"
+        },
+        "allow_unbounded_remote": {
+          "default": false,
+          "description": "Required opt-in for remote imports whose provider cannot enforce byte caps or cancel.",
+          "type": "boolean"
+        },
+        "idempotency_key": {
+          "description": "Durable request binding.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "max_bytes": {
+          "description": "Maximum source/transmitted bytes for this delivery.",
+          "minimum": 1,
+          "type": "integer",
+          "maximum": 9007199254740991
+        },
+        "max_seconds": {
+          "description": "Maximum wall-clock operation lifetime, 1–86400 seconds.",
+          "minimum": 1,
+          "type": "integer",
+          "maximum": 86400
+        },
+        "mode": {
+          "$ref": "#/$defs/DeliveryMode",
+          "description": "Explicit mode, never substituted."
+        },
+        "remote_name": {
+          "description": "Filename only; the result shows its collision-resistant final name.",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/CloudSource",
+          "description": "Source to bind."
+        }
+      },
+      "required": [
+        "account_id",
+        "mode",
+        "source",
+        "remote_name",
+        "max_bytes",
+        "max_seconds",
+        "idempotency_key"
+      ],
+      "type": "object"
+    },
+    "CloudPlanResult": {
+      "description": "Dry-run receipt.",
+      "properties": {
+        "plan": {
+          "$ref": "#/$defs/CloudPlanView",
+          "description": "Immutable reviewed plan."
+        },
+        "replayed": {
+          "description": "Durable receipt was reused.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "plan",
+        "replayed"
+      ],
+      "type": "object"
+    },
+    "CloudPlanView": {
+      "description": "Redacted, immutable dry-run plan returned to every caller.",
+      "properties": {
+        "account_id": {
+          "description": "Account alias.",
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,64}$"
+        },
+        "account_revision": {
+          "description": "Exact authorized account revision.",
+          "minimum": 0,
+          "type": "integer",
+          "maximum": 9007199254740991
+        },
+        "allow_unbounded_remote": {
+          "description": "Explicitly accepted weaker remote guarantees.",
+          "type": "boolean"
+        },
+        "delivery_id": {
+          "description": "Reserved delivery ULID; retries of this plan never create a second remote object.",
+          "type": "string",
+          "pattern": "^cld_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "destination": {
+          "description": "Configured destination root.",
+          "type": "string"
+        },
+        "expected_sha256": {
+          "description": "Source SHA-256 when known.",
+          "pattern": "^[0-9a-f]{64}$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "expires_at": {
+          "description": "Deadline to submit and approve this plan.",
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)\\.[0-9]{3}Z$",
+          "type": "string"
+        },
+        "hard_byte_cap": {
+          "description": "True only when Zeus can enforce the transmitted byte ceiling.",
+          "type": "boolean"
+        },
+        "max_bytes": {
+          "description": "Maximum bytes authorized locally.",
+          "minimum": 1,
+          "type": "integer",
+          "maximum": 9007199254740991
+        },
+        "max_seconds": {
+          "description": "Maximum local operation lifetime.",
+          "minimum": 1,
+          "type": "integer",
+          "maximum": 86400
+        },
+        "mode": {
+          "$ref": "#/$defs/DeliveryMode",
+          "description": "Explicit mode."
+        },
+        "plan_hash": {
+          "description": "Canonical hash bound by the human approval.",
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "plan_id": {
+          "description": "Prefixed plan ULID.",
+          "type": "string",
+          "pattern": "^clp_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "provider": {
+          "$ref": "#/$defs/ProviderKind",
+          "description": "Provider family."
+        },
+        "remote_cancellation_supported": {
+          "description": "True only when the provider can enforce cancellation.",
+          "type": "boolean"
+        },
+        "remote_name": {
+          "description": "Final unique remote object name.",
+          "type": "string"
+        },
+        "size_bytes": {
+          "description": "Exact planned bytes.",
+          "minimum": 0,
+          "type": "integer",
+          "maximum": 9007199254740991
+        },
+        "source_hash": {
+          "description": "Hash of the complete private source identity.",
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_redacted": {
+          "description": "Source job identity or URL origin; all URL paths and query strings withheld.",
+          "type": "string"
+        },
+        "supported": {
+          "description": "The requested mode is available with these exact constraints.",
+          "type": "boolean"
+        },
+        "unsupported_reason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CapabilityReason"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Machine-readable unavailable capability."
+        }
+      },
+      "required": [
+        "plan_id",
+        "delivery_id",
+        "plan_hash",
+        "account_id",
+        "account_revision",
+        "provider",
+        "mode",
+        "source_redacted",
+        "source_hash",
+        "destination",
+        "remote_name",
+        "size_bytes",
+        "max_bytes",
+        "max_seconds",
+        "supported",
+        "allow_unbounded_remote",
+        "remote_cancellation_supported",
+        "hard_byte_cap",
+        "expires_at"
+      ],
+      "type": "object"
+    },
+    "CloudSource": {
+      "description": "Approved source identity. Raw URLs occur only on incoming requests and private storage.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "An existing completed download; Zeus never removes this user file.",
+          "properties": {
+            "job_id": {
+              "description": "Download identity.",
+              "pattern": "^job_[0-7][0-9A-HJKMNP-TV-Z]{25}$",
+              "type": "string"
+            },
+            "kind": {
+              "const": "completed_job",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "job_id"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A public HTTP(S) source with an exact bounded length and no ambient session.",
+          "properties": {
+            "block_md5": {
+              "description": "Optional exact 4 MiB block MD5 manifest for bounded Baidu streaming.",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            },
+            "kind": {
+              "const": "public_url",
+              "type": "string"
+            },
+            "sha256": {
+              "description": "Optional expected SHA-256.",
+              "pattern": "^[0-9a-f]{64}$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "size_bytes": {
+              "description": "Exact source length; mismatch fails.",
+              "minimum": 0,
+              "type": "integer",
+              "maximum": 9007199254740991
+            },
+            "url": {
+              "description": "Potentially sensitive URL; Debug is redacted.",
+              "maxLength": 8192,
+              "minLength": 8,
+              "pattern": "^https?://",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "url",
+            "size_bytes"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "CloudSubmitParams": {
+      "additionalProperties": false,
+      "description": "Reserve a durable delivery and request human approval; never self-authorizes.",
+      "properties": {
+        "idempotency_key": {
+          "description": "Durable request binding.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "plan_hash": {
+          "description": "Reviewed canonical hash.",
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "plan_id": {
+          "description": "Reviewed plan identifier.",
+          "type": "string",
+          "pattern": "^clp_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        }
+      },
+      "required": [
+        "plan_id",
+        "plan_hash",
+        "idempotency_key"
+      ],
+      "type": "object"
+    },
+    "DeliveryMode": {
+      "description": "User-selected data path. Unsupported modes are never silently substituted.",
+      "oneOf": [
+        {
+          "const": "staged_upload",
+          "description": "Download to a local file, verify completely, then upload.",
+          "type": "string"
+        },
+        {
+          "const": "stream_upload",
+          "description": "Read through Zeus with bounded buffers and no full local cache.",
+          "type": "string"
+        },
+        {
+          "const": "remote_import",
+          "description": "Cloud provider fetches the approved URL itself.",
+          "type": "string"
+        }
+      ]
+    },
+    "ProviderCapabilities": {
+      "description": "Advertised implementation capabilities, not inferred product marketing features.",
+      "properties": {
+        "provider": {
+          "$ref": "#/$defs/ProviderKind",
+          "description": "Provider implementation."
+        },
+        "remote_cancel": {
+          "description": "Remote import can be cancelled at the provider.",
+          "type": "boolean"
+        },
+        "remote_import": {
+          "description": "Provider can retrieve a source URL.",
+          "type": "boolean"
+        },
+        "remote_import_hard_byte_limit": {
+          "description": "The provider can enforce a hard imported-byte ceiling before downloading.\nFalse means the daemon can only check size after the provider finishes.",
+          "type": "boolean"
+        },
+        "remote_sha256": {
+          "description": "Remote SHA-256 may be reported; receipts state whether it actually was.",
+          "type": "boolean"
+        },
+        "resumable_upload": {
+          "description": "Durable staged upload may resume at confirmed provider offsets.",
+          "type": "boolean"
+        },
+        "staged_upload": {
+          "description": "Local verified upload supported.",
+          "type": "boolean"
+        },
+        "stream_upload": {
+          "description": "Bounded forward-only upload supported.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "provider",
+        "staged_upload",
+        "stream_upload",
+        "remote_import",
+        "resumable_upload",
+        "remote_cancel",
+        "remote_import_hard_byte_limit",
+        "remote_sha256"
+      ],
+      "type": "object"
+    },
+    "ProviderConfig": {
+      "description": "Human-configured, nonsecret provider settings. Tokens live in a separate credential store.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Existing Drive folder ID; `root` is allowed. OAuth bearer token supplied separately.",
+          "properties": {
+            "parent_id": {
+              "description": "Parent folder ID.",
+              "type": "string"
+            },
+            "provider": {
+              "const": "google_drive",
+              "type": "string"
+            }
+          },
+          "required": [
+            "provider",
+            "parent_id"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Existing Disk folder, e.g. `disk:/Zeus`. OAuth token supplied separately.",
+          "properties": {
+            "provider": {
+              "const": "yandex_disk",
+              "type": "string"
+            },
+            "root_path": {
+              "description": "Existing root folder.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "provider",
+            "root_path"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Explicit external executable, config file and remote. Never auto-discovered.",
+          "properties": {
+            "config": {
+              "$ref": "#/$defs/RcloneConfig",
+              "description": "Adapter settings."
+            },
+            "provider": {
+              "const": "rclone",
+              "type": "string"
+            }
+          },
+          "required": [
+            "provider",
+            "config"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Native multipart upload into the authorized application's directory.",
+          "properties": {
+            "provider": {
+              "const": "baidu_netdisk",
+              "type": "string"
+            },
+            "root_path": {
+              "description": "Existing root under `/apps/<appname>`.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "provider",
+            "root_path"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "ProviderKind": {
+      "description": "Implemented native providers and the explicitly configured external adapter.",
+      "oneOf": [
+        {
+          "const": "google_drive",
+          "description": "Native Drive v3 resumable upload.",
+          "type": "string"
+        },
+        {
+          "const": "yandex_disk",
+          "description": "Native Disk REST upload and URL import.",
+          "type": "string"
+        },
+        {
+          "const": "rclone",
+          "description": "Explicitly configured rclone remote.",
+          "type": "string"
+        },
+        {
+          "const": "baidu_netdisk",
+          "description": "Native Baidu Netdisk multipart upload with an approved chunk manifest.",
+          "type": "string"
+        }
+      ]
+    },
+    "RcloneConfig": {
+      "additionalProperties": false,
+      "description": "Explicit human-configured executable and remote. Credentials remain in the rclone config.",
+      "properties": {
+        "config_file": {
+          "description": "Absolute path to the explicitly configured credential file.",
+          "type": "string"
+        },
+        "config_sha256": {
+          "description": "SHA-256 of the configuration authorized by the human; checked before every launch.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "executable": {
+          "description": "Absolute path to the trusted rclone executable. No shell is involved.",
+          "type": "string"
+        },
+        "executable_sha256": {
+          "description": "SHA-256 of the executable authorized by the human; checked before every launch.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "remote": {
+          "description": "Named remote only; inline connection strings and drive-letter paths are rejected.",
+          "type": "string"
+        },
+        "root_path": {
+          "description": "Existing remote folder/bucket prefix. Cannot contain traversal or URL syntax.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "executable",
+        "config_file",
+        "remote",
+        "root_path"
+      ],
+      "type": "object"
+    },
+    "RemoteArtifact": {
+      "description": "Public remote artifact evidence. No URLs, credentials or upload sessions.",
+      "properties": {
+        "local_sha256": {
+          "description": "Locally observed stream SHA-256, absent for provider-only import.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "object_id": {
+          "description": "Opaque provider object ID, or unique reserved path for path-based providers.",
+          "type": "string"
+        },
+        "object_path": {
+          "description": "Unique destination path/name selected for this operation.",
+          "type": "string"
+        },
+        "operation_id": {
+          "description": "Durable operation identifier.",
+          "type": "string"
+        },
+        "provider": {
+          "$ref": "#/$defs/ProviderKind",
+          "description": "Provider implementation."
+        },
+        "remote_sha256": {
+          "description": "Actual provider-reported SHA-256, absent where unsupported/unavailable.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "size": {
+          "description": "Exact provider-reported bytes.",
+          "minimum": 0,
+          "type": "integer",
+          "maximum": 9007199254740991
+        },
+        "verification": {
+          "$ref": "#/$defs/VerificationEvidence",
+          "description": "Strength of evidence actually obtained."
+        }
+      },
+      "required": [
+        "provider",
+        "operation_id",
+        "object_id",
+        "object_path",
+        "size",
+        "verification"
+      ],
+      "type": "object"
+    },
+    "VerificationEvidence": {
+      "description": "Actual evidence obtained; a local hash alone is never described as a remote hash match.",
+      "oneOf": [
+        {
+          "const": "local_and_remote_sha256",
+          "description": "Local bytes hashed and provider SHA-256 matched.",
+          "type": "string"
+        },
+        {
+          "const": "local_sha256_remote_size",
+          "description": "Local bytes hashed; only provider size was available.",
+          "type": "string"
+        },
+        {
+          "const": "expected_and_remote_sha256",
+          "description": "Expected hash matched the provider hash without reading source bytes locally.",
+          "type": "string"
+        },
+        {
+          "const": "remote_size_only",
+          "description": "Only provider-reported size was checked.",
+          "type": "string"
+        }
+      ]
+    }
+  }
+}

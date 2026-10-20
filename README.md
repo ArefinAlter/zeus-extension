@@ -7,11 +7,11 @@ The Manifest V3 browser extension of [Zeus](https://github.com/ArefinAlter/zeus)
 ## What it is for
 
 - **Download rescue.** An interrupted browser download is offered to Zeus (`handoff.offer`), which finishes it with resumable, verified transfers.
-- **Trust surface.** The popup shows approvals the daemon computed facts for. Only a human click in an extension page can approve; an agent cannot.
+- **Trust surface.** The popup shows approvals the daemon computed facts for. Supported browser decisions require a human click; an agent cannot approve. Cloud delivery requests direct the user to an interactive Zeus terminal and offer no browser decision.
 - **Session oracle.** After the user approves a site, and only for that site, the extension releases the cookies the browser would send, for at most 15 minutes, on a request from the daemon that passes the extension's own consent check.
 - **In-browser fetch fallback.** When a server refuses the daemon, the user's own browser performs the (ordinary, credentialed) fetch and streams the bytes to the daemon under flow control.
 
-It sends nothing anywhere except to the Zeus app on the same computer, has no analytics and ships no run-time dependencies. See [docs/PRIVACY.md](docs/PRIVACY.md) and [docs/PERMISSIONS.md](docs/PERMISSIONS.md).
+It sends nothing anywhere except to the Zeus app on the same computer, has no analytics and bundles only a pinned local BLAKE3 hashing library. See [docs/PRIVACY.md](docs/PRIVACY.md) and [docs/PERMISSIONS.md](docs/PERMISSIONS.md).
 
 ## Quick start
 
@@ -33,7 +33,7 @@ Load `dist/chrome` as an unpacked extension (Chrome or Edge, Developer mode). It
 | `npm run typecheck`                              | `tsc --noEmit` over `src`, `test` and the build scripts (strict, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`) |
 | `npm run lint`                                   | ESLint (typescript-eslint strict, type-checked) and `prettier --check`                                                     |
 | `npm test`, `npm run test:conformance`           | Vitest. The conformance suite proves the protocol codec against the spec's own examples and sequence diagrams              |
-| `npm run check`                                  | Manifest invariants, localisation parity, contract drift, generated-type freshness, no run-time dependencies               |
+| `npm run check`                                  | Manifest invariants, localisation parity, contract drift, generated-type freshness, pinned hashing dependency              |
 | `npm run sync:schema`                            | Copy the normative contracts from the sibling `zeus` checkout (`../zeus` or `$ZEUS_REPO`)                                  |
 | `npm run gen:types`                              | Regenerate `src/lib/protocol.generated.ts` from `schema/`                                                                  |
 | `npm run gen:icons`                              | Regenerate the placeholder PNG icons                                                                                       |

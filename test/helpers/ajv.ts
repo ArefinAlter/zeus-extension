@@ -2,6 +2,8 @@
 // extension's own schema interpreter, which cannot be used to test itself.
 import { Ajv2020 } from 'ajv/dist/2020.js';
 import commonSchema from '../../schema/common.schema.json';
+import approvalSchema from '../../schema/approvals.v1.schema.json';
+import cloudSchema from '../../schema/cloud.v1.schema.json';
 import domainSchema from '../../schema/domain.schema.json';
 import nmSchema from '../../schema/native-messaging.v1.schema.json';
 
@@ -17,6 +19,8 @@ export function makeAjv(): Ajv2020 {
   ajv.addSchema(commonSchema);
   ajv.addSchema(domainSchema);
   ajv.addSchema(nmSchema);
+  ajv.addSchema(approvalSchema);
+  ajv.addSchema(cloudSchema);
   return ajv;
 }
 

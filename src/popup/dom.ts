@@ -15,7 +15,10 @@ export interface Attrs {
   hidden?: boolean;
   disabled?: boolean;
   checked?: boolean;
-  value?: number;
+  value?: number | string;
+  autocomplete?: string;
+  spellcheck?: string;
+  oninput?: (event: Event) => void;
   max?: number;
   href?: string;
   lang?: string;
@@ -35,7 +38,7 @@ export function h<K extends keyof HTMLElementTagNameMap>(
   const el = document.createElement(tag);
   for (const [key, value] of Object.entries(attrs)) {
     if (value === undefined || value === false) continue;
-    if (key === 'onclick' || key === 'onchange') {
+    if (key === 'onclick' || key === 'onchange' || key === 'oninput') {
       el.addEventListener(key.slice(2), value as EventListener);
     } else if (key === 'class') {
       el.className = String(value);

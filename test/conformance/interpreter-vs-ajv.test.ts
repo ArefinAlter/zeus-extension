@@ -133,6 +133,18 @@ describe('schema interpreter agrees with Ajv', () => {
 });
 
 describe('interpreter hygiene', () => {
+  it('treats writeOnly as an annotation while retaining value constraints', () => {
+    const set = new SchemaSet([
+      {
+        $id: 'urn:write-only',
+        $defs: { Token: { type: 'string', minLength: 1, writeOnly: true } },
+      },
+    ]);
+    expect(set.isValid('urn:write-only#/$defs/Token', 'token')).toBe(true);
+    expect(set.isValid('urn:write-only#/$defs/Token', '')).toBe(false);
+    expect(set.isValid('urn:write-only#/$defs/Token', 1)).toBe(false);
+  });
+
   it('refuses a schema that uses a keyword it does not implement', () => {
     const doc: SchemaObject = {
       $id: 'urn:t',

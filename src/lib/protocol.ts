@@ -3,6 +3,8 @@
 // protocol.generated.ts; the guard interprets the very same schema files at runtime, so there is
 // one source of truth and no hand-written validator to drift.
 import commonSchema from '../../schema/common.schema.json';
+import approvalSchema from '../../schema/approvals.v1.schema.json';
+import cloudSchema from '../../schema/cloud.v1.schema.json';
 import domainSchema from '../../schema/domain.schema.json';
 import nmSchema from '../../schema/native-messaging.v1.schema.json';
 import { exceedsDepth, SchemaSet, type Issue, type SchemaObject } from './jsonschema';
@@ -43,7 +45,13 @@ export const NM_SCHEMA_ID = 'https://zeus.invalid/schema/native-messaging.v1';
 export const DOMAIN_SCHEMA_ID = 'https://zeus.invalid/schema/domain';
 export const COMMON_SCHEMA_ID = 'https://zeus.invalid/schema/common';
 
-export const schemas = new SchemaSet([commonSchema, domainSchema, nmSchema]);
+export const schemas = new SchemaSet([
+  commonSchema,
+  domainSchema,
+  cloudSchema,
+  approvalSchema,
+  nmSchema,
+]);
 
 export const nmRef = (def: string): string => `${NM_SCHEMA_ID}#/$defs/${def}`;
 export const domainRef = (def: string): string => `${DOMAIN_SCHEMA_ID}#/$defs/${def}`;
@@ -116,7 +124,8 @@ export type Capability =
   | 'approvals'
   | 'events'
   | 'job_control'
-  | 'grants';
+  | 'grants'
+  | 'kill_switch';
 
 export interface RequestSpec {
   /** Response types that answer this request (an `error` frame always may). */
@@ -159,6 +168,11 @@ export const REQUESTS = {
   },
   'grant.list': { responses: ['grant.list.response'], timeoutMs: 10_000, capability: 'grants' },
   'grant.revoke': { responses: ['grant.revoke.response'], timeoutMs: 10_000, capability: 'grants' },
+  kill_switch: {
+    responses: ['kill_switch.response'],
+    timeoutMs: 10_000,
+    capability: 'kill_switch',
+  },
 } as const satisfies Record<string, RequestSpec>;
 
 export type RequestType = keyof typeof REQUESTS;
@@ -233,7 +247,13 @@ const JOB_EVENT_BODY: SchemaObject = {
     event: { $ref: `${DOMAIN_SCHEMA_ID}#/$defs/EventBase` },
   },
 };
-const looseSchemas = new SchemaSet([commonSchema, domainSchema, nmSchema, JOB_EVENT_BODY]);
+const looseSchemas = new SchemaSet([
+  commonSchema,
+  domainSchema,
+  approvalSchema,
+  nmSchema,
+  JOB_EVENT_BODY,
+]);
 
 export function parseDaemonFrame(raw: unknown): ParseResult {
   if (!isObject(raw)) {

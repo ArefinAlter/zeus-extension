@@ -1,3 +1,4 @@
+import { withBinding, decisionBinding } from '../helpers/approvals';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   POPUP_PORT_NAME,
@@ -18,7 +19,7 @@ afterEach(() => {
 });
 
 function approval(over: Record<string, unknown> = {}): Record<string, unknown> {
-  return {
+  return withBinding({
     id: approvalId(1),
     kind: 'handoff',
     state: 'pending',
@@ -36,7 +37,7 @@ function approval(over: Record<string, unknown> = {}): Record<string, unknown> {
     expires_at: '2026-10-06T09:15:30.301Z',
     decided_at: null,
     ...over,
-  };
+  });
 }
 
 function grant(over: Record<string, unknown> = {}): Record<string, unknown> {
@@ -94,6 +95,9 @@ async function showApproval(w: World, over: Record<string, unknown> = {}): Promi
 
 const decide = (w: World, over: Record<string, unknown> = {}) =>
   w.ext.sendFromPage({
+    ...decisionBinding(
+      (w.bg.approvals.get(approvalId(1)) ?? approval()) as unknown as Record<string, unknown>,
+    ),
     cmd: 'approval.decide',
     approval_id: approvalId(1),
     decision: 'approve',
@@ -199,7 +203,7 @@ describe('deciding (spec 02 section 10.1)', () => {
       data: { approval_id: approvalId(1), state: 'approved', granted: true },
     });
     const frame = w.daemon.sent('approval.decide')[0];
-    expect(frame?.body).toEqual({
+    expect(frame?.body).toMatchObject({
       approval_id: approvalId(1),
       decision: 'approve',
       scope: 'site',
@@ -262,7 +266,12 @@ describe('deciding (spec 02 section 10.1)', () => {
 
   it('kinds without scopes (retry escalation) are a plain yes or no and need no browser access', async () => {
     const w = await new World().boot();
-    daemonDecides(w, null);
+    daemonDecides(w, null, {
+      kind: 'retry_escalation',
+      allowed_scopes: [],
+      origin: ORIGIN,
+      reason_codes: ['retry.exhausted'],
+    });
     await showApproval(w, {
       kind: 'retry_escalation',
       allowed_scopes: [],
@@ -271,7 +280,7 @@ describe('deciding (spec 02 section 10.1)', () => {
     });
     const result = await decide(w, { scope: undefined });
     expect(result).toMatchObject({ ok: true });
-    expect(w.daemon.sent('approval.decide')[0]?.body).toEqual({
+    expect(w.daemon.sent('approval.decide')[0]?.body).toMatchObject({
       approval_id: approvalId(1),
       decision: 'approve',
       ui: { surface: 'extension_popup', user_gesture: true },
@@ -344,6 +353,7 @@ describe('deciding (spec 02 section 10.1)', () => {
 
 describe("only the extension's own pages can command the trust surface (spec 02 section 10.2)", () => {
   const body = {
+    ...decisionBinding(approval()),
     cmd: 'approval.decide',
     approval_id: approvalId(1),
     decision: 'approve',

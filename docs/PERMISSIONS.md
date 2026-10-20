@@ -32,5 +32,5 @@ See [PRIVACY.md](PRIVACY.md). In one sentence: nothing leaves the user's compute
 ## Reviewer notes
 
 - The consent record is created only by a click in the extension's popup or options page (messages from any other sender are ignored: `sender.id` and the sender URL are checked), or by an event about an approval the extension itself displayed that a human decided in the Zeus terminal interface.
-- Cross-origin redirects: a credentialed fetch that is redirected to a different origin is refused if the browser holds cookies for that origin and the user gave no consent for it.
+- Browser fetch proxy redirects: all redirect chains fail closed with `redirect: error`, before the browser can attach cookies to a new destination. This deliberately restricts spec 02's post-response redirect rule. Resolve a safe final URL first; do not interpret a generic fetch failure as permission to bypass this restriction. URL refresh remains a separate consent-gated flow.
 - The in-browser fetch fallback performs an ordinary credentialed `fetch` exactly as if the user had clicked the link. It does not change request headers to disguise anything, does not solve challenges and reports a block page to Zeus as a block page.

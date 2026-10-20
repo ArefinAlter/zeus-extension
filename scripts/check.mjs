@@ -6,7 +6,7 @@
 //      for exists, the manifest's keys exist.
 //   4. Contract copies: schema/ matches its lock file and, when the zeus checkout is available, the
 //      checkout; the generated protocol types match the schema.
-//   5. Supply chain: no runtime dependencies; the host manifest templates satisfy the schema.
+//   5. Supply chain: only the pinned hashing dependency; host manifest templates satisfy schema.
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { verifyDist } from './lib/dist.mjs';
@@ -203,8 +203,9 @@ for (const [dir, target, store] of /** @type {const} */ ([
 {
   const pkg = readJson('package.json');
   const runtime = Object.keys(pkg.dependencies ?? {});
-  if (runtime.length > 0) fail(`runtime dependencies are not allowed: ${runtime.join(', ')}`);
-  else ok('no runtime dependencies (everything in dist/ is code from this repository)');
+  if (runtime.length !== 1 || pkg.dependencies['@noble/hashes'] !== '2.4.0')
+    fail('runtime dependencies must contain only the pinned @noble/hashes 2.4.0');
+  else ok('only pinned @noble/hashes is bundled; no remote runtime code');
   if (!existsSync(join(repoRoot, 'package-lock.json'))) fail('package-lock.json is missing');
 
   const devId = recordedDevExtensionId() ?? '';
