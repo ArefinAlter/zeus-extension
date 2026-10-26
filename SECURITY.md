@@ -4,7 +4,7 @@ This extension can release a signed-in user's cookies to a local program, so sec
 
 ## Reporting a vulnerability
 
-Please report privately through GitHub: **Security > Report a vulnerability** on this repository (<https://github.com/ArefinAlter/zeus-extension/security/advisories/new>). Do not open a public issue or pull request for a suspected vulnerability.
+Please report privately by email to **info@vernesystems.com** with a subject starting `SECURITY:` (the same address as the [website's security policy](https://zeus-site-bay.vercel.app/legal/security/)). GitHub's private vulnerability reporting is not enabled on this repository. Do not open a public issue or pull request for a suspected vulnerability.
 
 Include the affected version or commit, the browser and version, a description and impact, steps or a proof of concept, and whether you want to be credited. Do not include real cookies, tokens or personal data.
 
