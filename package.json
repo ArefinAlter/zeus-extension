@@ -1,6 +1,6 @@
 {
   "name": "zeus-extension",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.1",
   "private": true,
   "description": "Zeus browser extension: trust surface, download rescue, session oracle and in-browser fetch fallback for the Zeus download layer.",
   "license": "Apache-2.0",
