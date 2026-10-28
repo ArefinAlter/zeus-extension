@@ -388,6 +388,18 @@
             "null"
           ]
         },
+        "source_bytes_done": {
+          "default": 0,
+          "description": "Bytes prepared locally for staged upload, separate from provider-confirmed bytes.",
+          "minimum": 0,
+          "type": "integer",
+          "maximum": 9007199254740991
+        },
+        "source_verified": {
+          "default": false,
+          "description": "Full prepared source passed size/hash verification for the approved plan.",
+          "type": "boolean"
+        },
         "state": {
           "$ref": "#/$defs/CloudDeliveryState",
           "description": "Current state."
@@ -471,9 +483,429 @@
       ],
       "type": "object"
     },
+    "CloudOAuthBeginParams": {
+      "additionalProperties": false,
+      "description": "Begin sign-in for an explicitly reviewed destination and registered application.",
+      "properties": {
+        "account_id": {
+          "description": "Existing/new human-selected alias.",
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,64}$"
+        },
+        "client_secret": {
+          "description": "Registered app password entered only through hidden terminal input.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-zeus-secret": true,
+          "writeOnly": true
+        },
+        "config": {
+          "$ref": "#/$defs/ProviderConfig",
+          "description": "Exact destination, independent of provider OAuth permissions."
+        },
+        "expected_revision": {
+          "description": "Current revision when replacing an account.",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ],
+          "maximum": 9007199254740991
+        },
+        "idempotency_key": {
+          "description": "Same-intent retry binding for this bounded in-memory flow.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "label": {
+          "description": "Untrusted display label.",
+          "type": "string"
+        },
+        "max_bytes_per_delivery": {
+          "description": "Reviewed transfer ceiling.",
+          "minimum": 1,
+          "type": "integer",
+          "maximum": 9007199254740991
+        },
+        "redirect_uri": {
+          "description": "CLI-owned exact loopback redirect; absent for Baidu device authorization.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "registration": {
+          "$ref": "#/$defs/OAuthRegistration",
+          "description": "Explicit provider application and requested scopes."
+        }
+      },
+      "required": [
+        "account_id",
+        "label",
+        "config",
+        "max_bytes_per_delivery",
+        "registration",
+        "idempotency_key"
+      ],
+      "type": "object"
+    },
+    "CloudOAuthBeginResult": {
+      "description": "Human-only initial browser/device instructions, never an agent resource.",
+      "properties": {
+        "authorization_url": {
+          "$ref": "#/$defs/CloudOAuthHumanText",
+          "description": "Browser authorization URL or official device verification page.",
+          "x-zeus-secret": true
+        },
+        "poll_interval_ms": {
+          "description": "Minimum device polling interval; zero for loopback code exchange.",
+          "minimum": 0,
+          "type": "integer",
+          "maximum": 9007199254740991
+        },
+        "status": {
+          "$ref": "#/$defs/CloudOAuthStatus",
+          "description": "Durable destination identity plus bounded in-memory flow state."
+        },
+        "user_code": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CloudOAuthHumanText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Device code for the person, never the private polling credential.",
+          "x-zeus-secret": true
+        }
+      },
+      "required": [
+        "status",
+        "authorization_url",
+        "poll_interval_ms"
+      ],
+      "type": "object"
+    },
+    "CloudOAuthCancelParams": {
+      "additionalProperties": false,
+      "description": "Cancel a flow; no provider account credentials are changed.",
+      "properties": {
+        "flow_id": {
+          "description": "Started flow.",
+          "type": "string",
+          "pattern": "^cof_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        }
+      },
+      "required": [
+        "flow_id"
+      ],
+      "type": "object"
+    },
+    "CloudOAuthDisconnectParams": {
+      "additionalProperties": false,
+      "description": "Disable local account authority and optionally revoke access at a supported provider.",
+      "properties": {
+        "account_id": {
+          "description": "Account to disconnect.",
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,64}$"
+        },
+        "expected_revision": {
+          "description": "Current revision the person reviewed.",
+          "minimum": 0,
+          "type": "integer",
+          "maximum": 9007199254740991
+        },
+        "idempotency_key": {
+          "description": "Durable local revocation retry binding.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "remote": {
+          "description": "Explicit remote revocation; Google revokes this app/project's scopes, not just one folder.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "account_id",
+        "expected_revision",
+        "remote",
+        "idempotency_key"
+      ],
+      "type": "object"
+    },
+    "CloudOAuthDisconnectResult": {
+      "description": "Accurate local and remote disconnect outcomes.",
+      "properties": {
+        "account": {
+          "$ref": "#/$defs/CloudAccountView",
+          "description": "Locally revoked account, independent of provider response."
+        },
+        "local_cleanup_pending": {
+          "description": "Local authority is disabled even when private keyring deletion needs another attempt.",
+          "type": "boolean"
+        },
+        "reason": {
+          "description": "Stable redacted reason for unavailable or uncertain remote revocation.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "remote_revoked": {
+          "description": "true only after confirmed provider revocation, false after failure/unsupported, null if not requested.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "account",
+        "local_cleanup_pending"
+      ],
+      "type": "object"
+    },
+    "CloudOAuthFinishParams": {
+      "additionalProperties": false,
+      "description": "Submit the one-use loopback code/state or perform one bounded device poll.",
+      "properties": {
+        "code": {
+          "description": "Browser callback code; absent for device polling.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-zeus-secret": true,
+          "writeOnly": true
+        },
+        "flow_id": {
+          "description": "Flow started by this human credential.",
+          "type": "string",
+          "pattern": "^cof_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "state": {
+          "description": "Exact browser callback state; absent for device polling.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-zeus-secret": true,
+          "writeOnly": true
+        }
+      },
+      "required": [
+        "flow_id"
+      ],
+      "type": "object"
+    },
+    "CloudOAuthHumanText": {
+      "description": "Human-only provider URL/code projection; Debug always withholds its contents.",
+      "type": "string",
+      "x-zeus-secret": true
+    },
+    "CloudOAuthRefreshParams": {
+      "additionalProperties": false,
+      "description": "Human-requested refresh; regular transfers also refresh near-expiry credentials.",
+      "properties": {
+        "account_id": {
+          "description": "Registered OAuth account.",
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,64}$"
+        },
+        "expected_revision": {
+          "description": "Current destination revision.",
+          "minimum": 0,
+          "type": "integer",
+          "maximum": 9007199254740991
+        },
+        "idempotency_key": {
+          "description": "Same-intent refresh retry binding; a saved successful refresh is not dispatched twice.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "account_id",
+        "expected_revision",
+        "idempotency_key"
+      ],
+      "type": "object"
+    },
+    "CloudOAuthState": {
+      "description": "Authorization lifecycle, without access or refresh tokens.",
+      "oneOf": [
+        {
+          "const": "waiting",
+          "description": "Waiting for external browser/device consent.",
+          "type": "string"
+        },
+        {
+          "const": "connected",
+          "description": "New credential was safely stored and destination configured.",
+          "type": "string"
+        },
+        {
+          "const": "refresh_required",
+          "description": "Access token expired; supported refresh material is available for the same account.",
+          "type": "string"
+        },
+        {
+          "const": "canceled",
+          "description": "Explicit cancellation.",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "description": "Flow deadline passed; start a new sign-in.",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "description": "Provider denied or exchange failed; no credential material is returned.",
+          "type": "string"
+        },
+        {
+          "const": "sign_in_required",
+          "description": "A previously configured account needs renewed authentication.",
+          "type": "string"
+        },
+        {
+          "const": "revoked",
+          "description": "Local account authority was revoked.",
+          "type": "string"
+        },
+        {
+          "const": "manual",
+          "description": "Account uses an explicitly entered token or external rclone configuration.",
+          "type": "string"
+        }
+      ]
+    },
+    "CloudOAuthStatus": {
+      "description": "Nonsecret status projection; only the begin result contains human instructions.",
+      "properties": {
+        "account": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CloudAccountView"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Latest nonsecret account scope after a completed connection."
+        },
+        "account_id": {
+          "description": "Destination account alias.",
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,64}$"
+        },
+        "expires_at": {
+          "description": "Flow expiration (never token contents).",
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)\\.[0-9]{3}Z$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "flow_id": {
+          "description": "Flow identity when inspecting a sign-in attempt.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^cof_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
+        "local_cleanup_pending": {
+          "description": "An earlier requested keyring deletion still needs cleanup.",
+          "type": "boolean"
+        },
+        "refresh_available": {
+          "description": "Supported refresh material is present and neither locally revoked nor uncertain.",
+          "type": "boolean"
+        },
+        "state": {
+          "$ref": "#/$defs/CloudOAuthState",
+          "description": "Current lifecycle state."
+        },
+        "token_expires_at": {
+          "description": "Current token expiration when known.",
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)\\.[0-9]{3}Z$",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "account_id",
+        "state",
+        "refresh_available",
+        "local_cleanup_pending"
+      ],
+      "type": "object"
+    },
+    "CloudOAuthStatusParams": {
+      "additionalProperties": false,
+      "description": "Inspect exactly one flow or account through the human-only lifecycle surface.",
+      "properties": {
+        "account_id": {
+          "description": "Existing account, mutually exclusive with flow_id.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-z0-9_-]{1,64}$"
+        },
+        "flow_id": {
+          "description": "Started flow, mutually exclusive with account_id.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^cof_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        }
+      },
+      "type": "object",
+      "oneOf": [
+        {
+          "properties": {
+            "flow_id": {
+              "type": "string"
+            },
+            "account_id": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "flow_id"
+          ]
+        },
+        {
+          "properties": {
+            "account_id": {
+              "type": "string"
+            },
+            "flow_id": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "account_id"
+          ]
+        }
+      ]
+    },
     "CloudPlanParams": {
       "additionalProperties": false,
-      "description": "Compute a dry-run plan. Does not fetch source bytes or mutate the remote destination.",
+      "description": "Compute a dry-run plan. Hashes bounded local sources; never mutates the remote destination.",
       "properties": {
         "account_id": {
           "description": "Existing configured account scope.",
@@ -682,8 +1114,27 @@
       "type": "object"
     },
     "CloudSource": {
-      "description": "Approved source identity. Raw URLs occur only on incoming requests and private storage.",
+      "description": "Private local-file, completed-download or public-URL source identity.",
       "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "A local regular file inside a folder explicitly included by the desktop user.\nThe private path is withheld from delivery views and Debug output.",
+          "properties": {
+            "kind": {
+              "const": "local_file",
+              "type": "string"
+            },
+            "path": {
+              "$ref": "#/$defs/LocalFilePath",
+              "description": "Absolute source path; the daemon canonicalizes and checks the configured read scopes."
+            }
+          },
+          "required": [
+            "kind",
+            "path"
+          ],
+          "type": "object"
+        },
         {
           "additionalProperties": false,
           "description": "An existing completed download; Zeus never removes this user file.",
@@ -800,6 +1251,37 @@
           "type": "string"
         }
       ]
+    },
+    "LocalFilePath": {
+      "description": "An upload source path. Its wire value is private; Debug never displays it.",
+      "type": "string"
+    },
+    "OAuthRegistration": {
+      "additionalProperties": false,
+      "description": "Nonsecret, explicitly supplied app registration. Client passwords live only in the keyring.",
+      "properties": {
+        "client_id": {
+          "description": "Registered public application identifier.",
+          "type": "string"
+        },
+        "provider": {
+          "$ref": "#/$defs/ProviderKind",
+          "description": "Native provider; rclone manages its own authorization."
+        },
+        "scopes": {
+          "description": "Exact permissions the person will review on the provider consent page.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "provider",
+        "client_id",
+        "scopes"
+      ],
+      "type": "object"
     },
     "ProviderCapabilities": {
       "description": "Advertised implementation capabilities, not inferred product marketing features.",

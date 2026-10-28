@@ -9,7 +9,7 @@
     "native-messaging.v1.schema.json": "5a3e8a77ee5933f560d108effd7bbefdcf2915e4d6525dd4de4fceca07f38ef5",
     "common.schema.json": "561a3f00d0f01d8a3f66cc4b7059d8d4feffc999c85095f64ea73493a75507df",
     "approvals.v1.schema.json": "fde98ef450f7d7051f11507129bb25b9feeb4dd2da29a2c813495b0b0f7a99de",
-    "cloud.v1.schema.json": "c154cd96bb5925ca945299fed52f7d56976ea2858ea99928df9999aa38a8a0b1",
+    "cloud.v1.schema.json": "35d06388a38159874eec20b8ec84f51068889d8d9ff8e0efb0f82d8b80a304cb",
     "domain.schema.json": "c31fc7e6b0bdf34d984d4093a5e0f31d58f845ce831cdeb58673a5ae773649bf",
     "redaction-vectors.v1.json": "8f937e2533d5c195b071b4dec06d8f54474bb5090785247500b60fa2e239a75d",
     "examples/spec-examples.json": "f831c4bd3f1c96690cb82918968fa7729ce70f5119e78ba4c98b9fb18bf403a0"
