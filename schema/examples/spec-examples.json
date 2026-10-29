@@ -36,7 +36,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 211,
+      "line": 212,
       "value": {
         "v": 1,
         "id": "e1",
@@ -72,7 +72,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 230,
+      "line": 231,
       "value": {
         "v": 1,
         "id": "d1",
@@ -122,7 +122,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 368,
+      "line": 372,
       "value": {
         "v": 1,
         "id": "e2",
@@ -151,7 +151,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 404,
+      "line": 408,
       "value": {
         "v": 1,
         "id": "d2",
@@ -168,7 +168,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 419,
+      "line": 423,
       "value": {
         "v": 1,
         "id": "d3",
@@ -190,7 +190,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 441,
+      "line": 445,
       "value": {
         "v": 1,
         "id": "e14",
@@ -205,7 +205,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 460,
+      "line": 464,
       "value": {
         "v": 1,
         "id": "d6",
@@ -231,7 +231,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 498,
+      "line": 502,
       "value": {
         "v": 1,
         "id": "e4",
@@ -282,7 +282,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 555,
+      "line": 559,
       "value": {
         "v": 1,
         "id": "e5",
@@ -302,7 +302,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 577,
+      "line": 581,
       "value": {
         "v": 1,
         "id": "d7",
@@ -329,7 +329,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 604,
+      "line": 608,
       "value": {
         "v": 1,
         "id": "e6",
@@ -351,7 +351,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 647,
+      "line": 651,
       "value": {
         "v": 1,
         "id": "d8",
@@ -378,7 +378,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 696,
+      "line": 700,
       "value": {
         "v": 1,
         "id": "e7",
@@ -402,7 +402,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 722,
+      "line": 726,
       "value": {
         "v": 1,
         "id": "e8",
@@ -419,7 +419,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 746,
+      "line": 750,
       "value": {
         "v": 1,
         "id": "d9",
@@ -433,7 +433,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 750,
+      "line": 754,
       "value": {
         "v": 1,
         "id": "e9",
@@ -449,7 +449,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 754,
+      "line": 758,
       "value": {
         "v": 1,
         "id": "e10",
@@ -469,7 +469,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 772,
+      "line": 776,
       "value": {
         "v": 1,
         "id": "d10",
@@ -483,7 +483,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 812,
+      "line": 816,
       "value": {
         "v": 1,
         "id": "d4",
@@ -578,7 +578,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 875,
+      "line": 879,
       "value": {
         "v": 1,
         "id": "e3",
@@ -598,7 +598,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 890,
+      "line": 894,
       "value": {
         "v": 1,
         "id": "d5",
@@ -663,7 +663,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 941,
+      "line": 945,
       "value": {
         "v": 1,
         "id": "e9",
@@ -680,7 +680,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 950,
+      "line": 954,
       "value": {
         "v": 1,
         "id": "d12",
@@ -698,7 +698,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/ExtensionToDaemonMessage",
-      "line": 993,
+      "line": 997,
       "value": {
         "v": 1,
         "id": "e11",
@@ -714,7 +714,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 1012,
+      "line": 1016,
       "value": {
         "v": 1,
         "id": "d11",
@@ -731,7 +731,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 1024,
+      "line": 1028,
       "value": {
         "v": 1,
         "id": "d12",
@@ -758,7 +758,7 @@
     {
       "source": "02-native-messaging-v1.md",
       "ref": "native-messaging.v1#/$defs/DaemonToExtensionMessage",
-      "line": 1053,
+      "line": 1057,
       "value": {
         "v": 1,
         "id": "d13",

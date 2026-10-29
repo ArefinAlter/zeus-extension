@@ -117,6 +117,7 @@ export const EVENT_DEFS: ReadonlyMap<string, string> = (() => {
 export type Capability =
   | 'handoff'
   | 'session'
+  | 'session.page'
   | 'url_refresh.refetch'
   | 'url_refresh.download_api'
   | 'fetch_proxy'

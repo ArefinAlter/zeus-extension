@@ -6,13 +6,13 @@
 import type { Env } from '../lib/env';
 import { makeError } from '../lib/errors';
 import { hostPattern, isReleasableOrigin, originOf } from '../lib/origin';
-import type { ErrorEnvelope } from '../lib/protocol';
+import type { ErrorEnvelope, SessionPageSubject } from '../lib/protocol';
 import type { ConsentRecord, StateStore } from './state';
 
 /** Session material never lives longer than 15 minutes (spec 00 section 10). */
 export const MAX_SESSION_TTL_MS = 900_000;
 
-export interface ConsentGateRequest {
+interface JobConsentGateRequest {
   kind: 'session' | 'url_refresh' | 'fetch';
   origin: string;
   /** The URL that will be requested; its origin must equal `origin`. */
@@ -22,8 +22,21 @@ export interface ConsentGateRequest {
   grant_id?: string;
 }
 
+/** Page data has an explicit durable subject; no synthetic job or cookie release is used. */
+export interface PageConsentGateRequest {
+  kind: 'page';
+  origin: string;
+  url: string;
+  grant_id: string;
+  profile_id: string;
+  subject: SessionPageSubject;
+}
+
+export type ConsentGateRequest = JobConsentGateRequest | PageConsentGateRequest;
+
 export type GateFailure =
   | 'origin_mismatch'
+  | 'profile_mismatch'
   | 'insecure_origin'
   | 'never_listed'
   | 'no_consent'
@@ -71,6 +84,13 @@ export class ConsentGate {
           'session.consent_denied',
           'Session material is released only for https origins and loopback http.',
         ),
+      );
+    }
+    if (req.kind === 'page' && req.profile_id !== (await this.store.getProfileId())) {
+      return fail(
+        'invalid',
+        'profile_mismatch',
+        makeError('session.consent_denied', 'The page grant belongs to another browser profile.'),
       );
     }
     if ((await this.store.listNever()).some((e) => e.origin === req.origin)) {
@@ -142,6 +162,11 @@ export class ConsentGate {
     jobRuns: Record<string, string>,
   ): boolean {
     if (req.grant_id !== undefined && r.grant_id !== req.grant_id) return false;
+    if (req.kind === 'page') {
+      return req.subject.purpose === 'plan'
+        ? r.scope === 'site'
+        : r.scope === 'workflow' && r.run_id === req.subject.run_id;
+    }
     if (r.scope === 'once') return r.job_id === req.job_id;
     if (r.scope === 'workflow') {
       const run = jobRuns[req.job_id];

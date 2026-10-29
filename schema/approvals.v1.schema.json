@@ -253,27 +253,171 @@
       ]
     },
     "FactsPolicyException": {
-      "allOf": [
-        { "$ref": "#/$defs/FactsCommon" },
+      "oneOf": [
         {
-          "required": ["rule", "operation", "job_id", "origin", "subject_path", "untrusted_name", "quarantine_reasons"],
-          "properties": {
-            "kind": { "const": "policy_exception" },
-            "rule": {
-              "description": "The rule the exception bends, for this one subject only.",
-              "enum": ["path_outside_roots", "quarantined_file"]
+          "allOf": [
+            {
+              "$ref": "#/$defs/FactsCommon"
             },
-            "operation": { "enum": ["write", "open", "convert", "move", "delete"] },
-            "job_id": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/JobId" }, { "type": "null" }] },
-            "origin": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" }, { "type": "null" }] },
-            "subject_path": { "$ref": "#/$defs/LocalPath" },
-            "untrusted_name": { "$ref": "#/$defs/UntrustedName" },
-            "quarantine_reasons": {
-              "type": "array",
-              "uniqueItems": true,
-              "items": { "$ref": "https://zeus.invalid/schema/domain#/$defs/QuarantineReason" }
+            {
+              "required": [
+                "rule",
+                "operation",
+                "job_id",
+                "origin",
+                "subject_path",
+                "untrusted_name",
+                "quarantine_reasons"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "policy_exception"
+                },
+                "rule": {
+                  "description": "The rule the exception bends, for this one subject only.",
+                  "enum": [
+                    "path_outside_roots",
+                    "quarantined_file"
+                  ]
+                },
+                "operation": {
+                  "enum": [
+                    "write",
+                    "open",
+                    "convert",
+                    "move",
+                    "delete"
+                  ]
+                },
+                "job_id": {
+                  "oneOf": [
+                    {
+                      "$ref": "https://zeus.invalid/schema/common#/$defs/JobId"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "origin": {
+                  "oneOf": [
+                    {
+                      "$ref": "https://zeus.invalid/schema/common#/$defs/Origin"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "subject_path": {
+                  "$ref": "#/$defs/LocalPath"
+                },
+                "untrusted_name": {
+                  "$ref": "#/$defs/UntrustedName"
+                },
+                "quarantine_reasons": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "$ref": "https://zeus.invalid/schema/domain#/$defs/QuarantineReason"
+                  }
+                }
+              }
             }
-          }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/FactsCommon"
+            },
+            {
+              "required": [
+                "rule",
+                "operation",
+                "plan_id",
+                "browser_scope"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "policy_exception"
+                },
+                "rule": {
+                  "const": "browser_managed_network"
+                },
+                "operation": {
+                  "const": "read"
+                },
+                "plan_id": {
+                  "$ref": "#/$defs/PlanId"
+                },
+                "browser_scope": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "request_blake3",
+                    "origin",
+                    "grant_id",
+                    "profile_id",
+                    "start_urls",
+                    "scope",
+                    "max_reads",
+                    "max_body_bytes",
+                    "deadline_ms",
+                    "native_peer_pinning",
+                    "redirects",
+                    "network"
+                  ],
+                  "properties": {
+                    "request_blake3": {
+                      "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256"
+                    },
+                    "origin": {
+                      "$ref": "https://zeus.invalid/schema/common#/$defs/Origin"
+                    },
+                    "grant_id": {
+                      "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId"
+                    },
+                    "profile_id": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{32}$"
+                    },
+                    "start_urls": {
+                      "type": "array",
+                      "maxItems": 3,
+                      "items": {
+                        "type": "string",
+                        "maxLength": 4096
+                      }
+                    },
+                    "scope": {
+                      "type": "string",
+                      "maxLength": 256
+                    },
+                    "max_reads": {
+                      "const": 32
+                    },
+                    "max_body_bytes": {
+                      "const": 524288
+                    },
+                    "deadline_ms": {
+                      "const": 25000
+                    },
+                    "native_peer_pinning": {
+                      "const": false
+                    },
+                    "redirects": {
+                      "const": "deny"
+                    },
+                    "network": {
+                      "type": "string",
+                      "maxLength": 512
+                    }
+                  }
+                }
+              }
+            }
+          ]
         }
       ]
     },
@@ -307,6 +451,9 @@
             },
             "allowed_domains_omitted": { "type": "integer", "minimum": 0 },
             "session_origin": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" }, { "type": "null" }] },
+            "browser_document_mode": { "enum": ["browser_origin", null] },
+            "browser_profile_id": { "type": ["string", "null"], "pattern": "^[0-9a-f]{32}$" },
+            "browser_network": { "type": ["string", "null"], "maxLength": 512 },
             "budgets": {
               "type": "object",
               "required": ["max_pages", "max_files", "max_bytes", "max_duration_ms", "max_depth"],

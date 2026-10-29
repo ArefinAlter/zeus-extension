@@ -122,6 +122,8 @@ export interface ExtEnv {
   isUserActive(): boolean;
   /** True when the host is Firefox (decides the private cookie store and API quirks). */
   isFirefox: boolean;
+  /** The current extension context is private; ordinary page fetches must never choose another jar. */
+  isIncognitoContext: boolean;
 }
 
 export interface ExtApi {
@@ -365,6 +367,7 @@ export function createExtApi(): ExtApi {
       userAgentData: nav.userAgentData ?? null,
       isUserActive: () => nav.userActivation?.isActive === true,
       isFirefox: /\bFirefox\//.test(ua),
+      isIncognitoContext: ns.extension.inIncognitoContext,
     },
   };
 }

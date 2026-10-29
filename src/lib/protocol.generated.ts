@@ -6,7 +6,7 @@
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
  * via the `definition` "ExtensionToDaemonMessage".
  */
-export type ExtensionToDaemonMessage = (HelloMessage | PingMessage | PongMessage | ByeMessage | ErrorMessage | HandoffOfferMessage | HandoffWithdrawMessage | SessionResponseMessage | UrlRefreshResponseMessage | FetchHeadMessage | FetchChunkMessage | FetchEndMessage | FetchErrorMessage | ApprovalListMessage | ApprovalDecideMessage | EventsSubscribeMessage | EventsUnsubscribeMessage | JobListMessage | JobControlMessage | GrantListMessage | GrantRevokeMessage | KillSwitchMessage)
+export type ExtensionToDaemonMessage = (HelloMessage | PingMessage | PongMessage | ByeMessage | ErrorMessage | HandoffOfferMessage | HandoffWithdrawMessage | SessionResponseMessage | UrlRefreshResponseMessage | FetchHeadMessage | FetchChunkMessage | FetchEndMessage | FetchErrorMessage | ApprovalListMessage | ApprovalDecideMessage | EventsSubscribeMessage | EventsUnsubscribeMessage | JobListMessage | JobControlMessage | GrantListMessage | GrantRevokeMessage | KillSwitchMessage | SessionPageResponseMessage)
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
  * via the `definition` "HelloMessage".
@@ -241,9 +241,39 @@ body: KillSwitchBody
 })
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
+ * via the `definition` "SessionPageResponseMessage".
+ */
+export type SessionPageResponseMessage = (Envelope & {
+type?: "session.page.response"
+body: SessionPageResponseBody
+})
+/**
+ * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
+ * via the `definition` "SessionPageResponseBody".
+ */
+export type SessionPageResponseBody = ({
+status: "fetched"
+document: SessionPageDocument
+} | {
+status: "unavailable"
+error: ErrorEnvelope
+})
+/**
+ * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
+ * via the `definition` "SessionPageSubject".
+ */
+export type SessionPageSubject = ({
+purpose: "plan"
+plan_id: string
+} | {
+purpose: "run"
+run_id: string
+})
+/**
+ * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
  * via the `definition` "DaemonToExtensionMessage".
  */
-export type DaemonToExtensionMessage = (HelloAckMessage | PingMessage | PongMessage | ByeMessage | ErrorMessage | HandoffAcceptMessage | HandoffRejectMessage | SessionRequestMessage | UrlRefreshRequestMessage | FetchRangeMessage | FetchCreditMessage | FetchCancelMessage | ApprovalListResponseMessage | ApprovalPendingMessage | ApprovalDecideResponseMessage | EventsSubscribeResponseMessage | JobEventMessage | JobListResponseMessage | JobControlResponseMessage | GrantListResponseMessage | GrantRevokeResponseMessage | KillSwitchResponseMessage)
+export type DaemonToExtensionMessage = (HelloAckMessage | PingMessage | PongMessage | ByeMessage | ErrorMessage | HandoffAcceptMessage | HandoffRejectMessage | SessionRequestMessage | UrlRefreshRequestMessage | FetchRangeMessage | FetchCreditMessage | FetchCancelMessage | ApprovalListResponseMessage | ApprovalPendingMessage | ApprovalDecideResponseMessage | EventsSubscribeResponseMessage | JobEventMessage | JobListResponseMessage | JobControlResponseMessage | GrantListResponseMessage | GrantRevokeResponseMessage | KillSwitchResponseMessage | SessionPageRequestMessage | SessionPageCancelMessage)
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
  * via the `definition` "HelloAckMessage".
@@ -414,6 +444,22 @@ body: GrantRevokeResponseBody
 export type KillSwitchResponseMessage = (Envelope & {
 type?: "kill_switch.response"
 body: KillSwitchResult
+})
+/**
+ * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
+ * via the `definition` "SessionPageRequestMessage".
+ */
+export type SessionPageRequestMessage = (Envelope & {
+type?: "session.page.request"
+body: SessionPageRequestBody
+})
+/**
+ * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
+ * via the `definition` "SessionPageCancelMessage".
+ */
+export type SessionPageCancelMessage = (Envelope & {
+type?: "session.page.cancel"
+body: SessionPageCancelBody
 })
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
@@ -816,6 +862,27 @@ user_gesture: true
 }
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
+ * via the `definition` "SessionPageDocument".
+ */
+export interface SessionPageDocument {
+subject: SessionPageSubject
+grant_id: string
+profile_id: string
+/**
+ * Absolute http(s) URL as received. May contain secrets in its query string: never log it, see 00-conventions section 8.
+ */
+final_url: string
+http_status: number
+content_type: string
+link: (string | null)
+data: string
+/**
+ * RFC 3339 UTC instant, always with exactly three fractional digits and the Z designator.
+ */
+issued_at: string
+}
+/**
+ * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
  * via the `definition` "HelloAckBody".
  */
 export interface HelloAckBody {
@@ -1064,7 +1131,7 @@ refreshes_used: number
 bytes_done: number
 bytes_total: (number | null)
 grant_id: (string | null)
-}) | (FactsCommon & {
+}) | ((FactsCommon & {
 kind?: "policy_exception"
 /**
  * The rule the exception bends, for this one subject only.
@@ -1083,6 +1150,37 @@ subject_path: string
 untrusted_name: (string | null)
 quarantine_reasons: ("executable_type" | "mime_mismatch" | "html_disguised" | "archive_limits" | "av_flagged" | "untrusted_origin" | "session_derived")[]
 }) | (FactsCommon & {
+kind?: "policy_exception"
+rule: "browser_managed_network"
+operation: "read"
+/**
+ * Workflow plan id (prefix plan_, reserved in 00-conventions section 5.1; plans are defined by spec 08).
+ */
+plan_id: string
+browser_scope: {
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+request_blake3: string
+/**
+ * Web origin: scheme, ASCII (punycode) lowercase host, non-default port only. No path, query or fragment.
+ */
+origin: string
+grant_id: string
+profile_id: string
+/**
+ * @maxItems 3
+ */
+start_urls: []|[string]|[string, string]|[string, string, string]
+scope: string
+max_reads: 32
+max_body_bytes: 524288
+deadline_ms: 25000
+native_peer_pinning: false
+redirects: "deny"
+network: string
+}
+})) | (FactsCommon & {
 kind?: "workflow_plan"
 /**
  * Workflow plan id (prefix plan_, reserved in 00-conventions section 5.1; plans are defined by spec 08).
@@ -1111,6 +1209,9 @@ untrusted_title: (string | null)
 allowed_domains: [string]|[string, string]|[string, string, string]|[string, string, string, string]|[string, string, string, string, string]|[string, string, string, string, string, string]|[string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]
 allowed_domains_omitted: number
 session_origin: (string | null)
+browser_document_mode?: ("browser_origin" | null)
+browser_profile_id?: (string | null)
+browser_network?: (string | null)
 budgets: {
 max_pages: number
 max_files: number
@@ -3282,7 +3383,7 @@ refreshes_used: number
 bytes_done: number
 bytes_total: (number | null)
 grant_id: (string | null)
-}) | (FactsCommon & {
+}) | ((FactsCommon & {
 kind?: "policy_exception"
 /**
  * The rule the exception bends, for this one subject only.
@@ -3301,6 +3402,37 @@ subject_path: string
 untrusted_name: (string | null)
 quarantine_reasons: ("executable_type" | "mime_mismatch" | "html_disguised" | "archive_limits" | "av_flagged" | "untrusted_origin" | "session_derived")[]
 }) | (FactsCommon & {
+kind?: "policy_exception"
+rule: "browser_managed_network"
+operation: "read"
+/**
+ * Workflow plan id (prefix plan_, reserved in 00-conventions section 5.1; plans are defined by spec 08).
+ */
+plan_id: string
+browser_scope: {
+/**
+ * Lowercase hex of a 32-byte digest (SHA-256 or BLAKE3).
+ */
+request_blake3: string
+/**
+ * Web origin: scheme, ASCII (punycode) lowercase host, non-default port only. No path, query or fragment.
+ */
+origin: string
+grant_id: string
+profile_id: string
+/**
+ * @maxItems 3
+ */
+start_urls: []|[string]|[string, string]|[string, string, string]
+scope: string
+max_reads: 32
+max_body_bytes: 524288
+deadline_ms: 25000
+native_peer_pinning: false
+redirects: "deny"
+network: string
+}
+})) | (FactsCommon & {
 kind?: "workflow_plan"
 /**
  * Workflow plan id (prefix plan_, reserved in 00-conventions section 5.1; plans are defined by spec 08).
@@ -3329,6 +3461,9 @@ untrusted_title: (string | null)
 allowed_domains: [string]|[string, string]|[string, string, string]|[string, string, string, string]|[string, string, string, string, string]|[string, string, string, string, string, string]|[string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]|[string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]
 allowed_domains_omitted: number
 session_origin: (string | null)
+browser_document_mode?: ("browser_origin" | null)
+browser_profile_id?: (string | null)
+browser_network?: (string | null)
 budgets: {
 max_pages: number
 max_files: number
@@ -5534,6 +5669,34 @@ approvals_pending: number
  * True when the result was returned from the idempotency store instead of acting again (00-conventions section 5.4).
  */
 replayed?: boolean
+}
+/**
+ * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
+ * via the `definition` "SessionPageRequestBody".
+ */
+export interface SessionPageRequestBody {
+subject: SessionPageSubject
+grant_id: string
+profile_id: string
+/**
+ * Web origin: scheme, ASCII (punycode) lowercase host, non-default port only. No path, query or fragment.
+ */
+origin: string
+/**
+ * Absolute http(s) URL as received. May contain secrets in its query string: never log it, see 00-conventions section 8.
+ */
+url: string
+representation: ("html" | "json" | "xml" | "text")
+max_body_bytes: number
+deadline_ms: number
+incognito?: boolean
+}
+/**
+ * This interface was referenced by `NativeMessagingV1`'s JSON-Schema
+ * via the `definition` "SessionPageCancelBody".
+ */
+export interface SessionPageCancelBody {
+request_id: MessageId
 }
 /**
  * This interface was referenced by `NativeMessagingV1`'s JSON-Schema

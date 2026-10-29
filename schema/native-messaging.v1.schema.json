@@ -2458,6 +2458,9 @@
         },
         {
           "$ref": "#/$defs/KillSwitchMessage"
+        },
+        {
+          "$ref": "#/$defs/SessionPageResponseMessage"
         }
       ]
     },
@@ -2528,6 +2531,12 @@
         },
         {
           "$ref": "#/$defs/KillSwitchResponseMessage"
+        },
+        {
+          "$ref": "#/$defs/SessionPageRequestMessage"
+        },
+        {
+          "$ref": "#/$defs/SessionPageCancelMessage"
         }
       ]
     },
@@ -2610,6 +2619,261 @@
           }
         }
       }
+    },
+    "SessionPageSubject": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "purpose",
+            "plan_id"
+          ],
+          "properties": {
+            "purpose": {
+              "const": "plan"
+            },
+            "plan_id": {
+              "type": "string",
+              "pattern": "^plan_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "purpose",
+            "run_id"
+          ],
+          "properties": {
+            "purpose": {
+              "const": "run"
+            },
+            "run_id": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/RunId"
+            }
+          }
+        }
+      ]
+    },
+    "SessionPageRequestBody": {
+      "type": "object",
+      "required": [
+        "subject",
+        "grant_id",
+        "profile_id",
+        "origin",
+        "url",
+        "representation",
+        "max_body_bytes",
+        "deadline_ms"
+      ],
+      "properties": {
+        "subject": {
+          "$ref": "#/$defs/SessionPageSubject"
+        },
+        "grant_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId"
+        },
+        "profile_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "origin": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Origin"
+        },
+        "url": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Url"
+        },
+        "representation": {
+          "enum": [
+            "html",
+            "json",
+            "xml",
+            "text"
+          ]
+        },
+        "max_body_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 524288
+        },
+        "deadline_ms": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 25000
+        },
+        "incognito": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "SessionPageDocument": {
+      "type": "object",
+      "required": [
+        "subject",
+        "grant_id",
+        "profile_id",
+        "final_url",
+        "http_status",
+        "content_type",
+        "link",
+        "data",
+        "issued_at"
+      ],
+      "properties": {
+        "subject": {
+          "$ref": "#/$defs/SessionPageSubject"
+        },
+        "grant_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId"
+        },
+        "profile_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "final_url": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Url"
+        },
+        "http_status": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 599,
+          "not": {
+            "minimum": 300,
+            "maximum": 399
+          }
+        },
+        "content_type": {
+          "type": "string",
+          "maxLength": 256,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]*$"
+        },
+        "link": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 4096,
+          "x-zeus-secret": true
+        },
+        "data": {
+          "type": "string",
+          "maxLength": 699052,
+          "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+          "x-zeus-secret": true
+        },
+        "issued_at": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp"
+        }
+      }
+    },
+    "SessionPageResponseBody": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "status",
+            "document"
+          ],
+          "properties": {
+            "status": {
+              "const": "fetched"
+            },
+            "document": {
+              "$ref": "#/$defs/SessionPageDocument"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "status",
+            "error"
+          ],
+          "properties": {
+            "status": {
+              "const": "unavailable"
+            },
+            "error": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/ErrorEnvelope"
+            }
+          }
+        }
+      ]
+    },
+    "SessionPageRequestMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "session.page.request"
+            },
+            "body": {
+              "$ref": "#/$defs/SessionPageRequestBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
+    },
+    "SessionPageResponseMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "session.page.response"
+            },
+            "body": {
+              "$ref": "#/$defs/SessionPageResponseBody"
+            }
+          },
+          "required": [
+            "body",
+            "re"
+          ]
+        }
+      ]
+    },
+    "SessionPageCancelBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_id"
+      ],
+      "properties": {
+        "request_id": {
+          "$ref": "#/$defs/MessageId"
+        }
+      }
+    },
+    "SessionPageCancelMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "session.page.cancel"
+            },
+            "body": {
+              "$ref": "#/$defs/SessionPageCancelBody"
+            }
+          },
+          "required": [
+            "body"
+          ]
+        }
+      ]
     }
   }
 }

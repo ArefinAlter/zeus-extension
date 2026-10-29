@@ -24,6 +24,7 @@ import { JobBook } from './jobs';
 import { NativeLink, type LinkStatus, type LinkTiming } from './native';
 import { Notifier } from './notify';
 import { SessionService } from './session';
+import { PageService } from './pages';
 import { StateStore } from './state';
 import { UiService } from './ui';
 
@@ -39,6 +40,7 @@ export interface Background {
   readonly downloads: DownloadWatcher;
   readonly fetchProxy: FetchProxy;
   readonly sessions: SessionService;
+  readonly pages: PageService;
   readonly events: EventProcessor;
   readonly ui: UiService;
   /** Register listeners and open the native port. Call once, synchronously at worker start. */
@@ -80,7 +82,7 @@ export function createBackground(
 
   const link: NativeLink = new NativeLink(env, {
     ...(opts.timing === undefined ? {} : { timing: opts.timing }),
-    isBusy: () => popupPorts.size > 0 || fetchProxy.openCount() > 0,
+    isBusy: () => popupPorts.size > 0 || fetchProxy.openCount() > 0 || pages.openCount() > 0,
     buildHello: async () => {
       const capabilities: Capability[] = [
         'handoff',
@@ -90,6 +92,7 @@ export function createBackground(
         'fetch_proxy',
         'kill_switch',
       ];
+      if (!api.env.isIncognitoContext) capabilities.push('session.page');
       if (await api.extension.isAllowedIncognitoAccess().catch(() => false))
         capabilities.push('incognito');
       const cursor = await store.getLastEventSeq();
@@ -119,6 +122,7 @@ export function createBackground(
       },
       onClosed: (reason) => {
         fetchProxy.abortAll();
+        pages.abortAll();
         approvals.clear();
         if ((reason === 'host_not_found' || reason === 'forbidden') && !hostMissingShown) {
           hostMissingShown = true;
@@ -144,10 +148,12 @@ export function createBackground(
     limits: () => link.limits(),
     send: (type, body, sendOpts) => link.send(type, body, sendOpts),
   });
+  const pages = new PageService(env, gate, () => link.hasCapability('session.page'));
   const approvals = new ApprovalCenter(env, store, link, notifier, {
     changed,
     consentRemoved: (origin) => {
       fetchProxy.abortForOrigin(origin);
+      pages.abortAll();
     },
   });
   const downloads = new DownloadWatcher(env, store, link, { changed, internalDownloadIds });
@@ -197,6 +203,15 @@ export function createBackground(
       case 'session.request':
         void answer(message, () => sessions.handleSessionRequest(message));
         return;
+      case 'session.page.request':
+        void answer(message, async () => ({
+          type: 'session.page.response',
+          body: await pages.read(message.body, message.id),
+        }));
+        return;
+      case 'session.page.cancel':
+        pages.cancel(message.body.request_id);
+        return;
       case 'url.refresh.request':
         void answer(message, () => sessions.handleUrlRefresh(message));
         return;
@@ -227,9 +242,12 @@ export function createBackground(
 
   /** Run a request handler and post its reply with `re`; any failure becomes an error frame. */
   async function answer(
-    request: DaemonMessageOf<'session.request'> | DaemonMessageOf<'url.refresh.request'>,
+    request:
+      | DaemonMessageOf<'session.request'>
+      | DaemonMessageOf<'url.refresh.request'>
+      | DaemonMessageOf<'session.page.request'>,
     run: () => Promise<{
-      type: 'session.response' | 'url.refresh.response' | 'error';
+      type: 'session.response' | 'url.refresh.response' | 'session.page.response' | 'error';
       body: unknown;
     }>,
   ): Promise<void> {
@@ -364,6 +382,7 @@ export function createBackground(
       void notifier.openPopup();
     });
     api.permissions.onRemoved.addListener((removed) => {
+      pages.abortAll();
       for (const pattern of removed.origins ?? [])
         fetchProxy.abortForOrigin(pattern.replace(/\/\*$/, ''));
     });
@@ -395,6 +414,7 @@ export function createBackground(
     downloads,
     fetchProxy,
     sessions,
+    pages,
     events,
     ui,
     start,

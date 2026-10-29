@@ -126,6 +126,7 @@ export interface MockOptions {
   userAgent?: string;
   userAgentData?: UserAgentData | null;
   isFirefox?: boolean;
+  isIncognitoContext?: boolean;
   allowedIncognito?: boolean;
   acceptLanguages?: string[];
 }
@@ -401,6 +402,7 @@ export class MockExt {
             : opts.userAgentData,
         isUserActive: () => this.userActive,
         isFirefox: opts.isFirefox ?? false,
+        isIncognitoContext: opts.isIncognitoContext ?? false,
       },
     };
   }
