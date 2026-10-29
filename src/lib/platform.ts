@@ -157,6 +157,7 @@ export interface ExtApi {
     cancel(id: number): Promise<void>;
     erase(query: { id: number }): Promise<number[]>;
     removeFile(id: number): Promise<void>;
+    onCreated?: Evt<(item: DownloadItem) => void>;
     onChanged: Evt<(delta: DownloadDelta) => void>;
     onErased: Evt<(id: number) => void>;
   };
@@ -330,6 +331,9 @@ export function createExtApi(): ExtApi {
       cancel: (id) => ns.downloads.cancel(id),
       erase: (query) => ns.downloads.erase(query),
       removeFile: (id) => ns.downloads.removeFile(id),
+      onCreated: ns.downloads.onCreated
+        ? wrapEvent(ns.downloads.onCreated as unknown as Evt<(item: DownloadItem) => void>)
+        : undefined,
       onChanged: wrapEvent(ns.downloads.onChanged as unknown as Evt<(d: DownloadDelta) => void>),
       onErased: wrapEvent(ns.downloads.onErased),
     },

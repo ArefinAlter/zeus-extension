@@ -63,6 +63,7 @@ export function fakeNamespace(overrides: Record<string, unknown> = {}) {
       cancel: vi.fn(() => Promise.resolve()),
       erase: vi.fn(() => Promise.resolve([])),
       removeFile: vi.fn(() => Promise.resolve()),
+      onCreated: new FakeEvent(),
       onChanged: new FakeEvent(),
       onErased: new FakeEvent(),
     },

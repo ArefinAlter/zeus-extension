@@ -191,6 +191,7 @@ export class MockExt {
   readonly onStartup = new MockEvent<() => void>();
   readonly onInstalled = new MockEvent<() => void>();
   readonly onAlarm = new MockEvent<(alarm: { name: string }) => void>();
+  readonly onDownloadCreated = new MockEvent<(item: DownloadItem) => void>();
   readonly onDownloadChanged = new MockEvent<(delta: DownloadDelta) => void>();
   readonly onDownloadErased = new MockEvent<(id: number) => void>();
   readonly onPermissionsRemoved = new MockEvent<(removed: Permissions) => void>();
@@ -289,6 +290,7 @@ export class MockExt {
           this.removedFiles.push(id);
           return Promise.resolve();
         },
+        onCreated: this.onDownloadCreated,
         onChanged: this.onDownloadChanged,
         onErased: this.onDownloadErased,
       },
