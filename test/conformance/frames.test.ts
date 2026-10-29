@@ -37,6 +37,8 @@ describe('protocol tables derived from the schema', () => {
         'ping',
         'pong',
         'session.request',
+        'session.page.request',
+        'session.page.cancel',
         'url.refresh.request',
       ].sort(),
     );

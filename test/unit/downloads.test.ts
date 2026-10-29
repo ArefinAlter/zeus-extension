@@ -244,6 +244,7 @@ describe('detectBrowser', () => {
         }
       : null,
     isUserActive: () => true,
+    isIncognitoContext: false,
     isFirefox: /Firefox/.test(userAgent),
   });
   it('tells the browsers apart', () => {
