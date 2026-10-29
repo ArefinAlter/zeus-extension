@@ -1246,6 +1246,16 @@ bytes_low: number
  */
 bytes_high: number
 } | null)
+/**
+ * Explicit extra output effect, included in the reviewed facts hash. Null when no item sink was requested.
+ */
+item_sink?: (null | {
+format: "jsonl"
+file_name: string
+max_bytes: 67108864
+contents: "extracted_site_fields"
+url_redaction: "record"
+})
 }) | (FactsCommon & {
 kind?: "destructive_op"
 /**
@@ -3498,6 +3508,16 @@ bytes_low: number
  */
 bytes_high: number
 } | null)
+/**
+ * Explicit extra output effect, included in the reviewed facts hash. Null when no item sink was requested.
+ */
+item_sink?: (null | {
+format: "jsonl"
+file_name: string
+max_bytes: 67108864
+contents: "extracted_site_fields"
+url_redaction: "record"
+})
 }) | (FactsCommon & {
 kind?: "destructive_op"
 /**

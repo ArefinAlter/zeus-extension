@@ -16,11 +16,26 @@
     },
     "ClientKind": {
       "description": "Authority class bound to a credential (spec 05). service is never human (ADR 0011).",
-      "enum": ["agent", "human", "admin", "service"]
+      "enum": [
+        "agent",
+        "human",
+        "admin",
+        "service"
+      ]
     },
     "ClientRole": {
       "description": "The concrete program behind a connection (spec 05).",
-      "enum": ["cli", "tui", "gui", "native_host", "mcp", "a2a", "service", "embedded", "test"]
+      "enum": [
+        "cli",
+        "tui",
+        "gui",
+        "native_host",
+        "mcp",
+        "a2a",
+        "service",
+        "embedded",
+        "test"
+      ]
     },
     "Surface": {
       "description": "The surface an action arrived through (01 Actor.surface).",
@@ -28,35 +43,79 @@
     },
     "ApprovingSurface": {
       "description": "Trust surfaces that may approve (07 section 7.1).",
-      "enum": ["cli_interactive", "tui", "gui", "extension_popup", "extension_options", "extension_sidepanel"]
+      "enum": [
+        "cli_interactive",
+        "tui",
+        "gui",
+        "extension_popup",
+        "extension_options",
+        "extension_sidepanel"
+      ]
     },
     "HumanSurface": {
       "description": "Every surface a human decision or action may arrive through: the approving surfaces plus the notification surfaces, which may only deny or engage the kill switch (07 section 7.1).",
-      "enum": ["cli_interactive", "tui", "gui", "extension_popup", "extension_options", "extension_sidepanel", "extension_notification", "os_notification"]
+      "enum": [
+        "cli_interactive",
+        "tui",
+        "gui",
+        "extension_popup",
+        "extension_options",
+        "extension_sidepanel",
+        "extension_notification",
+        "os_notification"
+      ]
     },
     "ConfirmationLevel": {
       "description": "How the human confirmed: gesture (a click or key press after the input delay), typed_code (the bind code typed), os_auth (an operating-system user verification run by the daemon; later). Ordered gesture < typed_code < os_auth (07 section 7.7).",
-      "enum": ["gesture", "typed_code", "os_auth"]
+      "enum": [
+        "gesture",
+        "typed_code",
+        "os_auth"
+      ]
     },
     "ConfirmationMap": {
       "description": "Minimum confirmation per approve option: one key per scope in allowed_scopes other than never, or the single key approve when allowed_scopes is empty. A deny needs a gesture only.",
       "type": "object",
       "minProperties": 1,
       "properties": {
-        "once": { "$ref": "#/$defs/ConfirmationLevel" },
-        "site": { "$ref": "#/$defs/ConfirmationLevel" },
-        "workflow": { "$ref": "#/$defs/ConfirmationLevel" },
-        "approve": { "$ref": "#/$defs/ConfirmationLevel" }
+        "once": {
+          "$ref": "#/$defs/ConfirmationLevel"
+        },
+        "site": {
+          "$ref": "#/$defs/ConfirmationLevel"
+        },
+        "workflow": {
+          "$ref": "#/$defs/ConfirmationLevel"
+        },
+        "approve": {
+          "$ref": "#/$defs/ConfirmationLevel"
+        }
       }
     },
     "RequesterClient": {
       "description": "The authenticated client whose request caused the approval. Every member comes from the credential store and the connection, never from a self-declared name.",
       "type": "object",
-      "required": ["kind", "role", "client_id", "label"],
+      "required": [
+        "kind",
+        "role",
+        "client_id",
+        "label"
+      ],
       "properties": {
-        "kind": { "enum": ["agent", "service", "human", "admin"] },
-        "role": { "$ref": "#/$defs/ClientRole" },
-        "client_id": { "$ref": "#/$defs/ClientId" },
+        "kind": {
+          "enum": [
+            "agent",
+            "service",
+            "human",
+            "admin"
+          ]
+        },
+        "role": {
+          "$ref": "#/$defs/ClientRole"
+        },
+        "client_id": {
+          "$ref": "#/$defs/ClientId"
+        },
         "label": {
           "description": "Name given to the credential by the installer (cli, agent, host) or by the human who created it (zeus clients add --name). Not chosen by the client at connect time.",
           "type": "string",
@@ -73,13 +132,24 @@
     "RequesterDaemon": {
       "description": "The daemon raised the approval on its own, with no attributable client.",
       "type": "object",
-      "required": ["kind"],
+      "required": [
+        "kind"
+      ],
       "properties": {
-        "kind": { "const": "daemon" }
+        "kind": {
+          "const": "daemon"
+        }
       }
     },
     "Requester": {
-      "oneOf": [{ "$ref": "#/$defs/RequesterClient" }, { "$ref": "#/$defs/RequesterDaemon" }]
+      "oneOf": [
+        {
+          "$ref": "#/$defs/RequesterClient"
+        },
+        {
+          "$ref": "#/$defs/RequesterDaemon"
+        }
+      ]
     },
     "Hostname": {
       "type": "string",
@@ -94,30 +164,55 @@
     },
     "UntrustedName": {
       "description": "A file name or title that a server or an agent chose, after the display sanitiser. Rendered as untrusted text (07 section 10.1).",
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "maxLength": 255
     },
     "FactItem": {
       "description": "One download covered by the approval.",
       "type": "object",
-      "required": ["job_id", "untrusted_name", "untrusted_url", "total_bytes"],
+      "required": [
+        "job_id",
+        "untrusted_name",
+        "untrusted_url",
+        "total_bytes"
+      ],
       "properties": {
-        "job_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/JobId" },
-        "untrusted_name": { "$ref": "#/$defs/UntrustedName" },
+        "job_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/JobId"
+        },
+        "untrusted_name": {
+          "$ref": "#/$defs/UntrustedName"
+        },
         "untrusted_url": {
           "description": "The job URL through redact_url(log) (00-conventions section 8.2). Its path was chosen by a page or an agent.",
           "$ref": "https://zeus.invalid/schema/common#/$defs/RedactedUrl"
         },
         "total_bytes": {
           "description": "Size reported by the server or the browser; null when unknown.",
-          "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" }, { "type": "null" }]
+          "oneOf": [
+            {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       }
     },
     "TransferFacts": {
       "description": "What the jobs covered by the approval will transfer.",
       "type": "object",
-      "required": ["job_ids", "total_bytes", "unknown_size_count", "dest_dirs", "dest_dirs_omitted"],
+      "required": [
+        "job_ids",
+        "total_bytes",
+        "unknown_size_count",
+        "dest_dirs",
+        "dest_dirs_omitted"
+      ],
       "properties": {
         "job_ids": {
           "description": "Every job the approval covers, in the order they joined it.",
@@ -125,129 +220,326 @@
           "minItems": 1,
           "maxItems": 50,
           "uniqueItems": true,
-          "items": { "$ref": "https://zeus.invalid/schema/common#/$defs/JobId" }
+          "items": {
+            "$ref": "https://zeus.invalid/schema/common#/$defs/JobId"
+          }
         },
         "total_bytes": {
           "description": "Sum of the known sizes; null when no size is known.",
-          "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" }, { "type": "null" }]
+          "oneOf": [
+            {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
-        "unknown_size_count": { "type": "integer", "minimum": 0, "maximum": 50 },
+        "unknown_size_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50
+        },
         "dest_dirs": {
           "type": "array",
           "minItems": 1,
           "maxItems": 8,
           "uniqueItems": true,
-          "items": { "$ref": "#/$defs/LocalPath" }
+          "items": {
+            "$ref": "#/$defs/LocalPath"
+          }
         },
-        "dest_dirs_omitted": { "type": "integer", "minimum": 0, "maximum": 50 }
+        "dest_dirs_omitted": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50
+        }
       }
     },
     "FactsCommon": {
       "description": "Members every facts object has (07 section 4.4).",
       "type": "object",
-      "required": ["t", "approval_id", "revision", "kind", "requester", "issued_at", "expires_at", "allowed_scopes", "confirmation", "reason_codes", "agent_says_blake3"],
+      "required": [
+        "t",
+        "approval_id",
+        "revision",
+        "kind",
+        "requester",
+        "issued_at",
+        "expires_at",
+        "allowed_scopes",
+        "confirmation",
+        "reason_codes",
+        "agent_says_blake3"
+      ],
       "properties": {
         "t": {
           "description": "Facts format and hash domain separator. Any change to the members of a kind is a new value.",
           "const": "zeus.approval.facts.v1"
         },
-        "approval_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/ApprovalId" },
-        "revision": { "type": "integer", "minimum": 1, "maximum": 1000 },
-        "kind": { "$ref": "https://zeus.invalid/schema/domain#/$defs/ApprovalKind" },
-        "requester": { "$ref": "#/$defs/Requester" },
+        "approval_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/ApprovalId"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "kind": {
+          "$ref": "https://zeus.invalid/schema/domain#/$defs/ApprovalKind"
+        },
+        "requester": {
+          "$ref": "#/$defs/Requester"
+        },
         "issued_at": {
           "description": "When this revision was issued.",
           "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp"
         },
-        "expires_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
+        "expires_at": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp"
+        },
         "allowed_scopes": {
           "type": "array",
           "uniqueItems": true,
-          "items": { "$ref": "https://zeus.invalid/schema/domain#/$defs/GrantScope" }
+          "items": {
+            "$ref": "https://zeus.invalid/schema/domain#/$defs/GrantScope"
+          }
         },
-        "confirmation": { "$ref": "#/$defs/ConfirmationMap" },
+        "confirmation": {
+          "$ref": "#/$defs/ConfirmationMap"
+        },
         "reason_codes": {
           "type": "array",
           "maxItems": 8,
-          "items": { "$ref": "https://zeus.invalid/schema/common#/$defs/CapabilityName" }
+          "items": {
+            "$ref": "https://zeus.invalid/schema/common#/$defs/CapabilityName"
+          }
         },
         "agent_says_blake3": {
           "description": "BLAKE3 of the UTF-8 bytes of agent_says, so the hash binds the text the human saw; null when there is none.",
-          "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256" }, { "type": "null" }]
+          "oneOf": [
+            {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       }
     },
     "FactsHandoff": {
       "allOf": [
-        { "$ref": "#/$defs/FactsCommon" },
         {
-          "required": ["origin", "first_time_for_origin", "browser", "transfer", "items", "items_omitted"],
+          "$ref": "#/$defs/FactsCommon"
+        },
+        {
+          "required": [
+            "origin",
+            "first_time_for_origin",
+            "browser",
+            "transfer",
+            "items",
+            "items_omitted"
+          ],
           "properties": {
-            "kind": { "const": "handoff" },
-            "origin": { "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" },
-            "first_time_for_origin": { "type": "boolean" },
+            "kind": {
+              "const": "handoff"
+            },
+            "origin": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Origin"
+            },
+            "first_time_for_origin": {
+              "type": "boolean"
+            },
             "browser": {
               "type": "object",
-              "required": ["name", "incognito"],
+              "required": [
+                "name",
+                "incognito"
+              ],
               "properties": {
-                "name": { "$ref": "https://zeus.invalid/schema/domain#/$defs/Source/properties/browser/properties/name" },
-                "profile_id": { "type": "string", "pattern": "^[0-9a-f]{32}$" },
-                "incognito": { "type": "boolean" }
+                "name": {
+                  "$ref": "https://zeus.invalid/schema/domain#/$defs/Source/properties/browser/properties/name"
+                },
+                "profile_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{32}$"
+                },
+                "incognito": {
+                  "type": "boolean"
+                }
               }
             },
-            "transfer": { "$ref": "#/$defs/TransferFacts" },
-            "items": { "type": "array", "maxItems": 20, "items": { "$ref": "#/$defs/FactItem" } },
-            "items_omitted": { "type": "integer", "minimum": 0, "maximum": 50 }
+            "transfer": {
+              "$ref": "#/$defs/TransferFacts"
+            },
+            "items": {
+              "type": "array",
+              "maxItems": 20,
+              "items": {
+                "$ref": "#/$defs/FactItem"
+              }
+            },
+            "items_omitted": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50
+            }
           }
         }
       ]
     },
     "FactsSessionGrant": {
       "allOf": [
-        { "$ref": "#/$defs/FactsCommon" },
         {
-          "required": ["origin", "first_time_for_origin", "scope_hint", "run_id", "transfer", "items", "items_omitted"],
+          "$ref": "#/$defs/FactsCommon"
+        },
+        {
+          "required": [
+            "origin",
+            "first_time_for_origin",
+            "scope_hint",
+            "run_id",
+            "transfer",
+            "items",
+            "items_omitted"
+          ],
           "properties": {
-            "kind": { "const": "session_grant" },
-            "origin": { "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" },
-            "first_time_for_origin": { "type": "boolean" },
+            "kind": {
+              "const": "session_grant"
+            },
+            "origin": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Origin"
+            },
+            "first_time_for_origin": {
+              "type": "boolean"
+            },
             "scope_hint": {
               "description": "The scope the requester suggested; the human chooses.",
-              "enum": ["once", "site", "workflow", null]
+              "enum": [
+                "once",
+                "site",
+                "workflow",
+                null
+              ]
             },
-            "run_id": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/RunId" }, { "type": "null" }] },
+            "run_id": {
+              "oneOf": [
+                {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/RunId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "transfer": {
               "description": "Null for a sessions.request that names no job yet.",
-              "oneOf": [{ "$ref": "#/$defs/TransferFacts" }, { "type": "null" }]
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/TransferFacts"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             },
-            "items": { "type": "array", "maxItems": 20, "items": { "$ref": "#/$defs/FactItem" } },
-            "items_omitted": { "type": "integer", "minimum": 0, "maximum": 50 }
+            "items": {
+              "type": "array",
+              "maxItems": 20,
+              "items": {
+                "$ref": "#/$defs/FactItem"
+              }
+            },
+            "items_omitted": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50
+            }
           }
         }
       ]
     },
     "FactsRetryEscalation": {
       "allOf": [
-        { "$ref": "#/$defs/FactsCommon" },
         {
-          "required": ["job_id", "origin", "untrusted_name", "error", "refreshes_used", "bytes_done", "bytes_total", "grant_id"],
+          "$ref": "#/$defs/FactsCommon"
+        },
+        {
+          "required": [
+            "job_id",
+            "origin",
+            "untrusted_name",
+            "error",
+            "refreshes_used",
+            "bytes_done",
+            "bytes_total",
+            "grant_id"
+          ],
           "properties": {
-            "kind": { "const": "retry_escalation" },
-            "job_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/JobId" },
-            "origin": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" }, { "type": "null" }] },
-            "untrusted_name": { "$ref": "#/$defs/UntrustedName" },
+            "kind": {
+              "const": "retry_escalation"
+            },
+            "job_id": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/JobId"
+            },
+            "origin": {
+              "oneOf": [
+                {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/Origin"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "untrusted_name": {
+              "$ref": "#/$defs/UntrustedName"
+            },
             "error": {
               "type": "object",
-              "required": ["code", "class"],
+              "required": [
+                "code",
+                "class"
+              ],
               "properties": {
-                "code": { "$ref": "https://zeus.invalid/schema/common#/$defs/ErrorCode" },
-                "class": { "$ref": "https://zeus.invalid/schema/common#/$defs/ErrorClass" }
+                "code": {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/ErrorCode"
+                },
+                "class": {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/ErrorClass"
+                }
               }
             },
-            "refreshes_used": { "type": "integer", "minimum": 0, "maximum": 1000 },
-            "bytes_done": { "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" },
-            "bytes_total": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" }, { "type": "null" }] },
-            "grant_id": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId" }, { "type": "null" }] }
+            "refreshes_used": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "bytes_done": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+            },
+            "bytes_total": {
+              "oneOf": [
+                {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "grant_id": {
+              "oneOf": [
+                {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
           }
         }
       ]
@@ -423,72 +715,232 @@
     },
     "FactsWorkflowPlan": {
       "allOf": [
-        { "$ref": "#/$defs/FactsCommon" },
         {
-          "required": ["plan_id", "plan_blake3", "run_id", "renewal_of", "untrusted_title", "allowed_domains", "allowed_domains_omitted", "session_origin", "budgets", "pace", "robots_txt", "dest_dir", "estimate"],
+          "$ref": "#/$defs/FactsCommon"
+        },
+        {
+          "required": [
+            "plan_id",
+            "plan_blake3",
+            "run_id",
+            "renewal_of",
+            "untrusted_title",
+            "allowed_domains",
+            "allowed_domains_omitted",
+            "session_origin",
+            "budgets",
+            "pace",
+            "robots_txt",
+            "dest_dir",
+            "estimate"
+          ],
           "properties": {
-            "kind": { "const": "workflow_plan" },
-            "plan_id": { "$ref": "#/$defs/PlanId" },
+            "kind": {
+              "const": "workflow_plan"
+            },
+            "plan_id": {
+              "$ref": "#/$defs/PlanId"
+            },
             "plan_blake3": {
               "description": "BLAKE3 of the JCS form of the whole plan (spec 08). Any change to the plan is a new approval.",
               "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256"
             },
             "run_id": {
               "description": "The run the plan would start (08 creates it, awaiting approval, before raising the approval) or the run being renewed. Null only when no run exists yet.",
-              "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/RunId" }, { "type": "null" }]
+              "oneOf": [
+                {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/RunId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             },
             "renewal_of": {
               "description": "The workflow grant this approval would renew (07 section 6.3); null otherwise.",
-              "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId" }, { "type": "null" }]
+              "oneOf": [
+                {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             },
-            "untrusted_title": { "$ref": "#/$defs/UntrustedName" },
+            "untrusted_title": {
+              "$ref": "#/$defs/UntrustedName"
+            },
             "allowed_domains": {
               "type": "array",
               "minItems": 1,
               "maxItems": 20,
               "uniqueItems": true,
-              "items": { "$ref": "#/$defs/Hostname" }
+              "items": {
+                "$ref": "#/$defs/Hostname"
+              }
             },
-            "allowed_domains_omitted": { "type": "integer", "minimum": 0 },
-            "session_origin": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Origin" }, { "type": "null" }] },
-            "browser_document_mode": { "enum": ["browser_origin", null] },
-            "browser_profile_id": { "type": ["string", "null"], "pattern": "^[0-9a-f]{32}$" },
-            "browser_network": { "type": ["string", "null"], "maxLength": 512 },
+            "allowed_domains_omitted": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "session_origin": {
+              "oneOf": [
+                {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/Origin"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "browser_document_mode": {
+              "enum": [
+                "browser_origin",
+                null
+              ]
+            },
+            "browser_profile_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[0-9a-f]{32}$"
+            },
+            "browser_network": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 512
+            },
             "budgets": {
               "type": "object",
-              "required": ["max_pages", "max_files", "max_bytes", "max_duration_ms", "max_depth"],
+              "required": [
+                "max_pages",
+                "max_files",
+                "max_bytes",
+                "max_duration_ms",
+                "max_depth"
+              ],
               "properties": {
-                "max_pages": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
-                "max_files": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
-                "max_bytes": { "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" },
-                "max_duration_ms": { "$ref": "https://zeus.invalid/schema/common#/$defs/DurationMs" },
-                "max_depth": { "type": "integer", "minimum": 0, "maximum": 1000 }
+                "max_pages": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "max_files": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "max_bytes": {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+                },
+                "max_duration_ms": {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/DurationMs"
+                },
+                "max_depth": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000
+                }
               }
             },
             "pace": {
               "type": "object",
-              "required": ["min_interval_ms", "max_concurrency_per_host"],
+              "required": [
+                "min_interval_ms",
+                "max_concurrency_per_host"
+              ],
               "properties": {
-                "min_interval_ms": { "$ref": "https://zeus.invalid/schema/common#/$defs/DurationMs" },
-                "max_concurrency_per_host": { "type": "integer", "minimum": 1, "maximum": 8 }
+                "min_interval_ms": {
+                  "$ref": "https://zeus.invalid/schema/common#/$defs/DurationMs"
+                },
+                "max_concurrency_per_host": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 8
+                }
               }
             },
-            "robots_txt": { "enum": ["obey"] },
-            "dest_dir": { "$ref": "#/$defs/LocalPath" },
+            "robots_txt": {
+              "enum": [
+                "obey"
+              ]
+            },
+            "dest_dir": {
+              "$ref": "#/$defs/LocalPath"
+            },
             "estimate": {
               "description": "The dry run estimate: P10 (low) and P90 (high) of files and bytes (08); null when no dry run ran.",
               "oneOf": [
                 {
                   "type": "object",
-                  "required": ["files_low", "files_high", "bytes_low", "bytes_high"],
+                  "required": [
+                    "files_low",
+                    "files_high",
+                    "bytes_low",
+                    "bytes_high"
+                  ],
                   "properties": {
-                    "files_low": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
-                    "files_high": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
-                    "bytes_low": { "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" },
-                    "bytes_high": { "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" }
+                    "files_low": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "files_high": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "bytes_low": {
+                      "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+                    },
+                    "bytes_high": {
+                      "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+                    }
                   }
                 },
-                { "type": "null" }
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "item_sink": {
+              "description": "Explicit extra output effect, included in the reviewed facts hash. Null when no item sink was requested.",
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "format",
+                    "file_name",
+                    "max_bytes",
+                    "contents",
+                    "url_redaction"
+                  ],
+                  "properties": {
+                    "format": {
+                      "const": "jsonl"
+                    },
+                    "file_name": {
+                      "type": "string",
+                      "pattern": "^zeus-run-run_[0-9A-HJKMNP-TV-Z]{26}\\.items\\.jsonl$"
+                    },
+                    "max_bytes": {
+                      "const": 67108864
+                    },
+                    "contents": {
+                      "const": "extracted_site_fields"
+                    },
+                    "url_redaction": {
+                      "const": "record"
+                    }
+                  }
+                }
               ]
             }
           }
@@ -499,83 +951,243 @@
       "description": "An exact artifact tombstone or protection change; the expected record hash binds its prior revision.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["version", "artifact_id", "expected_record_blake3", "blake3", "sha256", "size_bytes", "quarantined", "current_retention", "current_retain_until", "operation", "requires_approval", "expires_at"],
+      "required": [
+        "version",
+        "artifact_id",
+        "expected_record_blake3",
+        "blake3",
+        "sha256",
+        "size_bytes",
+        "quarantined",
+        "current_retention",
+        "current_retain_until",
+        "operation",
+        "requires_approval",
+        "expires_at"
+      ],
       "properties": {
-        "version": { "const": 1 },
-        "artifact_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/ArtifactId" },
-        "expected_record_blake3": { "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256" },
-        "blake3": { "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256" },
-        "sha256": { "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256" },
-        "size_bytes": { "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" },
-        "quarantined": { "type": "boolean" },
-        "current_retention": { "enum": ["keep", "evictable"] },
-        "current_retain_until": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }, { "type": "null" }] },
+        "version": {
+          "const": 1
+        },
+        "artifact_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/ArtifactId"
+        },
+        "expected_record_blake3": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256"
+        },
+        "blake3": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256"
+        },
+        "sha256": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256"
+        },
+        "size_bytes": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+        },
+        "quarantined": {
+          "type": "boolean"
+        },
+        "current_retention": {
+          "enum": [
+            "keep",
+            "evictable"
+          ]
+        },
+        "current_retain_until": {
+          "oneOf": [
+            {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "operation": {
           "oneOf": [
             {
-              "type": "object", "additionalProperties": false,
-              "required": ["kind"],
-              "properties": { "kind": { "const": "delete" } }
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "delete"
+                }
+              }
             },
             {
-              "type": "object", "additionalProperties": false,
-              "required": ["kind", "retention", "retain_until"],
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "retention",
+                "retain_until"
+              ],
               "properties": {
-                "kind": { "const": "set_retention" },
-                "retention": { "enum": ["keep", "evictable"] },
-                "retain_until": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }, { "type": "null" }] }
+                "kind": {
+                  "const": "set_retention"
+                },
+                "retention": {
+                  "enum": [
+                    "keep",
+                    "evictable"
+                  ]
+                },
+                "retain_until": {
+                  "oneOf": [
+                    {
+                      "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
               }
             }
           ]
         },
-        "requires_approval": { "const": true },
-        "expires_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" }
+        "requires_approval": {
+          "const": true
+        },
+        "expires_at": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp"
+        }
       }
     },
     "FactsDestructiveOp": {
       "allOf": [
-        { "$ref": "#/$defs/FactsCommon" },
         {
-          "required": ["operation_set_blake3", "plan_id", "counts", "total_bytes", "to_trash", "quarantined_count", "sample", "sample_omitted"],
+          "$ref": "#/$defs/FactsCommon"
+        },
+        {
+          "required": [
+            "operation_set_blake3",
+            "plan_id",
+            "counts",
+            "total_bytes",
+            "to_trash",
+            "quarantined_count",
+            "sample",
+            "sample_omitted"
+          ],
           "properties": {
-            "kind": { "const": "destructive_op" },
+            "kind": {
+              "const": "destructive_op"
+            },
             "operation_set_blake3": {
               "description": "BLAKE3 of the JCS form of the complete operation list; the decision covers exactly that list.",
               "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256"
             },
-            "plan_id": { "oneOf": [{ "$ref": "#/$defs/PlanId" }, { "type": "null" }] },
-            "artifact_plan": { "$ref": "#/$defs/ArtifactLifecyclePlan" },
+            "plan_id": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/PlanId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "artifact_plan": {
+              "$ref": "#/$defs/ArtifactLifecyclePlan"
+            },
             "counts": {
               "type": "object",
-              "required": ["delete", "overwrite", "move", "rename"],
+              "required": [
+                "delete",
+                "overwrite",
+                "move",
+                "rename"
+              ],
               "properties": {
-                "delete": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
-                "overwrite": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
-                "move": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
-                "rename": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+                "delete": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "overwrite": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "move": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "rename": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
               }
             },
             "total_bytes": {
               "description": "Bytes of the files deleted or overwritten.",
               "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
             },
-            "to_trash": { "type": "boolean" },
-            "quarantined_count": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+            "to_trash": {
+              "type": "boolean"
+            },
+            "quarantined_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
             "sample": {
               "type": "array",
               "maxItems": 20,
               "items": {
                 "type": "object",
-                "required": ["op", "path", "to", "size_bytes"],
+                "required": [
+                  "op",
+                  "path",
+                  "to",
+                  "size_bytes"
+                ],
                 "properties": {
-                  "op": { "enum": ["delete", "overwrite", "move", "rename"] },
-                  "path": { "$ref": "#/$defs/LocalPath" },
-                  "to": { "oneOf": [{ "$ref": "#/$defs/LocalPath" }, { "type": "null" }] },
-                  "size_bytes": { "oneOf": [{ "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes" }, { "type": "null" }] }
+                  "op": {
+                    "enum": [
+                      "delete",
+                      "overwrite",
+                      "move",
+                      "rename"
+                    ]
+                  },
+                  "path": {
+                    "$ref": "#/$defs/LocalPath"
+                  },
+                  "to": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/$defs/LocalPath"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "size_bytes": {
+                    "oneOf": [
+                      {
+                        "$ref": "https://zeus.invalid/schema/common#/$defs/Bytes"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
                 }
               }
             },
-            "sample_omitted": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+            "sample_omitted": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
           }
         }
       ]
@@ -628,13 +1240,27 @@
     "RequestFacts": {
       "description": "The exact daemon-computed facts the request_hash covers and the trust surface renders (07 section 4.4). At most 16 KiB in JCS form.",
       "oneOf": [
-        { "$ref": "#/$defs/FactsHandoff" },
-        { "$ref": "#/$defs/FactsSessionGrant" },
-        { "$ref": "#/$defs/FactsRetryEscalation" },
-        { "$ref": "#/$defs/FactsPolicyException" },
-        { "$ref": "#/$defs/FactsWorkflowPlan" },
-        { "$ref": "#/$defs/FactsDestructiveOp" },
-        { "$ref": "#/$defs/FactsCloudDelivery" }
+        {
+          "$ref": "#/$defs/FactsHandoff"
+        },
+        {
+          "$ref": "#/$defs/FactsSessionGrant"
+        },
+        {
+          "$ref": "#/$defs/FactsRetryEscalation"
+        },
+        {
+          "$ref": "#/$defs/FactsPolicyException"
+        },
+        {
+          "$ref": "#/$defs/FactsWorkflowPlan"
+        },
+        {
+          "$ref": "#/$defs/FactsDestructiveOp"
+        },
+        {
+          "$ref": "#/$defs/FactsCloudDelivery"
+        }
       ]
     },
     "ApprovalBase": {
@@ -643,9 +1269,16 @@
     "ApprovalRequest": {
       "description": "The full approval as stored in the journal and as trust surfaces receive it: the 01 Approval entity plus request_hash, requested_by, revision, facts and agent_says (07 section 4).",
       "allOf": [
-        { "$ref": "#/$defs/ApprovalBase" },
         {
-          "required": ["request_hash", "requested_by", "revision", "facts"],
+          "$ref": "#/$defs/ApprovalBase"
+        },
+        {
+          "required": [
+            "request_hash",
+            "requested_by",
+            "revision",
+            "facts"
+          ],
           "properties": {
             "request_hash": {
               "description": "hex(BLAKE3(JCS(facts))) (07 section 4.6).",
@@ -653,10 +1286,23 @@
             },
             "requested_by": {
               "description": "facts.requester.client_id, or daemon.",
-              "anyOf": [{ "$ref": "#/$defs/ClientId" }, { "const": "daemon" }]
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/ClientId"
+                },
+                {
+                  "const": "daemon"
+                }
+              ]
             },
-            "revision": { "type": "integer", "minimum": 1, "maximum": 1000 },
-            "facts": { "$ref": "#/$defs/RequestFacts" },
+            "revision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "facts": {
+              "$ref": "#/$defs/RequestFacts"
+            },
             "agent_says": {
               "description": "Sanitised free text of the requester, at most 280 characters. Untrusted (07 section 4.5). Absent when the requester gave none.",
               "type": "string",
@@ -670,15 +1316,29 @@
     "ApprovalDecision": {
       "description": "What a trust surface sends to decide (approvals.decide params, spec 05; the native-messaging approval.decide body carries the same members, spec 02 section 10.1).",
       "type": "object",
-      "required": ["approval_id", "request_hash", "outcome", "channel"],
+      "required": [
+        "approval_id",
+        "request_hash",
+        "outcome",
+        "channel"
+      ],
       "properties": {
-        "approval_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/ApprovalId" },
+        "approval_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/ApprovalId"
+        },
         "request_hash": {
           "description": "The hash the surface recomputed from the facts it displayed.",
           "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256"
         },
-        "outcome": { "enum": ["approve", "deny"] },
-        "scope": { "$ref": "https://zeus.invalid/schema/domain#/$defs/GrantScope" },
+        "outcome": {
+          "enum": [
+            "approve",
+            "deny"
+          ]
+        },
+        "scope": {
+          "$ref": "https://zeus.invalid/schema/domain#/$defs/GrantScope"
+        },
         "channel": {
           "description": "The surface claimed; the daemon checks it against its own channel evidence (07 section 7).",
           "$ref": "#/$defs/Surface"
@@ -687,35 +1347,90 @@
           "description": "How the human confirmed; absent means gesture.",
           "$ref": "#/$defs/ConfirmationLevel"
         },
-        "idempotency_key": { "type": "string", "minLength": 1, "maxLength": 128 }
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
       }
     },
     "ChannelEvidence": {
       "description": "What the daemon itself established about the channel a decision came through (07 section 7). Recorded in the DecisionRecord and summarised in the audit record.",
       "type": "object",
-      "required": ["surface", "role", "client_id", "credential_kind", "effective_kind", "exe_verified", "tty", "confirmation"],
+      "required": [
+        "surface",
+        "role",
+        "client_id",
+        "credential_kind",
+        "effective_kind",
+        "exe_verified",
+        "tty",
+        "confirmation"
+      ],
       "properties": {
-        "surface": { "$ref": "#/$defs/Surface" },
-        "role": { "$ref": "#/$defs/ClientRole" },
-        "client_id": { "$ref": "#/$defs/ClientId" },
-        "credential_kind": { "$ref": "#/$defs/ClientKind" },
-        "effective_kind": { "$ref": "#/$defs/ClientKind" },
-        "exe_verified": { "type": "boolean" },
-        "peer_pid": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "surface": {
+          "$ref": "#/$defs/Surface"
+        },
+        "role": {
+          "$ref": "#/$defs/ClientRole"
+        },
+        "client_id": {
+          "$ref": "#/$defs/ClientId"
+        },
+        "credential_kind": {
+          "$ref": "#/$defs/ClientKind"
+        },
+        "effective_kind": {
+          "$ref": "#/$defs/ClientKind"
+        },
+        "exe_verified": {
+          "type": "boolean"
+        },
+        "peer_pid": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
         "tty": {
           "description": "verified: the daemon saw that the peer has a controlling terminal; asserted: the verified binary reported it and the platform offers no check; absent; not_applicable for non-terminal surfaces.",
-          "enum": ["verified", "asserted", "absent", "not_applicable"]
+          "enum": [
+            "verified",
+            "asserted",
+            "absent",
+            "not_applicable"
+          ]
         },
-        "confirmation": { "$ref": "#/$defs/ConfirmationLevel" },
+        "confirmation": {
+          "$ref": "#/$defs/ConfirmationLevel"
+        },
         "extension": {
           "type": "object",
-          "required": ["browser", "attested_extension", "connection_id", "user_gesture", "parent_verified"],
+          "required": [
+            "browser",
+            "attested_extension",
+            "connection_id",
+            "user_gesture",
+            "parent_verified"
+          ],
           "properties": {
-            "browser": { "$ref": "https://zeus.invalid/schema/native-messaging.v1#/$defs/BrowserName" },
-            "attested_extension": { "type": "string", "minLength": 1, "maxLength": 128 },
-            "profile_id": { "type": "string", "pattern": "^[0-9a-f]{32}$" },
-            "connection_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/ConnectionId" },
-            "user_gesture": { "const": true },
+            "browser": {
+              "$ref": "https://zeus.invalid/schema/native-messaging.v1#/$defs/BrowserName"
+            },
+            "attested_extension": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "profile_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{32}$"
+            },
+            "connection_id": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/ConnectionId"
+            },
+            "user_gesture": {
+              "const": true
+            },
             "parent_verified": {
               "description": "zeus-native-host found a registered browser executable as its parent (07 section 7.4).",
               "type": "boolean"
@@ -730,12 +1445,20 @@
     "HumanActor": {
       "description": "A human on any human surface.",
       "allOf": [
-        { "$ref": "#/$defs/ActorBase" },
         {
-          "required": ["surface"],
+          "$ref": "#/$defs/ActorBase"
+        },
+        {
+          "required": [
+            "surface"
+          ],
           "properties": {
-            "kind": { "const": "human" },
-            "surface": { "$ref": "#/$defs/HumanSurface" }
+            "kind": {
+              "const": "human"
+            },
+            "surface": {
+              "$ref": "#/$defs/HumanSurface"
+            }
           }
         }
       ]
@@ -743,207 +1466,512 @@
     "ApprovingActor": {
       "description": "A human on a surface that may approve.",
       "allOf": [
-        { "$ref": "#/$defs/ActorBase" },
         {
-          "required": ["surface"],
+          "$ref": "#/$defs/ActorBase"
+        },
+        {
+          "required": [
+            "surface"
+          ],
           "properties": {
-            "kind": { "const": "human" },
-            "surface": { "$ref": "#/$defs/ApprovingSurface" }
+            "kind": {
+              "const": "human"
+            },
+            "surface": {
+              "$ref": "#/$defs/ApprovingSurface"
+            }
           }
         }
       ]
     },
     "SystemActor": {
       "allOf": [
-        { "$ref": "#/$defs/ActorBase" },
-        { "properties": { "kind": { "const": "system" } } }
+        {
+          "$ref": "#/$defs/ActorBase"
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "system"
+            }
+          }
+        }
       ]
     },
     "DecisionBase": {
       "type": "object",
-      "required": ["approval_id", "revision", "request_hash", "outcome", "actor", "decided_at", "grant_ids"],
+      "required": [
+        "approval_id",
+        "revision",
+        "request_hash",
+        "outcome",
+        "actor",
+        "decided_at",
+        "grant_ids"
+      ],
       "properties": {
-        "approval_id": { "$ref": "https://zeus.invalid/schema/common#/$defs/ApprovalId" },
-        "revision": { "type": "integer", "minimum": 1, "maximum": 1000 },
-        "request_hash": { "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256" },
-        "outcome": { "enum": ["approve", "deny", "expire", "cancel"] },
-        "scope": { "$ref": "https://zeus.invalid/schema/domain#/$defs/GrantScope" },
-        "actor": { "$ref": "https://zeus.invalid/schema/domain#/$defs/Actor" },
-        "decided_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
+        "approval_id": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/ApprovalId"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "request_hash": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Hex256"
+        },
+        "outcome": {
+          "enum": [
+            "approve",
+            "deny",
+            "expire",
+            "cancel"
+          ]
+        },
+        "scope": {
+          "$ref": "https://zeus.invalid/schema/domain#/$defs/GrantScope"
+        },
+        "actor": {
+          "$ref": "https://zeus.invalid/schema/domain#/$defs/Actor"
+        },
+        "decided_at": {
+          "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp"
+        },
         "grant_ids": {
           "description": "Every grant the decision created: one per covered job for a once decision, otherwise at most one.",
           "type": "array",
           "maxItems": 50,
           "uniqueItems": true,
-          "items": { "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId" }
+          "items": {
+            "$ref": "https://zeus.invalid/schema/common#/$defs/GrantId"
+          }
         }
       }
     },
     "HumanDecisionRecord": {
       "allOf": [
-        { "$ref": "#/$defs/DecisionBase" },
         {
-          "required": ["evidence"],
+          "$ref": "#/$defs/DecisionBase"
+        },
+        {
+          "required": [
+            "evidence"
+          ],
           "properties": {
-            "outcome": { "enum": ["approve", "deny"] },
-            "actor": { "$ref": "#/$defs/HumanActor" },
-            "evidence": { "$ref": "#/$defs/ChannelEvidence" }
+            "outcome": {
+              "enum": [
+                "approve",
+                "deny"
+              ]
+            },
+            "actor": {
+              "$ref": "#/$defs/HumanActor"
+            },
+            "evidence": {
+              "$ref": "#/$defs/ChannelEvidence"
+            }
           }
         }
       ]
     },
     "SystemDecisionRecord": {
       "allOf": [
-        { "$ref": "#/$defs/DecisionBase" },
         {
-          "required": ["system_reason"],
+          "$ref": "#/$defs/DecisionBase"
+        },
+        {
+          "required": [
+            "system_reason"
+          ],
           "properties": {
-            "outcome": { "enum": ["expire", "cancel"] },
-            "actor": { "$ref": "#/$defs/SystemActor" },
-            "grant_ids": { "type": "array", "maxItems": 0 },
-            "system_reason": { "enum": ["deadline", "job_canceled", "request_withdrawn"] }
+            "outcome": {
+              "enum": [
+                "expire",
+                "cancel"
+              ]
+            },
+            "actor": {
+              "$ref": "#/$defs/SystemActor"
+            },
+            "grant_ids": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "system_reason": {
+              "enum": [
+                "deadline",
+                "job_canceled",
+                "request_withdrawn"
+              ]
+            }
           }
         }
       ]
     },
     "DecisionRecord": {
       "description": "Stored next to the ApprovalRequest in the journal (03 table approvals) when the approval leaves pending (07 section 5.3).",
-      "oneOf": [{ "$ref": "#/$defs/HumanDecisionRecord" }, { "$ref": "#/$defs/SystemDecisionRecord" }]
+      "oneOf": [
+        {
+          "$ref": "#/$defs/HumanDecisionRecord"
+        },
+        {
+          "$ref": "#/$defs/SystemDecisionRecord"
+        }
+      ]
     },
     "GrantBase": {
       "$ref": "https://zeus.invalid/schema/domain#/$defs/SessionGrant"
     },
     "GrantOnce": {
       "allOf": [
-        { "$ref": "#/$defs/GrantBase" },
         {
-          "required": ["job_id", "expires_at"],
+          "$ref": "#/$defs/GrantBase"
+        },
+        {
+          "required": [
+            "job_id",
+            "expires_at"
+          ],
           "properties": {
-            "scope": { "const": "once" },
-            "state": { "enum": ["active", "expired", "revoked", "consumed"] },
-            "expires_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
-            "decided_by": { "$ref": "#/$defs/ApprovingActor" },
-            "renewable": { "const": false },
-            "renewal_count": { "const": 0 },
-            "renewed_at": { "type": "null" }
+            "scope": {
+              "const": "once"
+            },
+            "state": {
+              "enum": [
+                "active",
+                "expired",
+                "revoked",
+                "consumed"
+              ]
+            },
+            "expires_at": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp"
+            },
+            "decided_by": {
+              "$ref": "#/$defs/ApprovingActor"
+            },
+            "renewable": {
+              "const": false
+            },
+            "renewal_count": {
+              "const": 0
+            },
+            "renewed_at": {
+              "type": "null"
+            }
           },
-          "not": { "required": ["run_id"] }
+          "not": {
+            "required": [
+              "run_id"
+            ]
+          }
         }
       ]
     },
     "GrantSite": {
       "allOf": [
-        { "$ref": "#/$defs/GrantBase" },
         {
-          "required": ["expires_at"],
+          "$ref": "#/$defs/GrantBase"
+        },
+        {
+          "required": [
+            "expires_at"
+          ],
           "properties": {
-            "scope": { "const": "site" },
-            "state": { "enum": ["active", "expired", "revoked"] },
-            "expires_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
-            "decided_by": { "$ref": "#/$defs/ApprovingActor" },
-            "renewable": { "const": false },
-            "renewal_count": { "const": 0 },
-            "renewed_at": { "type": "null" }
+            "scope": {
+              "const": "site"
+            },
+            "state": {
+              "enum": [
+                "active",
+                "expired",
+                "revoked"
+              ]
+            },
+            "expires_at": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp"
+            },
+            "decided_by": {
+              "$ref": "#/$defs/ApprovingActor"
+            },
+            "renewable": {
+              "const": false
+            },
+            "renewal_count": {
+              "const": 0
+            },
+            "renewed_at": {
+              "type": "null"
+            }
           },
-          "not": { "anyOf": [{ "required": ["job_id"] }, { "required": ["run_id"] }] }
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "job_id"
+                ]
+              },
+              {
+                "required": [
+                  "run_id"
+                ]
+              }
+            ]
+          }
         }
       ]
     },
     "GrantWorkflow": {
       "allOf": [
-        { "$ref": "#/$defs/GrantBase" },
         {
-          "required": ["run_id", "expires_at", "renewal_count"],
+          "$ref": "#/$defs/GrantBase"
+        },
+        {
+          "required": [
+            "run_id",
+            "expires_at",
+            "renewal_count"
+          ],
           "properties": {
-            "scope": { "const": "workflow" },
-            "state": { "enum": ["active", "expired", "revoked"] },
-            "expires_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
-            "decided_by": { "$ref": "#/$defs/ApprovingActor" },
-            "renewable": { "const": true }
+            "scope": {
+              "const": "workflow"
+            },
+            "state": {
+              "enum": [
+                "active",
+                "expired",
+                "revoked"
+              ]
+            },
+            "expires_at": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp"
+            },
+            "decided_by": {
+              "$ref": "#/$defs/ApprovingActor"
+            },
+            "renewable": {
+              "const": true
+            }
           },
-          "not": { "required": ["job_id"] }
+          "not": {
+            "required": [
+              "job_id"
+            ]
+          }
         }
       ]
     },
     "GrantNever": {
       "allOf": [
-        { "$ref": "#/$defs/GrantBase" },
         {
-          "required": ["expires_at"],
+          "$ref": "#/$defs/GrantBase"
+        },
+        {
+          "required": [
+            "expires_at"
+          ],
           "properties": {
-            "scope": { "const": "never" },
-            "state": { "enum": ["active", "revoked"] },
-            "expires_at": { "type": "null" },
-            "decided_by": { "$ref": "#/$defs/ApprovingActor" },
-            "uses": { "const": 0 },
-            "last_used_at": { "type": "null" },
-            "renewable": { "const": false },
-            "renewal_count": { "const": 0 },
-            "renewed_at": { "type": "null" }
+            "scope": {
+              "const": "never"
+            },
+            "state": {
+              "enum": [
+                "active",
+                "revoked"
+              ]
+            },
+            "expires_at": {
+              "type": "null"
+            },
+            "decided_by": {
+              "$ref": "#/$defs/ApprovingActor"
+            },
+            "uses": {
+              "const": 0
+            },
+            "last_used_at": {
+              "type": "null"
+            },
+            "renewable": {
+              "const": false
+            },
+            "renewal_count": {
+              "const": 0
+            },
+            "renewed_at": {
+              "type": "null"
+            }
           },
-          "not": { "anyOf": [{ "required": ["job_id"] }, { "required": ["run_id"] }] }
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "job_id"
+                ]
+              },
+              {
+                "required": [
+                  "run_id"
+                ]
+              }
+            ]
+          }
         }
       ]
     },
     "GrantRevoked": {
       "allOf": [
-        { "$ref": "#/$defs/GrantBase" },
         {
-          "required": ["revoked_at", "revoked_by", "revocation_reason"],
+          "$ref": "#/$defs/GrantBase"
+        },
+        {
+          "required": [
+            "revoked_at",
+            "revoked_by",
+            "revocation_reason"
+          ],
           "properties": {
-            "state": { "const": "revoked" },
-            "revoked_at": { "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp" },
-            "revoked_by": { "$ref": "#/$defs/HumanActor" }
+            "state": {
+              "const": "revoked"
+            },
+            "revoked_at": {
+              "$ref": "https://zeus.invalid/schema/common#/$defs/Timestamp"
+            },
+            "revoked_by": {
+              "$ref": "#/$defs/HumanActor"
+            }
           }
         }
       ]
     },
     "GrantUnrevoked": {
       "allOf": [
-        { "$ref": "#/$defs/GrantBase" },
+        {
+          "$ref": "#/$defs/GrantBase"
+        },
         {
           "properties": {
-            "state": { "enum": ["active", "expired", "consumed"] },
-            "revoked_at": { "type": "null" }
+            "state": {
+              "enum": [
+                "active",
+                "expired",
+                "consumed"
+              ]
+            },
+            "revoked_at": {
+              "type": "null"
+            }
           },
-          "not": { "anyOf": [{ "required": ["revoked_by"] }, { "required": ["revocation_reason"] }] }
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "revoked_by"
+                ]
+              },
+              {
+                "required": [
+                  "revocation_reason"
+                ]
+              }
+            ]
+          }
         }
       ]
     },
     "GrantRecord": {
       "description": "A SessionGrant (01 section 5.1) together with the invariants of 07 section 6.2 that depend on its scope and state.",
       "allOf": [
-        { "oneOf": [{ "$ref": "#/$defs/GrantOnce" }, { "$ref": "#/$defs/GrantSite" }, { "$ref": "#/$defs/GrantWorkflow" }, { "$ref": "#/$defs/GrantNever" }] },
-        { "oneOf": [{ "$ref": "#/$defs/GrantRevoked" }, { "$ref": "#/$defs/GrantUnrevoked" }] }
+        {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/GrantOnce"
+            },
+            {
+              "$ref": "#/$defs/GrantSite"
+            },
+            {
+              "$ref": "#/$defs/GrantWorkflow"
+            },
+            {
+              "$ref": "#/$defs/GrantNever"
+            }
+          ]
+        },
+        {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/GrantRevoked"
+            },
+            {
+              "$ref": "#/$defs/GrantUnrevoked"
+            }
+          ]
+        }
       ]
     },
     "KillSwitchRequest": {
       "description": "daemon.kill_switch params (spec 05) and the body of the native-messaging kill_switch request (02 section 10.1).",
       "type": "object",
-      "required": ["action", "surface"],
+      "required": [
+        "action",
+        "surface"
+      ],
       "properties": {
-        "action": { "enum": ["engage", "release"] },
-        "surface": { "$ref": "#/$defs/HumanSurface" },
+        "action": {
+          "enum": [
+            "engage",
+            "release"
+          ]
+        },
+        "surface": {
+          "$ref": "#/$defs/HumanSurface"
+        },
         "reason": {
           "description": "Free text for the human's own record. Untrusted; the audit record stores only its BLAKE3.",
           "type": "string",
           "maxLength": 280
         },
-        "idempotency_key": { "type": "string", "minLength": 1, "maxLength": 128 }
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
       }
     },
     "KillSwitchResult": {
       "type": "object",
-      "required": ["engaged", "changed", "grants_revoked", "jobs_paused", "approvals_pending"],
+      "required": [
+        "engaged",
+        "changed",
+        "grants_revoked",
+        "jobs_paused",
+        "approvals_pending"
+      ],
       "properties": {
-        "engaged": { "type": "boolean" },
+        "engaged": {
+          "type": "boolean"
+        },
         "changed": {
           "description": "False when the latch already had the requested value (the engage sweep still ran).",
           "type": "boolean"
         },
-        "grants_revoked": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
-        "jobs_paused": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
-        "approvals_pending": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+        "grants_revoked": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "jobs_paused": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "approvals_pending": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
         "replayed": {
           "description": "True when the result was returned from the idempotency store instead of acting again (00-conventions section 5.4).",
           "type": "boolean"
