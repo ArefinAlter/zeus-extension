@@ -8,7 +8,7 @@
   "files": {
     "native-messaging.v1.schema.json": "556315ead20e742410943dc2537a2abd269578a65b386f81edaebfba59f70e9b",
     "common.schema.json": "561a3f00d0f01d8a3f66cc4b7059d8d4feffc999c85095f64ea73493a75507df",
-    "approvals.v1.schema.json": "1d9805d05718f237c8c5c1aae008ba03407d4515ff93fc4ec44ce85326c94744",
+    "approvals.v1.schema.json": "4beaa689acd505a13f0387359a6132d3a0b586b0272f9b22a2efb46a1333ca33",
     "cloud.v1.schema.json": "35d06388a38159874eec20b8ec84f51068889d8d9ff8e0efb0f82d8b80a304cb",
     "domain.schema.json": "c31fc7e6b0bdf34d984d4093a5e0f31d58f845ce831cdeb58673a5ae773649bf",
     "redaction-vectors.v1.json": "8f937e2533d5c195b071b4dec06d8f54474bb5090785247500b60fa2e239a75d",

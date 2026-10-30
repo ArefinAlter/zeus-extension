@@ -920,7 +920,8 @@
                     "file_name",
                     "max_bytes",
                     "contents",
-                    "url_redaction"
+                    "url_redaction",
+                    "max_page_metadata_bytes"
                   ],
                   "properties": {
                     "format": {
@@ -938,6 +939,9 @@
                     },
                     "url_redaction": {
                       "const": "record"
+                    },
+                    "max_page_metadata_bytes": {
+                      "const": 8388608
                     }
                   }
                 }
@@ -1093,6 +1097,9 @@
             },
             "artifact_plan": {
               "$ref": "#/$defs/ArtifactLifecyclePlan"
+            },
+            "maintenance_plan": {
+              "$ref": "#/$defs/MaintenanceApi_ArtifactMaintenancePlan"
             },
             "counts": {
               "type": "object",
@@ -1977,6 +1984,288 @@
           "type": "boolean"
         }
       }
+    },
+    "MaintenanceApi_ArtifactMaintenancePlan": {
+      "additionalProperties": false,
+      "description": "Exact versioned plan. Details contain bounded core bundle or collection facts, never authority.",
+      "properties": {
+        "details": {
+          "description": "Exact content manifest/record revisions or collection targets."
+        },
+        "expires_at": {
+          "description": "No more than15minutes after preview.",
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)\\.[0-9]{3}Z$",
+          "type": "string"
+        },
+        "file": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MaintenanceApi_ArtifactFileBinding"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Source or destination binding; collection has no user-file target."
+        },
+        "operation": {
+          "$ref": "#/$defs/MaintenanceApi_ArtifactMaintenanceOperation",
+          "description": "Complete requested effect."
+        },
+        "requires_approval": {
+          "description": "Always true for collection; callers cannot downgrade it.",
+          "type": "boolean"
+        },
+        "store_id": {
+          "description": "Local store identity.",
+          "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$",
+          "type": "string"
+        },
+        "store_root_id": {
+          "$ref": "#/$defs/MaintenanceApi_FileId",
+          "description": "Local store directory identity."
+        },
+        "version": {
+          "description": "Plan format1.",
+          "minimum": 0,
+          "type": "integer",
+          "maximum": 4294967295
+        }
+      },
+      "required": [
+        "version",
+        "store_id",
+        "store_root_id",
+        "operation",
+        "details",
+        "requires_approval",
+        "expires_at"
+      ],
+      "type": "object"
+    },
+    "MaintenanceApi_ArtifactFileBinding": {
+      "additionalProperties": false,
+      "description": "Retained filesystem identities bound to a preview, reopened and compared before execution.",
+      "properties": {
+        "file_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MaintenanceApi_FileId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Source identity; null for a new destination."
+        },
+        "parent_id": {
+          "$ref": "#/$defs/MaintenanceApi_FileId",
+          "description": "Existing parent directory identity."
+        },
+        "path": {
+          "description": "Exact absolute filename.",
+          "type": "string"
+        },
+        "root": {
+          "description": "Authorized configured root.",
+          "type": "string"
+        },
+        "root_id": {
+          "$ref": "#/$defs/MaintenanceApi_FileId",
+          "description": "Root identity."
+        }
+      },
+      "required": [
+        "path",
+        "root",
+        "root_id",
+        "parent_id"
+      ],
+      "type": "object"
+    },
+    "MaintenanceApi_FileId": {
+      "description": "Stable identity of an open file object, used to detect a replaced or swapped `.zpart`\n(03 sections 3.1 and 7.2, checks L1 and L2). Numbers are decimal or hexadecimal *strings*\nbecause inode numbers and 128-bit file indexes exceed the 2^53 JSON integer limit.",
+      "oneOf": [
+        {
+          "description": "Unix: device and inode, decimal.",
+          "properties": {
+            "dev": {
+              "description": "`st_dev`.",
+              "type": "string"
+            },
+            "ino": {
+              "description": "`st_ino`.",
+              "type": "string"
+            },
+            "kind": {
+              "const": "unix",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "dev",
+            "ino"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Windows: 64-bit volume serial (16 lowercase hex digits) and 128-bit file index (32 hex digits).",
+          "properties": {
+            "file_index": {
+              "description": "`FILE_ID_128`.",
+              "type": "string"
+            },
+            "kind": {
+              "const": "windows",
+              "type": "string"
+            },
+            "volume_serial": {
+              "description": "Volume serial number.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "volume_serial",
+            "file_index"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "MaintenanceApi_ArtifactMaintenanceOperation": {
+      "description": "Bounded artifact maintenance; none of these operations authorizes another operation or a provider.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Verify exact stored objects and move mismatches into private damaged storage after human approval.",
+          "properties": {
+            "artifact_ids": {
+              "description": "1–64 visible active records;32MiB total observed bytes.",
+              "items": {
+                "description": "Identifier with the prefix `art_` followed by a 26 character ULID.",
+                "pattern": "^art_[0-7][0-9A-HJKMNP-TV-Z]{25}$",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "kind": {
+              "const": "scrub",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "artifact_ids"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Restore an absent/damaged object from exact verified bytes; requires a human decision.",
+          "properties": {
+            "artifact_id": {
+              "description": "Visible active record whose immutable content is restored.",
+              "pattern": "^art_[0-7][0-9A-HJKMNP-TV-Z]{25}$",
+              "type": "string"
+            },
+            "kind": {
+              "const": "repair",
+              "type": "string"
+            },
+            "path": {
+              "description": "Existing source within a permitted root; at most16MiB.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "artifact_id",
+            "path"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Export up to64 visible active records to a new bundle file; optional verified content is bounded.",
+          "properties": {
+            "artifact_ids": {
+              "description": "Exact records.",
+              "items": {
+                "description": "Identifier with the prefix `art_` followed by a 26 character ULID.",
+                "pattern": "^art_[0-7][0-9A-HJKMNP-TV-Z]{25}$",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "include_objects": {
+              "default": false,
+              "description": "Include present content; quarantined byte export is refused.",
+              "type": "boolean"
+            },
+            "kind": {
+              "const": "export",
+              "type": "string"
+            },
+            "path": {
+              "description": "New absolute destination inside an authorized root.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "artifact_ids",
+            "path"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Import a validated bundle. Existing immutable source identities replay without overwrite.",
+          "properties": {
+            "kind": {
+              "const": "import",
+              "type": "string"
+            },
+            "path": {
+              "description": "Existing regular bundle inside an authorized root.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "path"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Select exact unprotected CAS objects. Requires non-service owner access and human approval.",
+          "properties": {
+            "kind": {
+              "const": "collect",
+              "type": "string"
+            },
+            "limit": {
+              "description": "1–128 exact targets.",
+              "minimum": 0,
+              "type": "integer",
+              "maximum": 4294967295
+            },
+            "quota_pressure": {
+              "default": false,
+              "description": "Permit evictable active content as well as unreferenced content.",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "limit"
+          ],
+          "type": "object"
+        }
+      ]
     }
   }
 }

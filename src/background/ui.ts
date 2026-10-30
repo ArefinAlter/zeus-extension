@@ -158,7 +158,7 @@ export class UiService {
     const permissions: Record<string, boolean> = {};
     for (const origin of [...origins].slice(0, 40)) {
       permissions[origin] = await this.env.api.permissions
-        .contains({ origins: [hostPattern(origin)], permissions: ['cookies'] })
+        .contains({ origins: [hostPattern(origin)] })
         .catch(() => false);
     }
     const consentViews: ConsentView[] = consent.map((c) => ({

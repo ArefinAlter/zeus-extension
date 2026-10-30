@@ -292,6 +292,11 @@ export function createExtApi(): ExtApi {
   if (!ns) throw new Error('no extension API available in this context');
   const nav = (globalThis as unknown as { navigator: NavigatorLike }).navigator;
   const ua = nav.userAgent;
+  const onDownloadCreated = (
+    ns.downloads as unknown as {
+      onCreated?: Evt<(item: DownloadItem) => void>;
+    }
+  ).onCreated;
   return {
     runtime: {
       id: ns.runtime.id,
@@ -331,9 +336,7 @@ export function createExtApi(): ExtApi {
       cancel: (id) => ns.downloads.cancel(id),
       erase: (query) => ns.downloads.erase(query),
       removeFile: (id) => ns.downloads.removeFile(id),
-      onCreated: ns.downloads.onCreated
-        ? wrapEvent(ns.downloads.onCreated as unknown as Evt<(item: DownloadItem) => void>)
-        : undefined,
+      ...(onDownloadCreated ? { onCreated: wrapEvent(onDownloadCreated) } : {}),
       onChanged: wrapEvent(ns.downloads.onChanged as unknown as Evt<(d: DownloadDelta) => void>),
       onErased: wrapEvent(ns.downloads.onErased),
     },

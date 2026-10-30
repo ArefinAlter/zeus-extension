@@ -74,7 +74,7 @@ function scriptDecision(w: World, grant: Record<string, unknown> | null): void {
 }
 
 describe('15.1 rescue happy path', () => {
-  it('offer, approval, session release, ranged download and completion', async () => {
+  it('offer, approval, browser-only ranged download and completion', async () => {
     const w = await new World().boot();
     scriptDecision(w, siteGrant);
     w.ext.jar = [
@@ -101,9 +101,7 @@ describe('15.1 rescue happy path', () => {
     await w.settle();
 
     // the human clicks "This site (24 h)": the popup obtains the browser permission, then decides
-    expect(
-      await w.ext.api.permissions.request({ permissions: ['cookies'], origins: [`${ORIGIN}/*`] }),
-    ).toBe(true);
+    expect(await w.ext.api.permissions.request({ origins: [`${ORIGIN}/*`] })).toBe(true);
     const decided = (await w.ext.sendFromPage({
       ...decisionBinding(pendingApproval),
       cmd: 'approval.decide',
@@ -130,8 +128,8 @@ describe('15.1 rescue happy path', () => {
     await w.settle();
     const session = w.daemon.frames.find((f) => f.re === reqId);
     expect(session?.body).toMatchObject({
-      status: 'granted',
-      session: { session_id: sessionId(1), cookies: [{ name: 'portal_session', value: CANARY }] },
+      status: 'denied',
+      error: { code: 'session.consent_denied' },
     });
 
     // D: ranged GETs go direct. A later block moves the transfer to the browser:
@@ -199,10 +197,9 @@ describe('15.1 rescue happy path', () => {
     expect(w.ext.notificationsShown.map((n) => n.spec.title)).toContain('Zeus saved a file');
 
     expect(w.daemon.violations).toEqual([]);
-    // the cookie value appears only in the one session.response frame
-    const leaks = w.daemon.frames.filter(
-      (f) => JSON.stringify(f).includes(CANARY) && f.re !== reqId,
-    );
+    // Cookie values never leave the browser, including in legacy responses.
+    const leaks = w.daemon.frames.filter((f) => JSON.stringify(f).includes(CANARY));
+    expect(w.ext.cookieQueries).toEqual([]);
     expect(leaks).toEqual([]);
     expect(w.logs()).not.toContain(CANARY);
     expect(w.ext.local.dump() + w.ext.session.dump()).not.toContain(CANARY);
@@ -210,7 +207,7 @@ describe('15.1 rescue happy path', () => {
 });
 
 describe('15.2 expired URL', () => {
-  it('answers the refresh request with a fresh signed URL, then releases a session for the refresh', async () => {
+  it('refreshes a signed URL while refusing legacy cookie export', async () => {
     const w = await new World().boot();
     w.ext.grant(ORIGIN);
     await w.bg.store.putConsent({
@@ -288,7 +285,10 @@ describe('15.2 expired URL', () => {
       incognito: false,
     });
     await w.settle();
-    expect(w.daemon.frames.find((f) => f.re === sessId)?.body).toMatchObject({ status: 'granted' });
+    expect(w.daemon.frames.find((f) => f.re === sessId)?.body).toMatchObject({
+      status: 'denied',
+      error: { code: 'session.consent_denied' },
+    });
     expect(w.daemon.violations).toEqual([]);
   });
 });
@@ -417,12 +417,12 @@ describe('15.4 consent denied', () => {
     await w.settle();
     expect(w.daemon.frames.find((f) => f.re === reqId)?.body).toMatchObject({
       status: 'denied',
-      error: { code: 'policy.origin_never' },
+      error: { code: 'session.consent_denied' },
     });
     expect(w.daemon.violations).toEqual([]);
   });
 
-  it('a missing consent record answers consent_required even when the daemon has a grant', async () => {
+  it('legacy cookie export is denied even when the daemon has a grant', async () => {
     const w = await new World().boot();
     w.ext.grant(ORIGIN);
     const reqId = w.daemon.send('session.request', {
@@ -438,8 +438,8 @@ describe('15.4 consent denied', () => {
     });
     await w.settle();
     expect(w.daemon.frames.find((f) => f.re === reqId)?.body).toMatchObject({
-      status: 'consent_required',
-      error: { code: 'session.consent_required', class: 'auth_expired', retryable: true },
+      status: 'denied',
+      error: { code: 'session.consent_denied', class: 'policy_denied', retryable: false },
     });
   });
 });

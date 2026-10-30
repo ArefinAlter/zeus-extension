@@ -86,7 +86,6 @@ export function createBackground(
     buildHello: async () => {
       const capabilities: Capability[] = [
         'handoff',
-        'session',
         'url_refresh.refetch',
         'url_refresh.download_api',
         'fetch_proxy',

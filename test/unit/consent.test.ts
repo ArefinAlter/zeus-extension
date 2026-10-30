@@ -122,7 +122,7 @@ describe('release gate steps (spec 02 section 10.2)', () => {
     expect(r).toMatchObject({ ok: false, reason: 'no_consent' });
   });
 
-  it('step 3: the browser must hold the optional host permission, and cookies for sessions', async () => {
+  it('step 3: the browser must hold the optional host permission', async () => {
     const w = await setup();
     await consent(w);
     const noPermission = await w.bg.gate.evaluate({
@@ -152,7 +152,7 @@ describe('release gate steps (spec 02 section 10.2)', () => {
       job_id: jobId(),
       grant_id: grantId(1),
     });
-    expect(sessionNo).toMatchObject({ ok: false, reason: 'no_browser_permission' });
+    expect(sessionNo.ok).toBe(true);
     w.ext.grant(ORIGIN, true);
     expect(
       (
@@ -298,10 +298,13 @@ describe('cross-origin redirects (spec 02 section 9.3)', () => {
     );
   });
 
-  it('with host permission but no cookies it continues', async () => {
+  it('with host permission but no consent it fails closed without reading cookies', async () => {
     const w = await setup();
     w.ext.grant('https://cdn.example.net');
-    expect(await w.bg.gate.checkRedirectTarget('https://cdn.example.net/blob', ORIGIN)).toBe('ok');
+    expect(await w.bg.gate.checkRedirectTarget('https://cdn.example.net/blob', ORIGIN)).toBe(
+      'denied',
+    );
+    expect(w.ext.cookieQueries).toEqual([]);
   });
 
   it('with cookies for the final origin and no consent for it, it is denied; with consent it continues', async () => {
@@ -326,6 +329,7 @@ describe('cross-origin redirects (spec 02 section 9.3)', () => {
     );
     await consent(w, { grant_id: grantId(5), origin: 'https://cdn.example.net' });
     expect(await w.bg.gate.checkRedirectTarget('https://cdn.example.net/blob', ORIGIN)).toBe('ok');
+    expect(w.ext.cookieQueries).toEqual([]);
   });
 
   it('fails closed when cookies cannot be inspected', async () => {
