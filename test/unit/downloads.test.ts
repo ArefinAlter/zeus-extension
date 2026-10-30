@@ -284,6 +284,24 @@ describe('detectBrowser', () => {
 });
 
 describe('rescue flow end to end (spec 02 section 15.1)', () => {
+  it('a new browser download is preserved until interruption or explicit forwarding', async () => {
+    const w = await new World().boot();
+    const download = w.ext.addDownload({ id: 317, state: 'in_progress' });
+    w.ext.onDownloadCreated.emit(download);
+    await w.settle();
+    expect(w.ext.canceled).toEqual([]);
+    expect(w.ext.erased).toEqual([]);
+    expect(w.ext.downloadsList.get(317)?.state).toBe('in_progress');
+    expect(w.daemon.sent('handoff.offer')).toHaveLength(0);
+    w.ext.interrupt(317, 'NETWORK_DISCONNECTED');
+    await w.settle();
+    expect(w.daemon.sent('handoff.offer')).toHaveLength(1);
+    expect(await w.bg.store.getOffer('chrome:317:2026-10-05T09:15:12.004Z')).toMatchObject({
+      status: 'accepted',
+    });
+    expect(w.ext.downloadsList.has(317)).toBe(true);
+  });
+
   it('offers an interrupted download and records the accepted job', async () => {
     const w = await new World().boot();
     w.ext.addDownload({ id: 317, state: 'in_progress' });
