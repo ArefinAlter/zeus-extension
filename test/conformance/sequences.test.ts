@@ -558,3 +558,49 @@ describe('15.5 service worker restart mid-transfer', () => {
     expect((retried[0]?.body as { offer_key: string }).offer_key).toBe(key);
   });
 });
+
+describe('terminal handoff consent', () => {
+  it('negotiates control capabilities and accepts a human terminal grant only for a displayed approval', async () => {
+    const w = await new World().boot();
+    for (const capability of ['approvals', 'events', 'job_control', 'grants'])
+      expect(w.daemon.negotiated).toContain(capability);
+    expect(w.daemon.sent('events.subscribe')).toHaveLength(1);
+    expect(w.daemon.sent('job.list').length).toBeGreaterThan(0);
+    await w.ext.api.permissions.request({ origins: [`${ORIGIN}/*`] });
+    const grant = {
+      ...siteGrant,
+      scope: 'once',
+      job_id: jobId(1),
+      decided_by: { kind: 'human', surface: 'cli_interactive' },
+    };
+    const sendGrant = (seq: number) =>
+      w.daemon.send('job.event', {
+        subscription_id: 'sub1',
+        event: { seq, ts: '2026-10-05T09:15:34.870Z', type: 'grant.created', data: { grant } },
+      });
+    sendGrant(101);
+    await w.settle();
+    expect(await w.bg.store.listConsent()).toHaveLength(0);
+    w.daemon.send('approval.pending', { approval: pendingApproval });
+    await w.settle();
+    sendGrant(102);
+    await w.settle();
+    expect(
+      await w.bg.gate.evaluate({
+        kind: 'fetch',
+        origin: ORIGIN,
+        url: `${ORIGIN}/download/8841`,
+        job_id: jobId(1),
+      }),
+    ).toMatchObject({ ok: true });
+    expect(
+      await w.bg.gate.evaluate({
+        kind: 'fetch',
+        origin: ORIGIN,
+        url: `${ORIGIN}/download/8841`,
+        job_id: jobId(2),
+      }),
+    ).toMatchObject({ ok: false });
+    expect(w.daemon.violations).toEqual([]);
+  });
+});
