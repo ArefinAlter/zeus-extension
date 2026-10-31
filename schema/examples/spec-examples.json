@@ -60,7 +60,11 @@
             "url_refresh.refetch",
             "url_refresh.download_api",
             "fetch_proxy",
-            "incognito"
+            "incognito",
+            "approvals",
+            "events",
+            "job_control",
+            "grants"
           ],
           "sw_instance_id": "9c1f4a7e52b84d06",
           "resume": {

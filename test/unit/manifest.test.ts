@@ -40,7 +40,7 @@ describe('shipped manifests', () => {
       'notifications',
       'storage',
     ]);
-    expect(m.optional_permissions).toEqual(['cookies']);
+    expect(m.optional_permissions).toEqual([]);
     expect(m.host_permissions).toBeUndefined();
     expect(m.content_scripts).toBeUndefined();
     expect(m.externally_connectable).toBeUndefined();
@@ -106,7 +106,7 @@ describe('the manifest check catches regressions', () => {
       optional_host_permissions: ['<all_urls>'],
     });
     const text = problems(m).join('\n');
-    expect(text).toMatch(/cookies must be an optional permission/);
+    expect(text).toMatch(/cookie access is forbidden/);
     expect(text).toMatch(/optional host pattern "<all_urls>"/);
   });
   it('rejects a store build with a key, and a dev build without one or with a foreign one', () => {

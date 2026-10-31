@@ -38,8 +38,6 @@ export const DAEMON_CAPABILITIES = [
   'grants',
 ];
 
-const DAEMON_ONLY = ['approvals', 'events', 'job_control', 'grants'];
-
 export const DEFAULT_LIMITS = {
   max_frame_to_extension_bytes: 1_000_000,
   max_frame_to_daemon_bytes: 4_194_304,
@@ -78,8 +76,8 @@ export class FakeDaemon {
       if (opts.silentHello) return;
       const daemonCaps = opts.capabilities ?? DAEMON_CAPABILITIES;
       const offered = f.body.capabilities as string[];
-      // Capabilities both sides declare are intersected; daemon-only ones are simply advertised.
-      d.negotiated = daemonCaps.filter((c) => offered.includes(c) || DAEMON_ONLY.includes(c));
+      // Match the real daemon: only capabilities declared by both peers are negotiated.
+      d.negotiated = daemonCaps.filter((c) => offered.includes(c));
       d.reply(f, 'hello.ack', {
         protocol_version: opts.protocolVersion ?? 1,
         capabilities: d.negotiated,

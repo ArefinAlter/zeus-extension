@@ -28,12 +28,12 @@ describe('handshake (spec 02 section 5)', () => {
     expect(body.capabilities).toEqual(
       expect.arrayContaining([
         'handoff',
-        'session',
         'url_refresh.refetch',
         'url_refresh.download_api',
         'fetch_proxy',
       ]),
     );
+    expect(body.capabilities).not.toContain('session');
     expect(body.capabilities).not.toContain('incognito');
     expect(w.daemon.violations).toEqual([]);
   });

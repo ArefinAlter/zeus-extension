@@ -1,20 +1,9 @@
-// Session oracle (spec 02 section 8): answers session.request with scoped cookies and
-// url.refresh.request with a freshly derived URL. Both run only after the consent gate. Cookie
-// values exist in memory for the duration of one handler and are never logged or stored.
+// Browser session credentials stay inside the browser. Legacy cookie-export requests
+// are rejected; URL refreshes continue through the scoped consent gate.
 import type { Env } from '../lib/env';
 import { makeError } from '../lib/errors';
-import type { BrowserCookie } from '../lib/platform';
-import type {
-  Cookie,
-  DaemonMessageOf,
-  ErrorEnvelope,
-  ExtBody,
-  SessionMaterial,
-  Validators,
-} from '../lib/protocol';
+import type { DaemonMessageOf, ErrorEnvelope, ExtBody, Validators } from '../lib/protocol';
 import { redactUrl } from '../lib/redact';
-import { utf8Length } from '../lib/sanitize';
-import { toWireTimestamp } from '../lib/time';
 import type { ConsentGate } from './consent';
 import type { StateStore } from './state';
 
@@ -27,17 +16,8 @@ type RefreshBody = ExtBody<'url.refresh.response'>;
 
 export type RefreshReply = { type: 'url.refresh.response'; body: RefreshBody };
 
-const MAX_COOKIES_BYTES = 128 * 1024;
-const MAX_CONCURRENT_RELEASES = 4;
 const REFETCH_ABORT_MS = 25_000;
 const DOWNLOAD_API_POLL_MS = 150;
-
-const SESSION_HEADER_NAMES = [
-  'accept-language',
-  'sec-ch-ua',
-  'sec-ch-ua-mobile',
-  'sec-ch-ua-platform',
-] as const;
 
 /** Compose an Accept-Language header the way browsers do: q-values step down by 0.1. */
 export function formatAcceptLanguage(languages: readonly string[]): string {
@@ -46,52 +26,6 @@ export function formatAcceptLanguage(languages: readonly string[]): string {
     .slice(0, 8)
     .map((lang, i) => (i === 0 ? lang : `${lang};q=${Math.max(0.1, 1 - i * 0.1).toFixed(1)}`))
     .join(',');
-}
-
-function toWireCookie(c: BrowserCookie): Cookie | null {
-  if (c.name.length > 256 || c.domain.length > 255 || c.path.length > 1024) return null;
-  if (c.value.length > 8192 || utf8Length(c.value) > 8192) return null;
-  const expires =
-    c.session || c.expirationDate === undefined
-      ? null
-      : toWireTimestamp(Math.round(c.expirationDate * 1000));
-  const cookie: Cookie = {
-    name: c.name,
-    value: c.value,
-    domain: c.domain,
-    path: c.path,
-    secure: c.secure,
-    http_only: c.httpOnly,
-    same_site: c.sameSite,
-    host_only: c.hostOnly,
-    expires_at: expires,
-  };
-  if (c.partitionKey?.topLevelSite !== undefined && c.partitionKey.topLevelSite.length <= 300) {
-    cookie.partition_key = {
-      top_level_site: c.partitionKey.topLevelSite,
-      ...(c.partitionKey.hasCrossSiteAncestor === undefined
-        ? {}
-        : { has_cross_site_ancestor: c.partitionKey.hasCrossSiteAncestor }),
-    };
-  }
-  return cookie;
-}
-
-/** Most specific cookies first (what browsers send first), then by name, so truncation is deterministic. */
-function orderCookies(cookies: Cookie[]): Cookie[] {
-  return [...cookies].sort((a, b) => b.path.length - a.path.length || a.name.localeCompare(b.name));
-}
-
-function fitLimits(cookies: Cookie[], maxCount: number): Cookie[] {
-  const out: Cookie[] = [];
-  let bytes = 2;
-  for (const c of orderCookies(cookies)) {
-    const size = utf8Length(JSON.stringify(c)) + 1;
-    if (out.length >= maxCount || bytes + size > MAX_COOKIES_BYTES) break;
-    out.push(c);
-    bytes += size;
-  }
-  return out;
 }
 
 function headerValue(headers: Headers, name: string): string | null {
@@ -143,143 +77,26 @@ export function totalBytesFrom(status: number, headers: Headers): number | null 
 }
 
 export class SessionService {
-  private inFlight = 0;
-
   constructor(
     private readonly env: Env,
     private readonly gate: ConsentGate,
-    private readonly store: StateStore,
+    _store: StateStore,
     private readonly opts: { maxCookies: () => number; internalDownloadIds: Set<number> },
   ) {}
 
   // ---------- session.request ----------
 
-  async handleSessionRequest(msg: DaemonMessageOf<'session.request'>): Promise<SessionReply> {
-    const b = msg.body;
-    const gate = await this.gate.evaluate(
-      { kind: 'session', origin: b.origin, url: b.url, job_id: b.job_id, grant_id: b.grant_id },
-      b.ttl_ms,
-    );
-    if (!gate.ok) {
-      if (gate.status === 'invalid') return { type: 'error', body: { error: gate.error } };
-      return { type: 'session.response', body: { status: gate.status, error: gate.error } };
-    }
-    if (this.inFlight >= MAX_CONCURRENT_RELEASES) {
-      return unavailable('session.extension_busy', 'Too many concurrent session releases.');
-    }
-    // Replay protection: one session_id releases material at most once.
-    if (!(await this.store.claimSessionId(b.session_id))) {
-      return {
-        type: 'error',
-        body: {
-          error: makeError('nm.conflict', 'This session_id was already used for a release.'),
-        },
-      };
-    }
-    this.inFlight += 1;
-    try {
-      let storeId: string | undefined;
-      if (b.incognito) {
-        storeId = await this.incognitoStoreId();
-        if (storeId === undefined) {
-          await this.store.releaseSessionClaim(b.session_id);
-          return unavailable(
-            'session.store_unavailable',
-            'The private cookie store could not be identified.',
-          );
-        }
-      }
-      const cookies = await this.collectCookies(b.url, b.origin, storeId);
-      const session: SessionMaterial = {
-        session_id: b.session_id,
-        origin: b.origin,
-        issued_at: toWireTimestamp(this.env.clock.now()) ?? '1970-01-01T00:00:00.000Z',
-        ttl_ms: gate.ttl_ms,
-        cookies: fitLimits(cookies, this.opts.maxCookies()),
-        user_agent: this.env.api.env.userAgent.slice(0, 512),
-        headers: await this.sessionHeaders(b.request_headers),
-      };
-      if (storeId !== undefined) session.cookie_store_id = storeId;
-      // Only counts and handles are logged, never names or values (spec 00 section 8).
-      this.env.log.info('session released', {
-        session_id: b.session_id,
-        origin: b.origin,
-        cookie_count: session.cookies.length,
-        ttl_ms: session.ttl_ms,
-      });
-      return { type: 'session.response', body: { status: 'granted', session } };
-    } catch (e) {
-      await this.store.releaseSessionClaim(b.session_id);
-      this.env.log.warn('cookie read failed', { error: e instanceof Error ? e.name : 'unknown' });
-      return unavailable('session.store_unavailable', 'The cookie store could not be read.');
-    } finally {
-      this.inFlight -= 1;
-    }
-  }
-
-  /** The cookie store of private windows, or undefined when it cannot be identified (spec 02 10.1). */
-  private async incognitoStoreId(): Promise<string | undefined> {
-    if (!(await this.env.api.extension.isAllowedIncognitoAccess())) return undefined;
-    const stores = await this.env.api.cookies.getAllCookieStores();
-    if (this.env.api.env.isFirefox) return stores.find((s) => s.id === 'firefox-private')?.id;
-    for (const store of stores) {
-      for (const tabId of store.tabIds) {
-        try {
-          if ((await this.env.api.tabs.get(tabId)).incognito) return store.id;
-        } catch {
-          /* tab closed meanwhile */
-        }
-      }
-    }
-    return undefined;
-  }
-
-  private async collectCookies(
-    url: string,
-    origin: string,
-    storeId: string | undefined,
-  ): Promise<Cookie[]> {
-    const q = storeId === undefined ? { url } : { url, storeId };
-    const raw = await this.env.api.cookies.getAll(q);
-    // Partitioned (CHIPS) cookies are returned only when asked for by partition. Best effort: a
-    // browser that rejects the query simply contributes none.
-    const partitioned: BrowserCookie[] = await this.env.api.cookies
-      .getAll({ ...q, partitionKey: { topLevelSite: origin } })
-      .catch(() => []);
-    const seen = new Set<string>();
-    const out: Cookie[] = [];
-    for (const c of [...raw, ...partitioned]) {
-      const key = JSON.stringify([c.name, c.domain, c.path, c.partitionKey?.topLevelSite ?? '']);
-      if (seen.has(key)) continue;
-      seen.add(key);
-      const wire = toWireCookie(c);
-      if (wire) out.push(wire);
-    }
-    return out;
-  }
-
-  private async sessionHeaders(requested: readonly string[]): Promise<Record<string, string>> {
-    const out: Record<string, string> = {};
-    const env = this.env.api.env;
-    for (const name of SESSION_HEADER_NAMES) {
-      if (!requested.includes(name)) continue;
-      if (name === 'accept-language') {
-        const langs = await this.env.api.i18n.getAcceptLanguages();
-        const value = formatAcceptLanguage(langs);
-        if (value !== '') out[name] = value;
-      } else if (env.userAgentData) {
-        if (name === 'sec-ch-ua') {
-          out[name] = env.userAgentData.brands
-            .map((b) => `"${b.brand}";v="${b.version}"`)
-            .join(', ');
-        } else if (name === 'sec-ch-ua-mobile') {
-          out[name] = env.userAgentData.mobile ? '?1' : '?0';
-        } else {
-          out[name] = `"${env.userAgentData.platform}"`;
-        }
-      }
-    }
-    return out;
+  handleSessionRequest(_msg: DaemonMessageOf<'session.request'>): Promise<SessionReply> {
+    return Promise.resolve({
+      type: 'session.response',
+      body: {
+        status: 'denied',
+        error: makeError(
+          'session.consent_denied',
+          'Cookie export is disabled. Use the browser fetch proxy.',
+        ),
+      },
+    });
   }
 
   // ---------- url.refresh.request ----------
@@ -482,14 +299,4 @@ type RefreshOutcome =
 
 function fail(error: ErrorEnvelope): RefreshOutcome {
   return { kind: 'failed', error };
-}
-
-function unavailable(
-  code: 'session.extension_busy' | 'session.store_unavailable',
-  message: string,
-): SessionReply {
-  return {
-    type: 'session.response',
-    body: { status: 'unavailable', error: makeError(code, message) },
-  };
 }

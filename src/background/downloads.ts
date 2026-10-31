@@ -123,8 +123,11 @@ export class DownloadWatcher {
   /** Register the browser listeners. Must run synchronously at worker start (MV3 rule). */
   register(): void {
     if (this.env.api.downloads.onCreated) {
-      this.env.api.downloads.onCreated.addListener((item) => {
-        void this.onCreated(item);
+      this.env.api.downloads.onCreated.addListener(() => {
+        // A newly started transfer still belongs to the browser. Keep its record
+        // and bytes intact; automatic rescue applies only after interruption.
+        // Explicit forwarding is available in the refreshed popup.
+        this.hooks.changed();
       });
     }
     this.env.api.downloads.onChanged.addListener((delta) => {
@@ -136,29 +139,6 @@ export class DownloadWatcher {
   }
 
   // ---------- browser events ----------
-
-  async onCreated(item: DownloadItem): Promise<void> {
-    try {
-      if (this.hooks.internalDownloadIds.has(item.id)) return;
-      if (!(await this.store.getSettings()).auto_offer) return;
-      const verdict = classifyForward(item, this.env.api.runtime.id);
-      if (!verdict.offer) {
-        this.env.log.debug('download onCreated not offered', { id: item.id, why: verdict.why });
-        return;
-      }
-      try {
-        await this.env.api.downloads.cancel(item.id);
-        await this.env.api.downloads.erase({ id: item.id });
-      } catch {
-        // Ignore cancel/erase races
-      }
-      await this.queue(item, verdict);
-    } catch (e) {
-      this.env.log.warn('download onCreated handling failed', {
-        error: e instanceof Error ? e.name : 'unknown',
-      });
-    }
-  }
 
   async onChanged(delta: DownloadDelta): Promise<void> {
     try {

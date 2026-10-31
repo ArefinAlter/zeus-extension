@@ -157,9 +157,7 @@ export function mountPopup(api: ExtApi): { refresh(): Promise<void> } {
 
   /** Ask the browser for the optional host and cookie permissions. Must run inside a click handler. */
   function requestAccess(origin: string): Promise<boolean> {
-    return api.permissions
-      .request({ permissions: ['cookies'], origins: [hostPattern(origin)] })
-      .catch(() => false);
+    return api.permissions.request({ origins: [hostPattern(origin)] }).catch(() => false);
   }
 
   async function grantAccess(origin: string): Promise<void> {

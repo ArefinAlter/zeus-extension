@@ -18,7 +18,8 @@ export const ALLOWED_PERMISSIONS = [
   'storage',
 ];
 /** Permissions that may only be optional (requested from a user gesture at consent time). */
-export const ALLOWED_OPTIONAL_PERMISSIONS = ['cookies'];
+/** @type {string[]} */
+export const ALLOWED_OPTIONAL_PERMISSIONS = [];
 /** Host patterns that may be requested at runtime. Never the all-urls or any-scheme wildcard patterns. */
 export const ALLOWED_OPTIONAL_HOSTS = ['https://*/*', 'http://localhost/*', 'http://127.0.0.1/*'];
 /** Manifest keys that would widen the attack surface and are therefore forbidden outright. */
@@ -144,7 +145,7 @@ export function checkManifest(m, { target, store, root = repoRoot }) {
     if (!ALLOWED_OPTIONAL_PERMISSIONS.includes(p))
       bad(`optional permission "${p}" is not on the allow-list`);
   }
-  if (permissions.includes('cookies')) bad('cookies must be an optional permission, never static');
+  if (permissions.includes('cookies')) bad('cookie access is forbidden; use browser fetch');
   const hosts = strs(m.optional_host_permissions);
   for (const h of hosts)
     if (!ALLOWED_OPTIONAL_HOSTS.includes(h))

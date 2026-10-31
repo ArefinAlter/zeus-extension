@@ -84,9 +84,14 @@ export function createBackground(
     ...(opts.timing === undefined ? {} : { timing: opts.timing }),
     isBusy: () => popupPorts.size > 0 || fetchProxy.openCount() > 0 || pages.openCount() > 0,
     buildHello: async () => {
+      // The daemon negotiates an intersection. Declare the control/event APIs we consume,
+      // including grant events needed to honor a person's terminal decision in this browser.
       const capabilities: Capability[] = [
+        'approvals',
+        'events',
+        'job_control',
+        'grants',
         'handoff',
-        'session',
         'url_refresh.refetch',
         'url_refresh.download_api',
         'fetch_proxy',

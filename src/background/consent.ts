@@ -124,10 +124,8 @@ export class ConsentGate {
     }
 
     // Step 3: browser-enforced scoping: the optional host (and for cookies, cookie) permission.
-    const needCookies = req.kind === 'session';
     const granted = await this.env.api.permissions.contains({
       origins: [hostPattern(req.origin)],
-      ...(needCookies ? { permissions: ['cookies' as const] } : {}),
     });
     if (!granted) {
       return fail(
@@ -191,12 +189,8 @@ export class ConsentGate {
       origins: [hostPattern(finalOrigin)],
     });
     if (!hasHostPermission) return 'ok';
-    // If the cookies cannot be inspected the answer is unknown, so assume there are some (fail closed).
-    const cookieCount = await this.env.api.cookies.getAll({ url: finalUrl }).then(
-      (cookies) => cookies.length,
-      () => 1,
-    );
-    if (cookieCount === 0) return 'ok';
+    // Never inspect cookie values to decide whether a redirect needs consent.
+    // A privileged cross-origin target always needs its own explicit grant.
     const now = this.env.clock.now();
     const consented = (await this.store.listConsent()).some(
       (r) => r.origin === finalOrigin && r.expires_at_ms > now,

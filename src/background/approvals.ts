@@ -290,7 +290,6 @@ export class ApprovalCenter {
   private hasBrowserAccess(origin: string): Promise<boolean> {
     return this.env.api.permissions.contains({
       origins: [hostPattern(origin)],
-      permissions: ['cookies'],
     });
   }
 }

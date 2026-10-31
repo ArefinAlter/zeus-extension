@@ -23,7 +23,7 @@
     "open_in_tab": true
   },
   "permissions": ["alarms", "downloads", "nativeMessaging", "notifications", "storage"],
-  "optional_permissions": ["cookies"],
+  "optional_permissions": [],
   "optional_host_permissions": ["https://*/*", "http://localhost/*", "http://127.0.0.1/*"],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"

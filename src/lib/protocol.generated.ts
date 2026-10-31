@@ -1255,6 +1255,7 @@ file_name: string
 max_bytes: 67108864
 contents: "extracted_site_fields"
 url_redaction: "record"
+max_page_metadata_bytes: 8388608
 })
 }) | (FactsCommon & {
 kind?: "destructive_op"
@@ -1264,6 +1265,7 @@ kind?: "destructive_op"
 operation_set_blake3: string
 plan_id: (string | null)
 artifact_plan?: ArtifactLifecyclePlan
+maintenance_plan?: MaintenanceApi_ArtifactMaintenancePlan
 counts: {
 delete: number
 overwrite: number
@@ -3220,6 +3222,206 @@ requires_approval: true
 expires_at: string
 }
 /**
+ * Exact versioned plan. Details contain bounded core bundle or collection facts, never authority.
+ */
+export interface MaintenanceApi_ArtifactMaintenancePlan {
+/**
+ * Exact content manifest/record revisions or collection targets.
+ */
+details: {
+[k: string]: unknown | undefined
+}
+/**
+ * No more than15minutes after preview.
+ */
+expires_at: string
+/**
+ * Source or destination binding; collection has no user-file target.
+ */
+file?: (MaintenanceApi_ArtifactFileBinding | null)
+/**
+ * Complete requested effect.
+ */
+operation: ({
+/**
+ * 1–64 visible active records;32MiB total observed bytes.
+ *
+ * Items: Identifier with the prefix `art_` followed by a 26 character ULID.
+ */
+artifact_ids: string[]
+kind: "scrub"
+} | {
+/**
+ * Visible active record whose immutable content is restored.
+ */
+artifact_id: string
+kind: "repair"
+/**
+ * Existing source within a permitted root; at most16MiB.
+ */
+path: string
+} | {
+/**
+ * Exact records.
+ *
+ * Items: Identifier with the prefix `art_` followed by a 26 character ULID.
+ */
+artifact_ids: string[]
+/**
+ * Include present content; quarantined byte export is refused.
+ */
+include_objects?: boolean
+kind: "export"
+/**
+ * New absolute destination inside an authorized root.
+ */
+path: string
+} | {
+kind: "import"
+/**
+ * Existing regular bundle inside an authorized root.
+ */
+path: string
+} | {
+kind: "collect"
+/**
+ * 1–128 exact targets.
+ */
+limit: number
+/**
+ * Permit evictable active content as well as unreferenced content.
+ */
+quota_pressure?: boolean
+})
+/**
+ * Always true for collection; callers cannot downgrade it.
+ */
+requires_approval: boolean
+/**
+ * Local store identity.
+ */
+store_id: string
+/**
+ * Stable identity of an open file object, used to detect a replaced or swapped `.zpart`
+ * (03 sections 3.1 and 7.2, checks L1 and L2). Numbers are decimal or hexadecimal *strings*
+ * because inode numbers and 128-bit file indexes exceed the 2^53 JSON integer limit.
+ */
+store_root_id: ({
+/**
+ * `st_dev`.
+ */
+dev: string
+/**
+ * `st_ino`.
+ */
+ino: string
+kind: "unix"
+} | {
+/**
+ * `FILE_ID_128`.
+ */
+file_index: string
+kind: "windows"
+/**
+ * Volume serial number.
+ */
+volume_serial: string
+})
+/**
+ * Plan format1.
+ */
+version: number
+}
+/**
+ * Retained filesystem identities bound to a preview, reopened and compared before execution.
+ */
+export interface MaintenanceApi_ArtifactFileBinding {
+/**
+ * Source identity; null for a new destination.
+ */
+file_id?: (({
+/**
+ * `st_dev`.
+ */
+dev: string
+/**
+ * `st_ino`.
+ */
+ino: string
+kind: "unix"
+} | {
+/**
+ * `FILE_ID_128`.
+ */
+file_index: string
+kind: "windows"
+/**
+ * Volume serial number.
+ */
+volume_serial: string
+}) | null)
+/**
+ * Stable identity of an open file object, used to detect a replaced or swapped `.zpart`
+ * (03 sections 3.1 and 7.2, checks L1 and L2). Numbers are decimal or hexadecimal *strings*
+ * because inode numbers and 128-bit file indexes exceed the 2^53 JSON integer limit.
+ */
+parent_id: ({
+/**
+ * `st_dev`.
+ */
+dev: string
+/**
+ * `st_ino`.
+ */
+ino: string
+kind: "unix"
+} | {
+/**
+ * `FILE_ID_128`.
+ */
+file_index: string
+kind: "windows"
+/**
+ * Volume serial number.
+ */
+volume_serial: string
+})
+/**
+ * Exact absolute filename.
+ */
+path: string
+/**
+ * Authorized configured root.
+ */
+root: string
+/**
+ * Stable identity of an open file object, used to detect a replaced or swapped `.zpart`
+ * (03 sections 3.1 and 7.2, checks L1 and L2). Numbers are decimal or hexadecimal *strings*
+ * because inode numbers and 128-bit file indexes exceed the 2^53 JSON integer limit.
+ */
+root_id: ({
+/**
+ * `st_dev`.
+ */
+dev: string
+/**
+ * `st_ino`.
+ */
+ino: string
+kind: "unix"
+} | {
+/**
+ * `FILE_ID_128`.
+ */
+file_index: string
+kind: "windows"
+/**
+ * Volume serial number.
+ */
+volume_serial: string
+})
+}
+/**
  * Redacted, immutable dry-run plan returned to every caller.
  */
 export interface CloudPlanView {
@@ -3517,6 +3719,7 @@ file_name: string
 max_bytes: 67108864
 contents: "extracted_site_fields"
 url_redaction: "record"
+max_page_metadata_bytes: 8388608
 })
 }) | (FactsCommon & {
 kind?: "destructive_op"
@@ -3526,6 +3729,7 @@ kind?: "destructive_op"
 operation_set_blake3: string
 plan_id: (string | null)
 artifact_plan?: ArtifactLifecyclePlan
+maintenance_plan?: MaintenanceApi_ArtifactMaintenancePlan
 counts: {
 delete: number
 overwrite: number

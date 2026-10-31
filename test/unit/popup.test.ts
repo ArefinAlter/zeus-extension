@@ -176,9 +176,7 @@ describe('popup: approvals', () => {
     trustedClick(button('Allow this site for 24 hours'));
     await flush(w);
 
-    expect(w.ext.permissionRequests).toEqual([
-      { permissions: ['cookies'], origins: [`${ORIGIN}/*`] },
-    ]);
+    expect(w.ext.permissionRequests).toEqual([{ origins: [`${ORIGIN}/*`] }]);
     const decide = w.daemon.sent('approval.decide')[0];
     expect(decide?.body).toMatchObject({
       approval_id: approvalId(1),
@@ -440,9 +438,7 @@ describe('popup: status and lists', () => {
     expect(text()).toContain('Browser access needed');
     trustedClick(button(`Allow browser access to ${ORIGIN}`));
     await flush(w);
-    expect(w.ext.permissionRequests).toEqual([
-      { permissions: ['cookies'], origins: [`${ORIGIN}/*`] },
-    ]);
+    expect(w.ext.permissionRequests).toEqual([{ origins: [`${ORIGIN}/*`] }]);
     expect(text()).not.toContain('Browser access needed');
   });
 

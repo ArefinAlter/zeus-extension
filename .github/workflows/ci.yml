@@ -28,7 +28,7 @@ jobs:
         with:
           repository: ArefinAlter/zeus
           # Advance this pin together with schema/ when synchronizing contracts.
-          ref: f4da89dee3b0485e49f0f2b112143315048be321
+          ref: 3d23d1821b7a6a0ac0b7efbbadd453c911f6f53e
           path: zeus
       - uses: actions/setup-node@v5
         with:
